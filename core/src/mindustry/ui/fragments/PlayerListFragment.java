@@ -177,6 +177,13 @@ public class PlayerListFragment{
                         Call.sendChatMessage("/votekick " + user.name());
                     });
                 }).size(h);
+
+                t.button(Icon.hammer, ustyle, () -> 
+                        ui.showConfirm("@confirm", Core.bundle.format("confirmban",  user.name()), () -> Call.adminRequest(user, AdminAction.ban)));
+                t.button(Icon.cancel, ustyle, () -> 
+                        ui.showConfirm("@confirm", Core.bundle.format("confirmkick",  user.name()), () -> Call.adminRequest(user, AdminAction.kick)));
+                t.button(Icon.zoom, ustyle, () -> Call.adminRequest(user, AdminAction.trace));
+                
             }
             //原版模式
             else{

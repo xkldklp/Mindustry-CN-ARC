@@ -215,6 +215,10 @@ public class DesktopInput extends InputHandler{
         boolean panCam = false;
         float camSpeed = (!Core.input.keyDown(Binding.boost) ? panSpeed : panBoostSpeed) * Time.delta;
 
+        if(input.keyDown(Binding.drop)){
+            player.dropItems();
+        }
+
         if(input.keyDown(Binding.pan) && !scene.hasField() && !scene.hasDialog()){
             panCam = true;
             panning = true;

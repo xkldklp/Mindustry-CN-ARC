@@ -12,6 +12,7 @@ public enum Binding implements KeyBind{
     pan(KeyCode.mouseForward),
 
     boost(KeyCode.shiftLeft),
+    drop(KeyCode.h),
     command_mode(KeyCode.shiftLeft),
     control(KeyCode.controlLeft),
     respawn(KeyCode.v),

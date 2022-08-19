@@ -18,7 +18,7 @@ import static mindustry.Vars.*;
 
 public class Marker{
     /** 冷却时间*/
-    public static final float heatTime = 60f;
+    public static final float heatTime = 0f;
     /** 滞留时间*/
     public static final float retainTime = 1800f;
 

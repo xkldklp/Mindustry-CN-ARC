@@ -335,7 +335,15 @@ public class JoinDialog extends BaseDialog{
                 });
             }).size(54f).get();
             button.update(() -> button.getStyle().imageUpColor = player.color());
-        }).width(w).height(70f).pad(4);
+
+            t.row()
+
+            t.add("uuid").padRight(10);
+            t.field(Core.settings.getString("uuid"), text -> {
+                Core.settings.put("uuid", text);
+            }).grow().pad(8).maxTextLength(12);
+            
+        }).width(w).height(140f).pad(4);
         cont.row();
         cont.add(pane).width(w + 38).pad(0);
         cont.row();

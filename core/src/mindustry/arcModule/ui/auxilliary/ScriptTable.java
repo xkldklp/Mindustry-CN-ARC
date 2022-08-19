@@ -41,6 +41,10 @@ public class ScriptTable extends BaseToolsTable{
             Marker.lockonLastMark();
         });
 
+        scriptButton(Items.copper.uiIcon, "一键装弹", () -> {
+            Vars.player.dropItems();
+        });
+
         scriptButton(Icon.modeAttack, "自动攻击", () -> {
             boolean at = Core.settings.getBool("autotarget");
             Core.settings.put("autotarget", !at);

@@ -281,29 +281,27 @@ public class SettingsMenuDialog extends BaseDialog{
         float marg = 8f, isize = iconMed;
 
         menu.defaults().size(300f, 60f);
-        if(Core.settings.getInt("changelogreaded") == changeLogRead){
-            menu.button("@settings.game", Icon.settings, style, isize, () -> visible(0)).marginLeft(marg).row();
-            menu.row();
-            menu.button("@settings.graphics", Icon.image, style, isize, () -> visible(1)).marginLeft(marg).row();
-            menu.row();
-            menu.button("@settings.sound", Icon.filters, style, isize, () -> visible(2)).marginLeft(marg).row();
-            menu.row();
-            menu.button("@settings.arc", Icon.star,style,isize, () -> visible(3)).marginLeft(marg).row();
-            menu.row();
-            menu.button("@settings.forcehide", Icon.eyeSmall,style,isize, () -> visible(4)).marginLeft(marg).row();
-            menu.row();
-            menu.button("@settings.specmode", Icon.info,style,isize, () -> visible(5)).marginLeft(marg).row();
-            menu.row();
-            menu.button("@settings.cheating", Icon.lock,style,isize, () -> visible(6)).marginLeft(marg).row();
-            menu.row();
-            menu.button("@settings.language", Icon.chat, style, isize, ui.language::show).marginLeft(marg).row();
-            if(!mobile || Core.settings.getBool("keyboard")){
+        menu.button("@settings.game", Icon.settings, style, isize, () -> visible(0)).marginLeft(marg).row();
+        menu.row();
+        menu.button("@settings.graphics", Icon.image, style, isize, () -> visible(1)).marginLeft(marg).row();
+        menu.row();
+        menu.button("@settings.sound", Icon.filters, style, isize, () -> visible(2)).marginLeft(marg).row();
+        menu.row();
+        menu.button("@settings.arc", Icon.star,style,isize, () -> visible(3)).marginLeft(marg).row();
+        menu.row();
+        menu.button("@settings.forcehide", Icon.eyeSmall,style,isize, () -> visible(4)).marginLeft(marg).row();
+        menu.row();
+        menu.button("@settings.specmode", Icon.info,style,isize, () -> visible(5)).marginLeft(marg).row();
+        menu.row();
+        menu.button("@settings.cheating", Icon.lock,style,isize, () -> visible(6)).marginLeft(marg).row();
+        menu.row();
+        menu.button("@settings.language", Icon.chat, style, isize, ui.language::show).marginLeft(marg).row();
+        if(!mobile || Core.settings.getBool("keyboard")){
             menu.button("@settings.controls", Icon.move, style, isize, ui.controls::show).marginLeft(marg).row();
-            }
-
+        }
         menu.button("@settings.data", Icon.save, style, isize, () -> dataDialog.show()).marginLeft(marg).row();
 
-        int i = Core.settings.getInt("changelogreaded") == changeLogRead ? 7 : 1;
+        int i = 7
         for(var cat : categories){
             int index = i;
             if(cat.icon == null){
@@ -313,22 +311,9 @@ public class SettingsMenuDialog extends BaseDialog{
             }
             i++;
         }
-        }
-        else{
-            menu.button("@settings.arc", style, () -> visible(0));
-            menu.row();
-            menu.button("@settings.language", style, ui.language::show);
-        }
-
     }
 
     void addSettings(){
-
-        if(Core.settings.getInt("changelogreaded") != changeLogRead){
-            arc.sliderPref("changelogreaded", 0, 0, 150, 1, i -> i + "");
-            arc.checkPref("changelogexplain", false);
-        }else{
-
         sound.sliderPref("musicvol", 100, 0, 100, 1, i -> i + "%");
         sound.sliderPref("sfxvol", 100, 0, 100, 1, i -> i + "%");
         sound.sliderPref("ambientvol", 100, 0, 100, 1, i -> i + "%");
@@ -704,7 +689,6 @@ public class SettingsMenuDialog extends BaseDialog{
         cheating.checkPref("selectTeam",false);
         cheating.checkPref("playerNeedShooting", false);
         }
-
     }
 
     public void exportData(Fi file) throws IOException{
@@ -773,25 +757,13 @@ public class SettingsMenuDialog extends BaseDialog{
 
     private void visible(int index){
         prefs.clearChildren();
-
-
         Seq<Table> tables = new Seq<>();
-
-        if(Core.settings.getInt("changelogreaded") == changeLogRead){
-            tables.addAll(game, graphics, sound, arc,forcehide,specmode, cheating);
-        }
-        else{
+            tables.addAll(game, graphics, sound, arc,forcehide,specmode, cheating);   
             tables.addAll(arc);
-        }
         for(var custom : categories){
             tables.add(custom.table);
         }
-
         prefs.add(tables.get(index));
-
-
-
-
     }
 
     @Override

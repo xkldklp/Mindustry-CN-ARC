@@ -40,8 +40,8 @@ import static arc.Core.*;
 
 public class Vars implements Loadable{
     /** ARC */
-    public static String arcVersion = Version.arcBuild + "";
-    public static String arcVersionPrefix = "<ARC~" + Version.arcBuild + ">";
+    public static String arcVersion = Version.arcBuild + "";
+    public static String arcVersionPrefix = "<ARC~" + Version.arcBuild + ">";
     public static int changeLogRead = 18;
 
     public static String userContentURL = "https://raw.fastgit.org";
@@ -522,8 +522,7 @@ public class Vars implements Loadable{
     }
 
     public static Boolean arcInfoControl(){
-        return   (!arcCheatServer && (Core.settings.getBool("showOtherTeamState") ||
-                        player.team().id == 255 || state.rules.mode() != Gamemode.pvp));
+        return true;
     }
 
 }
