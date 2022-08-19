@@ -32,11 +32,11 @@ jobs:
       run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
     - name: Update F-Droid build string
       run: |
-        git clone --depth=1 --branch=master https://github.com/Jackson11500/Mindustry-CN-ARC-Builds
+        git clone --depth=1 --branch=master https://github.com/xkldklp/Mindustry-CN-ARC-Builds
         cd Mindustry-CN-ARC-Builds
         echo "Updating version to ${RELEASE_VERSION:1}"
         BNUM=$(($GITHUB_RUN_NUMBER + 1000))
         echo versionName=CN-ARC-v7-${RELEASE_VERSION:1}$'\n'versionCode=${BNUM} > version_fdroid.txt
         git add .
         git commit -m "Updating to build ${RELEASE_VERSION:1}"
-        git push https://Jackson11500:${{ secrets.API_TOKEN_GITHUB }}@github.com/Jackson11500/Mindustry-CN-ARC-Builds
+        git push https://xkldklp:${{ secrets.API_TOKEN_GITHUB }}@github.com/xkldklp/Mindustry-CN-ARC-Builds
