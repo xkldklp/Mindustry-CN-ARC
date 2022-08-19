@@ -358,7 +358,7 @@ abstract class PlayerComp implements UnitController, Entityc, Syncc, Timerc, Dra
             return;
         }
         indexer.eachBlock(player.team(), player.x, player.y, itemTransferRange,
-            build -> build.acceptStack(player.unit().item(), player.unit().stack.amount, player.unit()) > 0 && !(build.block instanceof CoreBlock)),
+            build -> build.acceptStack(player.unit().item(), player.unit().stack.amount, player.unit()) > 0 && !(build.block instanceof CoreBlock),
             build -> Call.transferInventory(player, build)
         );
     }

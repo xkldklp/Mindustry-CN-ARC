@@ -301,7 +301,7 @@ public class SettingsMenuDialog extends BaseDialog{
         }
         menu.button("@settings.data", Icon.save, style, isize, () -> dataDialog.show()).marginLeft(marg).row();
 
-        int i = 7
+        int i = 7;
         for(var cat : categories){
             int index = i;
             if(cat.icon == null){
@@ -689,7 +689,6 @@ public class SettingsMenuDialog extends BaseDialog{
         cheating.checkPref("selectTeam",false);
         cheating.checkPref("playerNeedShooting", false);
         }
-    }
 
     public void exportData(Fi file) throws IOException{
         Seq<Fi> files = new Seq<>();
@@ -759,7 +758,6 @@ public class SettingsMenuDialog extends BaseDialog{
         prefs.clearChildren();
         Seq<Table> tables = new Seq<>();
             tables.addAll(game, graphics, sound, arc,forcehide,specmode, cheating);   
-            tables.addAll(arc);
         for(var custom : categories){
             tables.add(custom.table);
         }

@@ -38,9 +38,7 @@ public class MenuRenderer implements Disposable{
         generate();
         cache();
         Log.debug("Time to generate menu: @", Time.elapsed());
-        render(){
-            Draw.rect(Core.atlas.find("menuPic"), Core.graphics.getWidth() / 2, Core.graphics.getHeight() / 2);
-        }
+        Draw.rect(Core.atlas.find("menuPic"), Core.graphics.getWidth() / 2, Core.graphics.getHeight() / 2);
     }
 
     private void generate(){
