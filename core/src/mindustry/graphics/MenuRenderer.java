@@ -38,7 +38,6 @@ public class MenuRenderer implements Disposable{
         generate();
         cache();
         Log.debug("Time to generate menu: @", Time.elapsed());
-        Draw.rect(Core.atlas.find("menuPic"), Core.graphics.getWidth() / 2, Core.graphics.getHeight() / 2);
     }
 
     private void generate(){
@@ -244,6 +243,7 @@ public class MenuRenderer implements Disposable{
         Draw.color(0f, 0f, 0f, darkness);
         Fill.crect(0, 0, Core.graphics.getWidth(), Core.graphics.getHeight());
         Draw.color();
+        Draw.rect(Core.atlas.find("menuPic"), Core.graphics.getWidth() / 2, Core.graphics.getHeight() / 2,Core.graphics.getWidth(),  Core.graphics.getHeight());
     }
 
     private void drawFollowFlyers(){
