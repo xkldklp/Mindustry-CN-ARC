@@ -33,8 +33,8 @@ abstract class BoundedComp implements Velc, Posc, Healthc, Flyingc{
             float dx = 0f, dy = 0f;
             var bigNum = Core.settings.getFloat("地图边界拓展", 0f) * tilesize;
             //repel unit out of bounds
-            if(x < left + bigNum) dx += (-(x - left)/warpDst);
-            if(y < bot + bigNum) dy += (-(y - bot)/warpDst);
+            if(x < left - bigNum) dx += (-(x - left)/warpDst);
+            if(y < bot - bigNum) dy += (-(y - bot)/warpDst);
             if(x > right + bigNum) dx -= (x - right)/warpDst;
             if(y > top + bigNum) dy -= (y - top)/warpDst;
 
