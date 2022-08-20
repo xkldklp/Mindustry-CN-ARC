@@ -80,7 +80,9 @@ public enum Binding implements KeyBind{
     rtsSelectHealth(KeyCode.f12),
 
     rtsSelectAll(KeyCode.f2),
-    lockonLastMark(KeyCode.f12)
+    lockonLastMark(KeyCode.f12),
+
+    klpMenu(KeyCode.shiftRight)
     ;
 
     private final KeybindValue defaultValue;
