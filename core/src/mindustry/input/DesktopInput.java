@@ -301,6 +301,10 @@ public class DesktopInput extends InputHandler{
             if(Core.input.keyTap(Binding.research) && state.isCampaign()) ui.research.toggle();
         }
 
+        if(Core.input.keyTap(Binding.klpMenu) && !Core.scene.hasKeyboard() && !ui.klpMenu.isShown()){
+            ui.klpMenu.show();
+        }
+
         if(state.isMenu() || Core.scene.hasDialog()) return;
 
         //zoom camera
