@@ -19,8 +19,14 @@ import mindustry.net.Administration.*;
 import mindustry.net.*;
 import mindustry.net.Packets.*;
 import mindustry.ui.*;
+import mindustry.world.blocks.defense.turrets.BaseTurret;
+import mindustry.world.blocks.defense.turrets.ReloadTurret;
+import mindustry.world.blocks.defense.turrets.Turret;
+import mindustry.world.blocks.production.GenericCrafter;
+import mindustry.world.blocks.production.HeatCrafter;
 import mindustry.world.blocks.storage.*;
 import mindustry.world.blocks.storage.CoreBlock.*;
+import mindustry.world.blocks.units.UnitFactory;
 
 import static mindustry.Vars.*;
 
@@ -342,7 +348,7 @@ abstract class PlayerComp implements UnitController, Entityc, Syncc, Timerc, Dra
     }
 
     public void buildDestroyedBlocks() {
-        if (unit.canBuild() && state.rules.mode() != Gamemode.pvp) {
+        if (unit.canBuild()) {
             int count = 0;
             for (Teams.BlockPlan plan : player.team().data().plans) {
                 if (within(plan.x * tilesize, plan.y * tilesize, buildingRange)) {
@@ -358,7 +364,9 @@ abstract class PlayerComp implements UnitController, Entityc, Syncc, Timerc, Dra
             return;
         }
         indexer.eachBlock(player.team(), player.x, player.y, itemTransferRange,
-            build -> build.acceptStack(player.unit().item(), player.unit().stack.amount, player.unit()) > 0 && !(build.block instanceof CoreBlock),
+            build -> build.acceptStack(player.unit().item(), player.unit().stack.amount, player.unit()) > 0 && (
+                    (build.block instanceof Turret && Core.settings.getBool("一键装填-炮台", false) ||
+                            (build.block instanceof GenericCrafter && Core.settings.getBool("一键装填-工厂", false)))),
             build -> Call.transferInventory(player, build)
         );
     }

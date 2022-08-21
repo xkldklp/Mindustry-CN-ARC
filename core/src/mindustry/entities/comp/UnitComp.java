@@ -65,12 +65,8 @@ abstract class UnitComp implements Healthc, Physicsc, Hitboxc, Statusc, Teamc, I
 
     /** Move based on preferred unit movement type. */
     public void movePref(Vec2 movement){
-        if(type.omniMovement || Core.settings.getBool("没有角度移动", false)){
-            if(Core.settings.getBool("我爱角度移动", false)){
-                rotateMove(movement);
-            }else{
-                moveAt(movement);
-            }
+        if((type.omniMovement || Core.settings.getBool("没有角度移动", false)) && !Core.settings.getBool("我爱角度移动", false)){
+            moveAt(movement);
         }else{
             rotateMove(movement);
         }
@@ -88,7 +84,7 @@ abstract class UnitComp implements Healthc, Physicsc, Hitboxc, Statusc, Teamc, I
         moveAt(Tmp.v2.trns(rotation, vec.len()));
 
         if(!vec.isZero()){
-            rotation = Angles.moveToward(rotation, vec.angle(), type.rotateSpeed * Time.delta);
+            rotation = Angles.moveToward(rotation, vec.angle(), type.rotateSpeed * Time.delta * Core.settings.getFloat("单位转向速度", 1f));
         }
     }
 
@@ -479,7 +475,7 @@ abstract class UnitComp implements Healthc, Physicsc, Hitboxc, Statusc, Teamc, I
         drag = type.drag * (isGrounded() ? (floorOn().dragMultiplier) : 1f) * dragMultiplier * state.rules.dragMultiplier;
 
         //apply knockback based on spawns
-        if(Core.settings.getBool("刷怪圈也阻止不了我对你的爱" , false) || (team != state.rules.waveTeam && state.hasSpawns() && (!net.client() || isLocal()))){
+        if(!Core.settings.getBool("刷怪圈也阻止不了我对你的爱" , true) && (team != state.rules.waveTeam && state.hasSpawns() && (!net.client() || isLocal()))){
             float relativeSize = state.rules.dropZoneRadius + hitSize/2f + 1f;
             for(Tile spawn : spawner.getSpawns()){
                 if(within(spawn.worldx(), spawn.worldy(), relativeSize)){

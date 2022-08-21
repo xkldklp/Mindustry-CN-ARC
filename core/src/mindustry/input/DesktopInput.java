@@ -215,7 +215,7 @@ public class DesktopInput extends InputHandler{
         boolean panCam = false;
         float camSpeed = (!Core.input.keyDown(Binding.boost) ? panSpeed : panBoostSpeed) * Time.delta;
 
-        if(input.keyDown(Binding.drop)){
+        if((input.keyDown(Binding.drop) && settings.getBool("按住一键装填", false)) || input.keyTap(Binding.drop)){
             player.dropItems();
         }
 
@@ -756,6 +756,10 @@ public class DesktopInput extends InputHandler{
 
     protected void updateMovement(Unit unit){
         boolean omni = unit.type.omniMovement;
+        if(omni)
+            omni = !settings.getBool("没有角度移动", false);
+        else
+            omni = settings.getBool("我爱角度移动", false);
 
         float speed = unit.speed();
         float xa = Core.input.axis(Binding.move_x);
@@ -770,7 +774,7 @@ public class DesktopInput extends InputHandler{
         float mouseAngle = Angles.mouseAngle(unit.x, unit.y);
         boolean aimCursor = omni && player.shooting && unit.type.hasWeapons() && unit.type.faceTarget && !boosted;
 
-        if(aimCursor){
+        if(aimCursor || settings.getBool("强制看向鼠标", false)){
             unit.lookAt(mouseAngle);
         }else{
             unit.lookAt(unit.prefRotation());
