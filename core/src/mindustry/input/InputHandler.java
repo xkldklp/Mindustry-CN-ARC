@@ -100,6 +100,8 @@ public abstract class InputHandler implements InputProcessor, GestureListener{
 
     private WidgetGroup group = new WidgetGroup();
 
+    public Vec2 lastCommandPos;
+
     private final Eachable<BuildPlan> allPlans = cons -> {
         player.unit().plans().each(cons);
         selectPlans.each(cons);
@@ -810,6 +812,25 @@ public abstract class InputHandler implements InputProcessor, GestureListener{
         }
     }
 
+    public void commandTap(Vec2 target, int[] ids){
+        if(commandMode){
+            if(ids.length > 0){
+
+                Teamc attack = world.buildWorld(target.x, target.y);
+
+                if(attack == null || attack.team() == player.team()){
+                    attack = selectedEnemyUnit(target.x, target.y);
+                }
+
+                Call.commandUnits(player, ids, attack instanceof Building b ? b : null, attack instanceof Unit u ? u : null, target);
+            }
+
+            if(commandBuild != null){
+                Call.commandBuilding(player, commandBuild, target);
+            }
+        }
+    }
+
     public void commandTap(float screenX, float screenY){
         if(commandMode){
             //right click: move to position
@@ -831,6 +852,7 @@ public abstract class InputHandler implements InputProcessor, GestureListener{
                 }
 
                 Call.commandUnits(player, ids, attack instanceof Building b ? b : null, attack instanceof Unit u ? u : null, target);
+                lastCommandPos = target;
             }
 
             if(commandBuild != null){

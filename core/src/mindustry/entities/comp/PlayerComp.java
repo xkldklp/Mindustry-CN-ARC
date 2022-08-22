@@ -28,6 +28,7 @@ import mindustry.world.blocks.storage.*;
 import mindustry.world.blocks.storage.CoreBlock.*;
 import mindustry.world.blocks.units.UnitFactory;
 
+import static arc.Core.settings;
 import static mindustry.Vars.*;
 
 @EntityDef(value = {Playerc.class}, serialize = false)
@@ -367,7 +368,10 @@ abstract class PlayerComp implements UnitController, Entityc, Syncc, Timerc, Dra
             build -> build.acceptStack(player.unit().item(), player.unit().stack.amount, player.unit()) > 0 && (
                     (build.block instanceof Turret && Core.settings.getBool("一键装填-炮台", false) ||
                             (build.block instanceof GenericCrafter && Core.settings.getBool("一键装填-工厂", false)))),
-            build -> Call.transferInventory(player, build)
+            build -> {
+                player.unit().aim(build.x,build.y);
+                Call.transferInventory(player, build);
+            }
         );
     }
 

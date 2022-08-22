@@ -53,9 +53,12 @@ public class KlpMenuDialog extends BaseDialog{
         addSliderSetting("地图边界拓展", "地图边界拓展",0f , 250f / 8, 30, 0f, "拓展后单位不会在拓展后边界受到神秘力量(31格外会瞬间死亡！)");
 
         settings.add("[yellow]------------------玩家控制------------------").row();
+        addCheckSetting("强制控制单位", "强制控制单位" , "抢我单位？");
         addCheckSetting("一键装填-工厂", "一键装填-工厂" , "使一键装填可以向工厂丢入物品");
         addCheckSetting("一键装填-炮台", "一键装填-炮台" , "使一键装填可以向炮台丢入物品");
         addCheckSetting("按住一键装填", "按住一键装填" , "按住装填按键 然后疯狂装填！");
+        addCheckSetting("自由鼠标", "自由鼠标" , "开启后单位aim不会跟随鼠标位置,且一键装弹可绕过wz检测");
+        addCheckSetting("按住一键装填自由鼠标", "按住一键装填自由鼠标" , "开启后单位aim不会跟随鼠标位置,且一键装弹可绕过wz检测");
 
         settings.add("[yellow]------------------多人游戏------------------").row();
         settings.table(table -> {

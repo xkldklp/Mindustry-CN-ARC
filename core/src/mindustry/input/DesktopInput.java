@@ -10,6 +10,8 @@ import arc.math.*;
 import arc.math.geom.*;
 import arc.scene.*;
 import arc.scene.ui.layout.*;
+import arc.struct.ObjectMap;
+import arc.struct.Seq;
 import arc.util.*;
 import mindustry.*;
 import mindustry.arcModule.Marker;
@@ -21,6 +23,10 @@ import mindustry.gen.*;
 import mindustry.graphics.*;
 import mindustry.ui.*;
 import mindustry.world.*;
+
+import java.lang.reflect.Array;
+import java.util.Locale;
+import java.util.Objects;
 
 import static arc.Core.*;
 import static mindustry.Vars.net;
@@ -49,6 +55,9 @@ public class DesktopInput extends InputHandler{
     public long selectMillis = 0;
     /** Previously selected tile. */
     public Tile prevSelected;
+    /** Previously selected tile. */
+    public Seq<Unit> lastCommand = new Seq<Unit>();
+
 
     public boolean autoAim = false;
 
@@ -262,6 +271,7 @@ public class DesktopInput extends InputHandler{
         }else{
             commandMode = false;
         }
+        if (!commandMode) lastCommand.clear();
 
         //validate commanding units
         selectedUnits.removeAll(u -> !u.isCommandable() || !u.isValid());
@@ -692,6 +702,20 @@ public class DesktopInput extends InputHandler{
             int level = settings.getInt("superUnitEffect");
             settings.put("superUnitEffect", (level + 1) % 3);
         }
+        if (commandMode && settings.getBool("强制控制单位", false) && lastCommand.size > 0){
+            Seq<Unit> needCommand = new Seq<>();
+            for (Unit unit : lastCommand){
+                if(!Objects.equals(unit.lastCommanded, "[#" + player.color.toString().toUpperCase() + "]" + player.name)){
+                    unit.lastCommanded = "[#" + player.color.toString().toUpperCase() + "]" + player.name;
+                    needCommand.add(unit);
+                }
+            }
+            int[] ids = new int[needCommand.size];
+            for(int i = 0; i < ids.length; i++){
+                ids[i] = needCommand.get(i).id;
+            }
+            if(needCommand.size > 0) commandTap(lastCommandPos, ids);
+        }
 
     }
 
@@ -719,6 +743,10 @@ public class DesktopInput extends InputHandler{
         if(scene.hasMouse() || !commandMode) return false;
 
         if(button == KeyCode.mouseRight){
+            lastCommand.clear();
+            for (Unit unit : selectedUnits){
+                lastCommand.add(unit);
+            }
             commandTap(x, y);
         }
 
@@ -782,7 +810,7 @@ public class DesktopInput extends InputHandler{
 
         unit.movePref(movement);
 
-        if (!autoAim) unit.aim(Core.input.mouseWorld());
+        if (!autoAim && (!settings.getBool("自由鼠标", false) && !(settings.getBool("按住一键装填自由鼠标", false) && input.keyDown(Binding.drop))) || (player.shooting && !input.keyDown(Binding.drop))) unit.aim(Core.input.mouseWorld());
         unit.controlWeapons(true, player.shooting && !boosted);
 
         player.boosting = Core.input.keyDown(Binding.boost);

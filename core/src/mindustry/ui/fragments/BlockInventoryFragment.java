@@ -21,6 +21,7 @@ import mindustry.type.*;
 
 import java.util.*;
 
+import static arc.Core.settings;
 import static mindustry.Vars.*;
 
 public class BlockInventoryFragment{
@@ -73,11 +74,16 @@ public class BlockInventoryFragment{
         if(!build.canWithdraw()) return;
 
         //take everything
-        if(player.unit().stack.item != lastItem) Call.transferInventory(player, build);
+        if(player.unit().stack.item != lastItem) {
+            player.unit().aim(build.x,build.y);
+            Call.transferInventory(player, build);
+        }
         int amount = Math.min(requested, player.unit().maxAccepted(lastItem));
 
         if(amount > 0){
+
             Call.requestItem(player, build, lastItem, amount);
+
             holding = false;
             holdTime = 0f;
             held = true;
