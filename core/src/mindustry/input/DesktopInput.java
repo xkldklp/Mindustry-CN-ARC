@@ -757,9 +757,9 @@ public class DesktopInput extends InputHandler{
     protected void updateMovement(Unit unit){
         boolean omni = unit.type.omniMovement;
         if(omni)
-            omni = !settings.getBool("没有角度移动", false);
+            omni = !settings.getBool("我爱角度移动", false);
         else
-            omni = settings.getBool("我爱角度移动", false);
+            omni = settings.getBool("没有角度移动", false);
 
         float speed = unit.speed();
         float xa = Core.input.axis(Binding.move_x);
