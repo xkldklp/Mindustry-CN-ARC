@@ -4,6 +4,7 @@ import arc.*;
 import arc.graphics.g2d.*;
 import arc.struct.*;
 import arc.util.*;
+import mindustry.core.UI;
 import mindustry.entities.units.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
@@ -27,7 +28,7 @@ public class HeatConductor extends Block{
         super.setBars();
 
         //TODO show number
-        addBar("heat", (HeatConductorBuild entity) -> new Bar(() -> Core.bundle.format("bar.heatamount", (int)entity.heat), () -> Pal.lightOrange, () -> entity.heat / visualMaxHeat));
+        addBar("heat", (HeatConductorBuild entity) -> new Bar(() -> UI.simpleFormat("热量",entity.heat,visualMaxHeat,0), () -> Pal.lightOrange, () -> entity.heat / visualMaxHeat));
     }
 
     @Override

@@ -88,6 +88,8 @@ public class UI implements ApplicationListener, Loadable{
 
     private @Nullable Element lastAnnouncement;
 
+    private @Nullable Element lastArcAnnouncement;
+
     public UI(){
         Fonts.loadFonts();
     }
@@ -325,12 +327,16 @@ public class UI implements ApplicationListener, Loadable{
     }
 
     public void showInfoFade(String info){
+        showInfoFade(info,  7f);
+    }
+
+    public void showInfoFade(String info, float duration){
         var cinfo = Core.scene.find("coreinfo");
         Table table = new Table();
         table.touchable = Touchable.disabled;
         table.setFillParent(true);
         if(cinfo.visible && !state.isMenu()) table.marginTop(cinfo.getPrefHeight() / Scl.scl() / 2);
-        table.actions(Actions.fadeOut(7f, Interp.fade), Actions.remove());
+        table.actions(Actions.fadeOut(duration, Interp.fade), Actions.remove());
         table.top().add(info).style(Styles.outlineLabel).padTop(10);
         Core.scene.add(table);
     }
@@ -579,7 +585,7 @@ public class UI implements ApplicationListener, Loadable{
         t.pack();
         t.act(0.1f);
         Core.scene.add(t);
-        lastAnnouncement = t;
+        lastArcAnnouncement = t;
     }
 
     public void showOkText(String title, String text, Runnable confirmed){
@@ -645,7 +651,7 @@ public class UI implements ApplicationListener, Loadable{
         }else if(mag >= 1_000_000){
             return sign + Strings.fixed(mag / 1_000_000f, 1) + "[gray]" +millions + "[]";
         }else if(mag >= 25_000){
-            return number / 1000 + "[gray]" + thousands + "[]";
+            return sign + mag / 1000 + "[gray]" + thousands + "[]";
         }else if(mag >= 2500){
             return sign + Strings.fixed(mag / 1000f, 1) + "[gray]" + thousands + "[]";
         }else{
@@ -665,11 +671,11 @@ public class UI implements ApplicationListener, Loadable{
         }else if(mag >= 1_000_000){
             return sign + Strings.fixed(mag / 1_000_000f, decimal) + "[gray]" +millions + "[]";
         }else if(mag >= 25_000){
-            return number / 1000 + "[gray]" + thousands + "[]";
+            return sign + mag / 1000 + "[gray]" + thousands + "[]";
         }else if(mag >= 2500){
             return sign + Strings.fixed(mag / 1000f, decimal) + "[gray]" + thousands + "[]";
         }else{
-            return number + "";
+            return Strings.autoFixed(mag, decimal) + "";
         }
     }
 
@@ -684,11 +690,33 @@ public class UI implements ApplicationListener, Loadable{
         }else if(mag >= 1_000_000){
             return sign + Strings.fixed(mag / 1_000_000f, 1) + millions + "";
         }else if(mag >= 25_000){
-            return number / 1000 + thousands + "";
+            return sign + mag / 1000 + thousands + "";
         }else if(mag >= 2500){
-            return sign + Strings.fixed(mag / 1000f, 1) + thousands + "";
+            return sign + Strings.autoFixed(mag / 1000f, 1) + thousands + "";
         }else{
             return number + "";
+        }
+    }
+
+    public static String colorFormatAmount(float number){
+        if (number == 0) return "";
+        //prevent overflow
+        if(number == Long.MIN_VALUE) number ++;
+
+        long mag = (long) Math.abs(number);
+        String sign = number < 0 ? "[orange]-" : "[green]";
+        if(mag >= 1_000_000_000){
+            return sign + Strings.fixed(mag / 1_000_000_000f, 1) + billions+ "";
+        }else if(mag >= 1_000_000){
+            return sign + Strings.fixed(mag / 1_000_000f, 1) + millions + "";
+        }else if(mag >= 25_000){
+            return sign + mag / 1000 + thousands + "";
+        }else if(mag >= 2500){
+            return sign + Strings.fixed(mag / 1000f, 1) + thousands + "";
+        }else if(mag >= 100){
+            return sign + (int)mag + "";
+        }else{
+            return sign + Strings.autoFixed(mag, 1) + "";
         }
     }
 
@@ -714,5 +742,41 @@ public class UI implements ApplicationListener, Loadable{
     public static String formatFloat(float number){
         if (Math.abs(number - Math.round(number)) < 0.01) return String.format("%.0f", number);
         return String.format("%.2f", number);
+    }
+
+    public static String arcFixed(float number, int maxDeci){
+
+        String sign = number < 0 ? "-" : "";
+        number = Math.abs(number);
+        if(number >= 1_000_000_000){
+            return sign + Strings.fixed(number / 1_000_000_000f, 1) + billions+ "";
+        }else if(number >= 1_000_000){
+            return sign + Strings.fixed(number / 1_000_000f, 1) + millions + "";
+        }else if(number >= 25_000){
+            return sign + number / 1000 + thousands + "";
+        }else if(number >= 2500){
+            return sign + Strings.fixed(number / 1000f, 1) + thousands + "";
+        }else{
+            return sign + Strings.autoFixed(number,maxDeci);
+        }
+    }
+
+    public static String simpleFormat(String text,float cur,float total,int deci){
+        return text + " " + simpleView(cur,total,deci);
+    }
+
+    public static String simpleFormat(String text,float cur,float total){
+        return simpleFormat(text,cur,total,1);
+    }
+
+    public static String simpleView(float cur,float total,int deci){
+        float pre = cur/total;
+        if(pre>0.99) return arcFixed(cur,deci);
+        else if (pre<0.001) return  arcFixed(cur,deci) + "/" + arcFixed(total,deci);
+        else return arcFixed(cur,deci) + "/" + arcFixed(total,deci) + " | [lightgray]" + (int)(pre * 100) + "%";
+    }
+
+    public static String simpleView(float cur,float total){
+        return simpleView(cur,total,1);
     }
 }

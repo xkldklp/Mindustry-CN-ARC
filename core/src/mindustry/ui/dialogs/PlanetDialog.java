@@ -35,6 +35,7 @@ import mindustry.world.blocks.storage.*;
 
 import static arc.Core.*;
 import static mindustry.Vars.*;
+import static mindustry.arcModule.DrawUtilities.arcDrawText;
 import static mindustry.graphics.g3d.PlanetRenderer.*;
 import static mindustry.ui.dialogs.PlanetDialog.Mode.*;
 
@@ -68,6 +69,10 @@ public class PlanetDialog extends BaseDialog implements PlanetInterfaceRenderer{
 
     public Table sectorTop = new Table(), notifs = new Table(), expandTable = new Table();
     public Label hoverLabel = new Label("");
+
+    private boolean alwaysShowName = false;
+
+    private int viewInt = 60;
 
     public PlanetDialog(){
         super("", Styles.fullDialog);
@@ -233,6 +238,13 @@ public class PlanetDialog extends BaseDialog implements PlanetInterfaceRenderer{
             buttons.add().growX();
             buttons.add(sectorTop).minWidth(230f);
             buttons.add().growX();
+            buttons.button("显示周期",Icon.settings,()->{
+                if(viewInt==1) viewInt = 60;
+                else if (viewInt==60) viewInt = 120;
+                else viewInt = 1;
+                ui.arcInfo("调整资源输入|输出显示周期为 [orange]" + viewInterval(viewInt));
+            }).size(100f, 54f).pad(2).bottom();
+            buttons.button("区块名称", Icon.bookOpen, () -> alwaysShowName = !alwaysShowName).size(100f, 54f).pad(2).bottom();
             addTech();
         }
     }
@@ -463,6 +475,9 @@ public class PlanetDialog extends BaseDialog implements PlanetInterfaceRenderer{
                         Draw.rect(icon, 0, 0, iw, iw * icon.height / icon.width);
                     });
                 }
+                planets.drawPlane(sec,()->{
+                    if((canSelect(sec) || sec.hasBase()) && alwaysShowName) arcDrawText((sec.preset !=null ? "" : "[gray]") +  sec.name(),0.5f,0,0,0);
+                });
             }
         }
 
@@ -594,7 +609,7 @@ public class PlanetDialog extends BaseDialog implements PlanetInterfaceRenderer{
 
             //sector notifications & search
             c.top().right();
-            c.defaults().width(290f);
+            c.defaults().width(350f);
 
             c.button(bundle.get("sectorlist") +
             (attacked == 0 ? "" : "\n[red]⚠[lightgray] " + bundle.format("sectorlist.attacked", "[red]" + attacked + "[]")),
@@ -638,7 +653,7 @@ public class PlanetDialog extends BaseDialog implements PlanetInterfaceRenderer{
 
             readd[0] = () -> {
                 con.clearChildren();
-                for(Sector sec : all){
+                for(Sector sec : all.copy().sort(sector -> sector.info.production.size)){
                     if(sec.hasBase() && (searchText.isEmpty() || sec.name().toLowerCase().contains(searchText.toLowerCase()))){
                         con.button(t -> {
                             t.marginRight(10f);
@@ -655,8 +670,20 @@ public class PlanetDialog extends BaseDialog implements PlanetInterfaceRenderer{
                                 }
 
                                 String ic = sec.iconChar() == null ? "" : sec.iconChar() + " ";
-
                                 head.add(ic + sec.name()).growX().wrap();
+
+                                if(!mobile && !sec.info.export.isEmpty() && sec.info.destination != null && sec.info.destination.hasBase()){
+                                    String des = sec.info.destination.iconChar();
+                                    String text = Iconc.rightOpen + " " + (des == null || des.isEmpty() ? "" : des + " ") + sec.info.destination.name();
+                                    head.button(text, Styles.cleart, () -> {
+                                        ui.planet.showSelect(sec, other -> {
+                                            if(other.planet == sec.planet){
+                                                sec.info.destination = other;
+                                            }
+                                        });
+                                    }).minWidth(150f).right().padRight(10f);
+                                }
+
                             }).growX().row();
 
                             if(sec.isAttacked()){
@@ -800,18 +827,27 @@ public class PlanetDialog extends BaseDialog implements PlanetInterfaceRenderer{
         displayItems(c, scl, stats, name, t -> {});
     }
 
+    void displayItems(Table c, float scl, ObjectMap<Item, ExportStat> stats, String name,Boolean showColor){
+        displayItems(c, scl, stats, name, t -> {},showColor);
+    }
+
     void displayItems(Table c, float scl, ObjectMap<Item, ExportStat> stats, String name, Cons<Table> builder){
+        displayItems(c, scl, stats, name, t -> {},false);
+    }
+
+    void displayItems(Table c, float scl, ObjectMap<Item, ExportStat> stats, String name, Cons<Table> builder,Boolean showColor){
         Table t = new Table().left();
 
         int i = 0;
+        int rowSet = settings.getInt("itemSelectionWidth");
         for(var item : content.items()){
             var stat = stats.get(item);
             if(stat == null) continue;
-            int total = (int)(stat.mean * 60 * scl);
-            if(total > 1){
+            int total = (int)(stat.mean * viewInt * scl);
+            if(total != 0){
                 t.image(item.uiIcon).padRight(3);
-                t.add(UI.formatAmount(total) + " " + Core.bundle.get("unit.perminute")).color(Color.lightGray).padRight(3);
-                if(++i % 3 == 0){
+                t.add(showColor? UI.colorFormatAmount(total) : UI.formatAmount(total)).color(Color.lightGray).padRight(3);
+                if( ++i % rowSet == 0){
                     t.row();
                 }
             }
@@ -819,7 +855,8 @@ public class PlanetDialog extends BaseDialog implements PlanetInterfaceRenderer{
 
         if(t.getChildren().any()){
             c.defaults().left();
-            c.add(name).row();
+            c.add(name + "  ("+ viewInterval(viewInt) + ")").color(getThemeColor()).center().row();
+            c.image().color(getThemeColor()).fillX().row();
             builder.get(c);
             c.add(t).padLeft(10f).row();
         }
@@ -846,7 +883,8 @@ public class PlanetDialog extends BaseDialog implements PlanetInterfaceRenderer{
             }
 
             if(sector.save != null && sector.info.resources.any()){
-                c.add("@sectors.resources").left().row();
+                c.add("资源").color(getThemeColor()).center().row();
+                c.image().color(getThemeColor()).fillX().row();
                 c.table(t -> {
                     for(UnlockableContent uc : sector.info.resources){
                         if(uc == null) continue;
@@ -856,10 +894,10 @@ public class PlanetDialog extends BaseDialog implements PlanetInterfaceRenderer{
             }
 
             //production
-            displayItems(c, sector.getProductionScale(), sector.info.production, "@sectors.production");
+            displayItems(c, sector.getProductionScale(), sector.info.production, "产出",true);
 
             //export
-            displayItems(c, sector.getProductionScale(), sector.info.export, "@sectors.export", t -> {
+            displayItems(c, sector.getProductionScale(), sector.info.export, "输出", t -> {
                 if(sector.info.destination != null && sector.info.destination.hasBase()){
                     String ic = sector.info.destination.iconChar();
                     t.add(Iconc.rightOpen + " " + (ic == null || ic.isEmpty() ? "" : ic + " ") + sector.info.destination.name()).padLeft(10f).row();
@@ -868,7 +906,7 @@ public class PlanetDialog extends BaseDialog implements PlanetInterfaceRenderer{
 
             //import
             if(sector.hasBase()){
-                displayItems(c, 1f, sector.info.importStats(sector.planet), "@sectors.import", t -> {
+                displayItems(c, 1f, sector.info.importStats(sector.planet), "输入", t -> {
                     sector.info.eachImport(sector.planet, other -> {
                         String ic = other.iconChar();
                         t.add(Iconc.rightOpen + " " + (ic == null || ic.isEmpty() ? "" : ic + " ") + other.name()).padLeft(10f).row();
@@ -881,7 +919,8 @@ public class PlanetDialog extends BaseDialog implements PlanetInterfaceRenderer{
             //stored resources
             if(sector.hasBase() && items.total > 0){
 
-                c.add("@sectors.stored").left().row();
+                c.add("存储").color(getThemeColor()).center().row();
+                c.image().color(getThemeColor()).fillX().row();
                 c.table(t -> {
                     t.left();
 
@@ -889,9 +928,23 @@ public class PlanetDialog extends BaseDialog implements PlanetInterfaceRenderer{
 
                         int i = 0;
                         for(ItemStack stack : items){
+                            /*
+                            res.stack(
+                                    new Table(tt -> {
+                                        tt.image(stack.item.uiIcon).padRight(3).tooltip(tooltip -> tooltip.background(Styles.black6).margin(4f).add(stack.item.localizedName).style(Styles.outlineLabel));
+                                    }),
+
+                                    new Table(tt -> {
+                                        tt.label(() -> {
+                                            float result = arcGetProduction(sector,stack.item);
+                                            return UI.colorFormatAmount(result);
+                                        }).get().setFontScale(0.75f);
+                                    }).top().left()
+                            );*/
+
                             res.image(stack.item.uiIcon).padRight(3);
                             res.add(UI.formatAmount(Math.max(stack.amount, 0))).color(Color.lightGray);
-                            if(++i % 4 == 0){
+                            if(++i % settings.getInt("itemSelectionWidth") == 0){
                                 res.row();
                             }
                         }
@@ -928,6 +981,15 @@ public class PlanetDialog extends BaseDialog implements PlanetInterfaceRenderer{
         }
 
         dialog.show();
+    }
+
+    float arcGetProduction(Sector sector, Item item){
+        ExportStat pro = sector.info.production.get(item), exp = sector.info.export.get(item),in = sector.info.importStats(sector.planet).get(item);
+        float result = 0f;
+        if(pro != null) result += pro.mean * viewInt * sector.getProductionScale();
+        if(exp != null) result -= exp.mean * viewInt * sector.getProductionScale();
+        if(in != null) result += in.mean * viewInt;
+        return result;
     }
 
     void addSurvivedInfo(Sector sector, Table table, boolean wrap){
@@ -1223,4 +1285,12 @@ public class PlanetDialog extends BaseDialog implements PlanetInterfaceRenderer{
         /** Launch between planets. */
         planetLaunch
     }
+
+    private String viewInterval(int viewInt){
+        if (viewInt == 60) return "每分";
+        else if(viewInt == 120) return "每周期";
+        else if(viewInt == 1) return "每秒";
+        else return "每" + viewInt + "秒";
+    }
+
 }

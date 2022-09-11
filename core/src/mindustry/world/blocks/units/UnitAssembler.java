@@ -93,9 +93,8 @@ public class UnitAssembler extends PayloadBlock{
     public void setBars(){
         super.setBars();
 
-        //addBar("progress", (UnitAssemblerBuild e) -> new Bar("bar.progress", Pal.ammo, () -> e.progress));
         addBar("progress", (UnitAssembler.UnitAssemblerBuild e) -> new Bar(() ->
-                Iconc.units + " " + (int)(e.progress * 100) + "%" + " | " +Strings.fixed((e.plan().time * (1-e.progress))/(60f * e.timeScale()),0) +  " s",
+                Iconc.units + " " + (int)(e.progress * 100) + "%" + " | " +Strings.fixed((e.plan().time * (1-e.progress))/(60f * Vars.state.rules.unitBuildSpeed(e.team) * e.timeScale()),0) +  " s",
                 () -> Pal.ammo, () -> e.progress
 
         ));
@@ -304,6 +303,8 @@ public class UnitAssembler extends PayloadBlock{
             for(var module : modules){
                 Drawf.selected(module, Pal.accent);
             }
+
+            Drawf.dashRect(Tmp.c1.set(Pal.accent).lerp(Pal.remove, invalidWarmup), getRect(Tmp.r1, x, y, rotation));
         }
 
         @Override
@@ -326,7 +327,7 @@ public class UnitAssembler extends PayloadBlock{
                     prev = mod.block;
                 }
 
-                t.label(() -> "[accent] -> []" + unit().emoji() + " " + unit().name);
+                t.label(() -> "[accent] -> []" + unit().emoji() + " " + unit().localizedName);
             }).pad(4).padLeft(0f).fillX().left();
         }
 
@@ -472,7 +473,7 @@ public class UnitAssembler extends PayloadBlock{
                     x + 0.6f * (Mathf.clamp(progress, 0f, 1f) - 0.5f) * block.size * tilesize, y + block.size * tilesize / 2.5f);
             Draw.color();
 
-            this.block.drawText((int)(progress * 100) + "%" + " | " +Strings.fixed((plan().time * (1-progress))/(60f * timeScale()),0) +  " s", x, y + block.size * tilesize / 2.5f - 5f, true, 0.9f);
+            block.drawText((int)(progress * 100) + "%" + " | " +Strings.fixed((plan().time * (1-progress))/(60f * Vars.state.rules.unitBuildSpeed(team) * timeScale()),0) +  " s", x, y + block.size * tilesize / 2.5f - 5f, true, 0.9f);
         }
 
         @Override

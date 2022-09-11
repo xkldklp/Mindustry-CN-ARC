@@ -4,12 +4,15 @@ import arc.*;
 import arc.func.*;
 import arc.graphics.*;
 import arc.scene.actions.*;
+import arc.scene.event.Touchable;
 import arc.scene.ui.*;
 import arc.scene.ui.TextButton.*;
 import arc.scene.ui.layout.*;
+import arc.struct.Seq;
 import arc.util.*;
 import mindustry.core.GameState.*;
 import mindustry.ctype.*;
+import mindustry.game.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
 import mindustry.logic.LExecutor.*;
@@ -24,13 +27,18 @@ public class LogicDialog extends BaseDialog{
     public LCanvas canvas;
     Cons<String> consumer = s -> {};
     boolean privileged;
+    float period = 15f;
+    float counter = 0f;
+    Table varTable = new Table();
+    Table mainTable = new Table();
+    boolean refreshing = true;
+
     @Nullable LExecutor executor;
 
     public LogicDialog(){
         super("logic");
 
         clearChildren();
-
         canvas = new LCanvas();
         shouldPause = true;
 
@@ -41,13 +49,151 @@ public class LogicDialog extends BaseDialog{
         onResize(() -> {
             setup();
             canvas.rebuild();
+            varsTable();
         });
 
-        add(canvas).grow().name("canvas");
+
+        add(mainTable).grow().name("canvas");
+        rebuildMain();
 
         row();
 
         add(buttons).growX().name("canvas");
+    }
+
+    private void rebuildMain(){
+        mainTable.clear();
+        canvas.rebuild();
+        if(!Core.settings.getBool("logicSupport"))  {
+            mainTable.add(canvas).grow();
+        }else{
+            varsTable();
+            mainTable.add(varTable);
+            mainTable.add(canvas).grow();
+            counter=0;
+            varTable.update(()->{
+                counter+=Time.delta;
+                if(counter>period && refreshing){
+                    counter=0;
+                }
+            });
+        }
+    }
+    private void varsTable(){
+        varTable.clear();
+        varTable.table(t->{
+            t.table(tt->{
+                tt.add("刷新间隔").padRight(5f).left();
+                TextField field = tt.field((int)period + "", text -> {
+                    period = Integer.parseInt(text);
+                }).width(100f).valid(Strings::canParsePositiveInt).maxTextLength(5).get();
+                tt.slider(1, 60,1, period, res -> {
+                    period = res;
+                    field.setText((int)res + "");
+                });
+            });
+            t.row();
+            t.table(tt->{
+                tt.button(Icon.cancelSmall,Styles.cleari,()->{
+                    Core.settings.put("logicSupport",!Core.settings.getBool("logicSupport"));
+                    ui.arcInfo("[orange]已关闭逻辑辅助器！");
+                    rebuildMain();
+                }).size(50f);
+                tt.button(Icon.refreshSmall,Styles.cleari,()->{
+                    executor.build.updateCode(executor.build.code);
+                    varsTable();
+                    ui.arcInfo("[orange]已更新逻辑显示！");
+                }).size(50f);
+                tt.button(Icon.pauseSmall,Styles.cleari,()->{
+                    refreshing = !refreshing;
+                    ui.arcInfo("[orange]已" + (refreshing?"开启":"关闭") + "逻辑刷新");
+                }).checked(refreshing).size(50f);
+                tt.button(Icon.rightOpenOutSmall,Styles.cleari,()->{
+                    Core.settings.put("rectJumpLine",!Core.settings.getBool("rectJumpLine"));
+                    ui.arcInfo("[orange]已" + (refreshing?"开启":"关闭") + "方形跳转线");
+                    this.canvas.rebuild();
+                }).checked(refreshing).size(50f);
+                /*
+                tt.button(Icon.trash,Styles.cleari,()->{
+                    excludeNull = !excludeNull;
+                    ui.arcInfo("已" + (excludeNull?"关闭":"开启") + "null排除");
+                }).checked(excludeNull).size(50f);*/
+            });
+        });
+        varTable.row();
+            varTable.pane(t->{
+                if(executor==null) return;
+                for(var s : executor.vars){
+                    //if((s.constant && !showConstant) || (!s.constant && showConstant)) continue;
+                    if(s.name.startsWith("___")) continue;
+                    String text = s.isobj ? PrintI.toString(s.objval) : Math.abs(s.numval - (long)s.numval) < 0.00001 ? (long)s.numval + "" : s.numval + "";
+                    //if(text == "null" && excludeNull) continue;
+                    t.table(tt->{
+                        tt.background(Tex.whitePane);
+
+                        tt.table(tv->{
+                            tv.labelWrap(s.name).width(100f);
+                            tv.touchable = Touchable.enabled;
+                            tv.tapped(()->{
+                                Core.app.setClipboardText(s.name);
+                                ui.arcInfo("[cyan]复制变量名[white]\n " + s.name);
+                            });
+                        });
+                        tt.table(tv->{
+                            Label varPro = tv.labelWrap(text).width(200f).get();
+                            tv.touchable = Touchable.enabled;
+                            tv.tapped(()->{
+                                Core.app.setClipboardText(varPro.getText().toString());
+                                ui.arcInfo("[cyan]复制变量属性[white]\n " + varPro.getText());
+                            });
+                            tv.update(()->{
+                                if(counter + Time.delta>period && refreshing){
+                                    varPro.setText(s.isobj ? PrintI.toString(s.objval) : Math.abs(s.numval - (long)s.numval) < 0.00001 ? (long)s.numval + "" : s.numval + "");
+                                }
+                            });
+                        }).padLeft(20f);
+
+                        tt.update(()->{
+                            if(counter + Time.delta>period && refreshing){
+                                tt.setColor(arcVarsColor(s));
+                            }
+                        });
+
+                    }).padTop(10f).row();
+                }
+            }).width(400f).padLeft(20f);
+    }
+    private Color arcVarsColor(Var s){
+        if(s.constant && s.name.startsWith("@")) return Color.goldenrod;
+        else if (s.constant) return Color.tan;
+        else return typeColor(s,new Color());
+    }
+
+    private Color typeColor(Var s, Color color){
+        return color.set(
+            !s.isobj ? Pal.place :
+            s.objval == null ? Color.darkGray :
+            s.objval instanceof String ? Pal.ammo :
+            s.objval instanceof Content ? Pal.logicOperations :
+            s.objval instanceof Building ? Pal.logicBlocks :
+            s.objval instanceof Unit ? Pal.logicUnits :
+            s.objval instanceof Team ? Pal.logicUnits :
+            s.objval instanceof Enum<?> ? Pal.logicIo :
+            Color.white
+        );
+    }
+
+    private String typeName(Var s){
+        return
+            !s.isobj ? "number" :
+            s.objval == null ? "null" :
+            s.objval instanceof String ? "string" :
+            s.objval instanceof Content ? "content" :
+            s.objval instanceof Building ? "building" :
+            s.objval instanceof Team ? "team" :
+            s.objval instanceof Unit ? "unit" :
+            s.objval instanceof Enum<?> ? "enum" :
+            "unknown";
     }
 
     private void setup(){
@@ -78,6 +224,11 @@ public class LogicDialog extends BaseDialog{
                     }).marginLeft(12f).disabled(b -> Core.app.getClipboardText() == null);
                     t.row();
                     t.button("[orange]清空",Icon.trash,style,()-> canvas.clearAll()).marginLeft(12f);
+                    t.row();
+                    t.button("[orange]逻辑辅助器",Icon.settings,style,()-> {
+                        Core.settings.put("logicSupport",!Core.settings.getBool("logicSupport"));
+                        rebuildMain();
+                    }).marginLeft(12f);
                 });
             });
 
@@ -111,26 +262,6 @@ public class LogicDialog extends BaseDialog{
                         Color varColor = Pal.gray;
                         float stub = 8f, mul = 0.5f, pad = 4;
 
-                        Color color =
-                            !s.isobj ? Pal.place :
-                            s.objval == null ? Color.darkGray :
-                            s.objval instanceof String ? Pal.ammo :
-                            s.objval instanceof Content ? Pal.logicOperations :
-                            s.objval instanceof Building ? Pal.logicBlocks :
-                            s.objval instanceof Unit ? Pal.logicUnits :
-                            s.objval instanceof Enum<?> ? Pal.logicIo :
-                            Color.white;
-
-                        String typeName =
-                            !s.isobj ? "number" :
-                            s.objval == null ? "null" :
-                            s.objval instanceof String ? "string" :
-                            s.objval instanceof Content ? "content" :
-                            s.objval instanceof Building ? "building" :
-                            s.objval instanceof Unit ? "unit" :
-                            s.objval instanceof Enum<?> ? "enum" :
-                            "unknown";
-
                         t.add(new Image(Tex.whiteui, varColor.cpy().mul(mul))).width(stub);
                         t.stack(new Image(Tex.whiteui, varColor), new Label(" " + s.name + " ", Styles.outlineLabel){{
                             setColor(Pal.accent);
@@ -138,7 +269,6 @@ public class LogicDialog extends BaseDialog{
 
                         t.add(new Image(Tex.whiteui, Pal.gray.cpy().mul(mul))).width(stub);
                         t.table(Tex.pane, out -> {
-                            float period = 15f;
                             float[] counter = {-1f};
                             Label label = out.add("").style(Styles.outlineLabel).padLeft(4).padRight(4).width(140f).wrap().get();
                             label.update(() -> {
@@ -156,9 +286,13 @@ public class LogicDialog extends BaseDialog{
                             label.act(1f);
                         }).padRight(pad);
 
-                        //TODO type name does not update, is this important?
-                        t.add(new Image(Tex.whiteui, color.cpy().mul(mul))).width(stub);
-                        t.stack(new Image(Tex.whiteui, color), new Label(" " + typeName + " ", Styles.outlineLabel));
+                        t.add(new Image(Tex.whiteui, typeColor(s, new Color()).mul(mul))).update(i -> i.setColor(typeColor(s, i.color).mul(mul))).width(stub);
+
+                        t.stack(new Image(Tex.whiteui, typeColor(s, new Color())){{
+                            update(() -> setColor(typeColor(s, color)));
+                        }}, new Label(() -> " " + typeName(s) + " "){{
+                            setStyle(Styles.outlineLabel);
+                        }});
 
                         t.row();
 
@@ -234,7 +368,7 @@ public class LogicDialog extends BaseDialog{
                 modified.get(result);
             }
         };
-
+        varsTable();
         show();
     }
 }

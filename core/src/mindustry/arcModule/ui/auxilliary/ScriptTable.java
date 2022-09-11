@@ -10,25 +10,17 @@ import arc.scene.ui.layout.*;
 import mindustry.*;
 import mindustry.arcModule.*;
 import mindustry.content.*;
-import mindustry.game.*;
 import mindustry.gen.*;
+import mindustry.input.DesktopInput;
 
+import static mindustry.Vars.*;
 import static mindustry.arcModule.ui.RStyles.*;
 import static mindustry.content.UnitTypes.vela;
 
 public class ScriptTable extends BaseToolsTable{
-    private boolean boost = false;
 
     public ScriptTable(){
         super(UnitTypes.gamma.uiIcon);
-
-        if(Vars.mobile){
-            Events.run(EventType.Trigger.update, () -> {
-                if(!Vars.player.dead() && Vars.player.unit().type.canBoost && boost){
-                    Vars.player.boosting = true;
-                }
-            });
-        }
     }
 
     @Override
@@ -48,14 +40,35 @@ public class ScriptTable extends BaseToolsTable{
         scriptButton(Icon.modeAttack, "自动攻击", () -> {
             boolean at = Core.settings.getBool("autotarget");
             Core.settings.put("autotarget", !at);
+            ui.arcInfo("已" + (at?"关闭":"开启") + "自动攻击");
         }, b -> Core.settings.getBool("autotarget"));
 
+        scriptButton(vela.uiIcon, "强制助推", () -> {
+            boolean ab = Core.settings.getBool("forceBoost");
+            Core.settings.put("forceBoost", !ab);
+            ui.arcInfo("已" + (ab?"关闭":"开启") + "强制助推");
+        }, b -> Core.settings.getBool("forceBoost"));
 
-        scriptButton(vela.uiIcon, "助推", () -> boost = !boost).checked(boost);
+        if(!mobile)
+        scriptButton(Icon.eyeSmall, "取消追踪", () -> {
+            boolean ab = Core.settings.getBool("removePan");
+            if(control.input instanceof DesktopInput){
+                ((DesktopInput) control.input).panning = true;
+            }
+            Core.settings.put("removePan", !ab);
+            ui.arcInfo("已" + (ab?"取消":"开启") + "强制追踪控制单位");
+        }, b -> Core.settings.getBool("removePan"));
+        scriptButton(Items.copper.uiIcon, "一键放置", () -> {
+            player.dropItems();
+        });
     }
 
     private void scriptButton(Drawable region, String describe, Runnable runnable, Boolf<ImageButton> checked){
         scriptButton(region, clearLineNoneTogglei, describe, runnable).checked(checked);
+    }
+
+    private void scriptButton(TextureRegion region, String describe, Runnable runnable, Boolf<ImageButton> checked){
+        scriptButton(new TextureRegionDrawable(region), clearLineNoneTogglei, describe, runnable).checked(checked);
     }
 
     private Cell<ImageButton> scriptButton(TextureRegion region, String describe, Runnable runnable){

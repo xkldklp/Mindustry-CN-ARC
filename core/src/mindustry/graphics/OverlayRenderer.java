@@ -83,6 +83,7 @@ public class OverlayRenderer{
     }
 
     public void drawTop(){
+        District.drawDistrict();
 
         if(!player.dead() && ui.hudfrag.shown){
             if(Core.settings.getBool("playerindicators")){

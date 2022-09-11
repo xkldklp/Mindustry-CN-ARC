@@ -60,7 +60,7 @@ public class ModsDialog extends BaseDialog{
                 searchtxt = res;
                 rebuildBrowser();
             }).growX().get();
-            table.button(Icon.list, Styles.clearNonei, 32f, () -> {
+            table.button(Icon.list, Styles.emptyi, 32f, () -> {
                 orderDate = !orderDate;
                 rebuildBrowser();
             }).update(b -> b.getStyle().imageUp = (orderDate ? Icon.list : Icon.star)).size(40f).get()
@@ -199,13 +199,6 @@ public class ModsDialog extends BaseDialog{
                             //there's no good way to know if it's a java mod here, so assume it's not
                             githubImportMod(text, false, null);
                         });
-                    }).margin(12f);
-
-                    t.row();
-
-                    t.button("[cyan]冷却液[white]的mod资源站", Icon.link,bstyle, () -> {
-                        dialog.hide();
-                        Core.app.openURI("http://cryofluid.ys168.com/");
                     }).margin(12f);
                 });
                 dialog.addCloseButton();

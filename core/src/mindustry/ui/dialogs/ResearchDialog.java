@@ -583,8 +583,8 @@ public class ResearchDialog extends BaseDialog{
             infoTable.table(b -> {
                 b.margin(0).left().defaults().left();
 
-                if((selectable||Core.settings.getBool("researchViewer")) && (node.content.description != null || node.content.stats.toMap().size > 0)){
-                    b.button(Icon.info, Styles.cleari, () -> ui.content.show(node.content)).growY().width(50f);
+                if(selectable || Core.settings.getBool("researchViewer")){
+                    b.button(Icon.info, Styles.flati, () -> ui.content.show(node.content)).growY().width(50f);
                 }
                 b.add().grow();
                 b.table(desc -> {
@@ -679,8 +679,7 @@ public class ResearchDialog extends BaseDialog{
                         disabledFontColor = Color.gray;
                         up = buttonOver;
                         over = buttonDown;
-                    }}, () -> spend(node))
-                    .disabled(i -> !canSpend(node)).growX().height(44f).colspan(3);
+                    }}, () -> spend(node)).disabled(i -> !canSpend(node)).growX().height(44f).colspan(3);
                 }
             });
 

@@ -566,6 +566,7 @@ public class LogicBlock extends Block{
 
         @Override
         public void buildConfiguration(Table table){
+
             if(!accessible()){
                 //go away
                 deselect();

@@ -35,6 +35,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import static mindustry.Vars.*;
+import static mindustry.ui.Styles.cleart;
 import static mindustry.ui.Styles.nodeArea;
 
 public class MessageDialog extends BaseDialog{
@@ -186,6 +187,16 @@ public class MessageDialog extends BaseDialog{
             t.row();
 
             t.add("调整显示的信息").height(50f);
+            t.row();
+            t.table(tt->{
+                tt.button("关闭全部",cleart,()->{
+                    for (arcMsgType type : arcMsgType.values()) type.show = false;
+                }).width(200f).height(50f);
+                tt.button("默认",cleart,()->{
+                    for (arcMsgType type : arcMsgType.values()) type.show = true;
+                    arcMsgType.serverTips.show = false;
+                }).width(200f).height(50f);
+            });
             t.row();
             for (arcMsgType type : arcMsgType.values()){
 

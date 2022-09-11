@@ -84,6 +84,9 @@ public class PlayerListFragment{
         Groups.player.copy(players);
 
         players.sort(Structs.comps(Structs.comparing(Player::team), Structs.comparingBool(p -> !p.admin)));
+        if(search.getText().length() > 0){
+            players.filter(p -> Strings.stripColors(p.name().toLowerCase()).contains(search.getText().toLowerCase()));
+        }
 
         for(var user : players){
             found = true;
@@ -96,17 +99,37 @@ public class PlayerListFragment{
             button.left();
             button.margin(5).marginBottom(10);
 
-            Table table = new Table(){
+            ClickListener listener = new ClickListener();
+            Table iconTable = new Table(){
                 @Override
                 public void draw(){
                     super.draw();
-                    Draw.color(Pal.gray);
+                    Draw.colorMul(user.team().color, listener.isOver() ? 1.3f : 1f);
                     Draw.alpha(parentAlpha);
                     Lines.stroke(Scl.scl(4f));
                     Lines.rect(x, y, width, height);
                     Draw.reset();
                 }
             };
+            boolean clickable = !(state.rules.fog && state.rules.pvp && user.team() != player.team());
+
+            if(clickable){
+                iconTable.addListener(listener);
+                iconTable.addListener(new HandCursorListener());
+            }
+            iconTable.margin(8);
+            iconTable.name = user.name();
+            iconTable.touchable = Touchable.enabled;
+
+            iconTable.tapped(() -> {
+                if(!user.dead() && clickable){
+                    Core.camera.position.set(user.unit());
+                    ui.arcInfo("定位玩家：" + user.name);
+                    if(control.input instanceof DesktopInput input){
+                        input.panning = true;
+                    }
+                }
+            });
 
             var style = new ImageButtonStyle(){{
                 down = Styles.none;
@@ -125,34 +148,33 @@ public class PlayerListFragment{
                 imageOverColor = Color.lightGray;
             }};
 
-            table.margin(4);
-            table.add(new Image(user.icon()).setScaling(Scaling.bounded)).grow();
-            table.name = user.name();
+            iconTable.margin(4);
+            iconTable.add(new Image(user.icon()).setScaling(Scaling.bounded)).grow();
+            iconTable.name = user.name();
 
             if (Core.settings.getBool("arcWayzerServerMode")){
-                button.add(table).size(h);
+                button.add(iconTable).size(h);
                 if (Core.settings.getBool("cheating_mode")){
                     button.labelWrap("[" + user.id + "] ").minWidth(150f);
                 }
                 button.image(Icon.admin).visible(() -> user.admin && !(!user.isLocal() && net.server())).size(bs).get().updateVisibility();
-                button.labelWrap("[#" + user.color().toString().toUpperCase() + "]" + user.name()).width(320f).pad(10);
-                button.add().grow();
+                button.table(
+                    t -> {
+                        t.labelWrap("[#" + user.color().toString().toUpperCase() + "]" + user.name()).minWidth(300f);
+                        t.touchable = Touchable.enabled;
+                        t.tapped(()->{
+                            Core.app.setClipboardText(user.name);
+                            ui.arcInfo("复制昵称：" + user.name);
+                        });
+                    }
+                ).width(320f).pad(10f).left();
 
-                button.button(Icon.copy, Styles.clearNonei, () -> {
-                    Core.app.setClipboardText(user.name);
-                });
+                button.add().grow();
 
                 button.button(Icon.link, Styles.clearNonei, () -> {
                     String message = arcAtPlayer(user.name);
                     Call.sendChatMessage(message);
                 });
-
-                button.button(Icon.units, Styles.clearNonei,()->{
-                    if(control.input instanceof DesktopInput){
-                        ((DesktopInput) control.input).panning = true;
-                    }
-                     Core.camera.position.lerpDelta(user.x, user.y,1f);
-                }).visible(()-> !user.isLocal());
 
                 button.button(Icon.lock, Styles.clearTogglei, () -> {
                     if(follow != user){
@@ -162,6 +184,7 @@ public class PlayerListFragment{
                     }
                     if(control.input instanceof DesktopInput){
                         ((DesktopInput) control.input).panning = follow == user;
+                        ui.arcInfo("追踪玩家：" + user.name);
                     }
                 }).checked(b -> {
                     boolean checked = follow == user;
@@ -187,7 +210,7 @@ public class PlayerListFragment{
             }
             //原版模式
             else{
-                button.add(table).size(h);
+                button.add(iconTable).size(h);
                 button.labelWrap("[#" + user.color().toString().toUpperCase() + "]" + user.name()).width(170f).pad(10);
                 button.add().grow();
 
@@ -199,15 +222,15 @@ public class PlayerListFragment{
                     button.table(t -> {
                         t.defaults().size(bs);
 
-                        t.button(Icon.hammer, ustyle,
-                        () -> ui.showConfirm("@confirm", Core.bundle.format("confirmban",  user.name()), () -> Call.adminRequest(user, AdminAction.ban)));
-                        t.button(Icon.cancel, ustyle,
-                        () -> ui.showConfirm("@confirm", Core.bundle.format("confirmkick",  user.name()), () -> Call.adminRequest(user, AdminAction.kick)));
+                    t.button(Icon.hammerSmall, ustyle,
+                    () -> ui.showConfirm("@confirm", Core.bundle.format("confirmban",  user.name()), () -> Call.adminRequest(user, AdminAction.ban)));
+                    t.button(Icon.cancelSmall, ustyle,
+                    () -> ui.showConfirm("@confirm", Core.bundle.format("confirmkick",  user.name()), () -> Call.adminRequest(user, AdminAction.kick)));
 
-                        t.row();
+                    t.row();
 
-                        t.button(Icon.admin, style, () -> {
-                            if(net.client()) return;
+                    t.button(Icon.adminSmall, style, () -> {
+                        if(net.client()) return;
 
                             String id = user.uuid();
 
@@ -227,18 +250,16 @@ public class PlayerListFragment{
                             .touchable(() -> net.client() ? Touchable.disabled : Touchable.enabled)
                             .checked(user.admin);
 
-                        t.button(Icon.zoom, ustyle, () -> Call.adminRequest(user, AdminAction.trace));
+                    t.button(Icon.zoomSmall, ustyle, () -> Call.adminRequest(user, AdminAction.trace));
 
                     }).padRight(12).size(bs + 10f, bs);
                 }else if(!user.isLocal() && !user.admin && net.client() && Groups.player.size() >= 3 && player.team() == user.team()){ //votekick
                     button.add().growY();
 
-                    button.button(Icon.hammer, ustyle,
-                    () -> {
-                        ui.showConfirm("@confirm", Core.bundle.format("confirmvotekick",  user.name()), () -> {
-                            Call.sendChatMessage("/votekick " + user.name());
-                        });
-                    }).size(h);
+                button.button(Icon.hammer, ustyle,
+                    () -> ui.showConfirm("@confirm", Core.bundle.format("confirmvotekick",  user.name()),
+                    () -> Call.sendChatMessage("/votekick " + user.name())))
+                .size(h);
                 }
             }
             content.add(button).padBottom(-6).width(700f).maxHeight(h + 14);

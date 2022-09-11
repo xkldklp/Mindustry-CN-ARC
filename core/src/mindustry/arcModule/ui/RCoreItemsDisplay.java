@@ -5,6 +5,7 @@ import arc.struct.*;
 import arc.util.Interval;
 import mindustry.*;
 import mindustry.core.*;
+import mindustry.entities.Units;
 import mindustry.type.*;
 import mindustry.ui.*;
 import mindustry.world.blocks.storage.CoreBlock;
@@ -124,13 +125,13 @@ public class RCoreItemsDisplay extends CoreItemsDisplay{
                         if(core == null) return "";
                         int planAmount = planItems.get(item);
                         int amount = core.items.get(item);
-                        if(planAmount == 0) return "" + UI.formatAmount(amount);
-                        String planColor = (planAmount > 0 ? "[scarlet]" : "[green]");
+                        if(planAmount == 0) return (amount >= player.team().core().storageCapacity * 0.99 ? "[stat]" : "") + UI.formatAmount(amount);
+                        String planColor = (planAmount > 0 ?  "[scarlet]" : "[green]");
                         String amountColor = (amount < planAmount / 2 ? "[scarlet]" : amount < planAmount ? "[stat]" : "[green]");
                         return amountColor + UI.formatAmount(amount) + "[white]/" + planColor + UI.formatAmount(Math.abs(planAmount));
                     }).padRight(3).minWidth(52f).left();
 
-                    if(++i % 5 == 0){
+                    if(++i % Core.settings.getInt("arcCoreItemsCol") == 0){
                         row();
                     }
                 }
@@ -138,13 +139,17 @@ public class RCoreItemsDisplay extends CoreItemsDisplay{
         }
 
         if(arccoreitems == 2 || arccoreitems == 3){
+            row();
+            i = 0;
             for(UnitType unit : content.units()){
                 if(usedUnits.contains(unit)){
                     image(unit.uiIcon).size(iconSmall).padRight(3).tooltip(t -> t.background(Styles.black6).margin(4f).add(unit.localizedName).style(Styles.outlineLabel));
-                    //TODO leaks garbage
-                    label(() -> "" + Vars.player.team().data().countType(unit)).padRight(3).minWidth(52f).left();
+                    label(() -> {
+                        int typeCount = player.team().data().countType(unit);
+                        return (typeCount == Units.getCap(player.team())?"[stat]":"") + typeCount;
+                    }).padRight(3).minWidth(52f).left();
 
-                    if(++i % 5 == 0){
+                    if(++i % Core.settings.getInt("arcCoreItemsCol") == 0){
                         row();
                     }
                 }

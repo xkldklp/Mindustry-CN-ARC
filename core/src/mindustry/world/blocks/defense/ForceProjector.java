@@ -10,6 +10,7 @@ import arc.util.*;
 import arc.util.io.*;
 import mindustry.annotations.Annotations.*;
 import mindustry.content.*;
+import mindustry.core.UI;
 import mindustry.entities.*;
 import mindustry.game.*;
 import mindustry.gen.*;
@@ -81,7 +82,10 @@ public class ForceProjector extends Block{
     @Override
     public void setBars(){
         super.setBars();
-        addBar("shield", (ForceBuild entity) -> new Bar(() -> "护盾: " + (shieldHealth + phaseShieldBoost * entity.phaseHeat - (float)((int)(entity.buildup * 100) / 100)) + " / " + (int)(shieldHealth + phaseShieldBoost * entity.phaseHeat), () -> Pal.accent, () -> entity.broken ? 0f : 1f - entity.buildup / (shieldHealth + phaseShieldBoost * entity.phaseHeat)).blink(Color.white));
+        addBar("shield", (ForceBuild entity) -> new Bar(() ->  UI.simpleFormat("盾容", shieldHealth + phaseShieldBoost * entity.phaseHeat - entity.buildup,shieldHealth + phaseShieldBoost * entity.phaseHeat),
+                () -> Pal.accent,
+                () -> entity.broken ? 0f : 1f - entity.buildup / (shieldHealth + phaseShieldBoost * entity.phaseHeat))
+                .blink(Color.white));
     }
 
     @Override

@@ -2,6 +2,7 @@ package mindustry.world.blocks.production;
 
 import arc.*;
 import arc.math.*;
+import mindustry.core.UI;
 import mindustry.graphics.*;
 import mindustry.ui.*;
 import mindustry.world.blocks.heat.*;
@@ -26,7 +27,7 @@ public class HeatCrafter extends GenericCrafter{
 
         addBar("heat", (HeatCrafterBuild entity) ->
             new Bar(() ->
-            Core.bundle.format("bar.heatpercent", (int)entity.heat, (int)(entity.efficiencyScale() * 100)),
+            UI.simpleFormat("热量",entity.heat,heatRequirement,0),
             () -> Pal.lightOrange,
             () -> entity.heat / heatRequirement));
     }
@@ -67,11 +68,6 @@ public class HeatCrafter extends GenericCrafter{
         }
 
         @Override
-        public void updateEfficiencyMultiplier(){
-            efficiency *= efficiencyScale();
-            potentialEfficiency *= efficiencyScale();
-        }
-
         public float efficiencyScale(){
             float over = Math.max(heat - heatRequirement, 0f);
             return Math.min(Mathf.clamp(heat / heatRequirement) + over / heatRequirement * overheatScale, maxEfficiency);

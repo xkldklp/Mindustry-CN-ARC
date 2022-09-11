@@ -44,6 +44,7 @@ public class Vars implements Loadable{
     public static String arcVersionPrefix = "<ARC~" + Version.arcBuild + ">";
     public static int changeLogRead = 18;
 
+    public static Seq<District.advDistrict> districtList = new Seq<>();
     public static String userContentURL = "https://raw.fastgit.org";
 
     /** 服务器远程控制允许或移除作弊功能 */

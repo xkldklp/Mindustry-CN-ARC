@@ -1,3 +1,18 @@
+[cyan]------------------------[v138-8/30]---------------------------
+Fixed an exploit allowing logic-controlled units to transfer items with no cooldown
+Fixed objectives edit dialog being broken with UI scaling
+Fixed logic-spawned waves creating ghost units
+Fixed non-hittable units being targeted in certain situations
+Made player list more compact
+Made clicking player on list jump to their position
+Made Neoplasm stay on most liquids instead of disappearing
+Various minor balancing changes
+Changed interplanetary accelerator launch text for Serpulo with some beta clarification
+Added Call.openURI method for servers to share links to players
+Added sounds for most Erekir blocks/units
+Added descriptions for Erekir content
+Added two new campaign maps
+
 [cyan]------------------------[v137]---------------------------
 Fixed boosting units jittering when near obstacles [Mobile]
 Fixed command UI not refreshing when switching single units

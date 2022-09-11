@@ -258,6 +258,10 @@ public class UnitType extends UnlockableContent{
     public Color lightColor = Pal.powerLight;
     /** sound played when this unit explodes (*not* when it is shot down) */
     public Sound deathSound = Sounds.bang;
+    /** sound played on loop when this unit is around. */
+    public Sound loopSound = Sounds.none;
+    /** volume of loop sound */
+    public float loopSoundVolume = 0.5f;
     /** effect that this unit emits when falling */
     public Effect fallEffect = Fx.fallSmoke;
     /** effect created at engine when unit falls. */
@@ -420,7 +424,7 @@ public class UnitType extends UnlockableContent{
 
     //(undocumented, you shouldn't need to use these, and if you do just check how they're drawn and copy that)
     public TextureRegion baseRegion, legRegion, region, previewRegion, shadowRegion, cellRegion, itemCircleRegion,
-        softShadowRegion, jointRegion, footRegion, legBaseRegion, baseJointRegion, outlineRegion, treadRegion;
+            softShadowRegion, jointRegion, footRegion, legBaseRegion, baseJointRegion, outlineRegion, treadRegion;
     public TextureRegion[] wreckRegions, segmentRegions, segmentOutlineRegions;
     public TextureRegion[][] treadRegions;
 
@@ -545,14 +549,14 @@ public class UnitType extends UnlockableContent{
 
     public void display(Unit unit, Table table){
         table.table(t -> {
-        t.left();
-        t.add(new Image(uiIcon)).size(iconMed).scaling(Scaling.fit);
-        if(unit.team.id < 6){
-            t.labelWrap("[#" + unit.team.color + "]" + localizedName).left().width(190f).padLeft(5);
-        }else{
-            t.labelWrap("[#" + unit.team.color + "]" + localizedName + "[" + unit.team.id + "]").left().width(190f).padLeft(5);
-        }
-    }).growX().left();
+            t.left();
+            t.add(new Image(uiIcon)).size(iconMed).scaling(Scaling.fit);
+            if(unit.team.id < 6){
+                t.labelWrap("[#" + unit.team.color + "]" + localizedName).left().width(190f).padLeft(5);
+            }else{
+                t.labelWrap("[#" + unit.team.color + "]" + localizedName + "[" + unit.team.id + "]").left().width(190f).padLeft(5);
+            }
+        }).growX().left();
         table.row();
 
         table.table(bars -> {
@@ -757,10 +761,10 @@ public class UnitType extends UnlockableContent{
 
         if(pathCost == null){
             pathCost =
-                example instanceof WaterMovec ? ControlPathfinder.costNaval :
-                allowLegStep ? ControlPathfinder.costLegs :
-                hovering ? ControlPathfinder.costHover :
-                ControlPathfinder.costGround;
+                    example instanceof WaterMovec ? ControlPathfinder.costNaval :
+                            allowLegStep ? ControlPathfinder.costLegs :
+                                    hovering ? ControlPathfinder.costHover :
+                                            ControlPathfinder.costGround;
         }
 
         if(flying){
@@ -948,10 +952,10 @@ public class UnitType extends UnlockableContent{
         cellRegion = Core.atlas.find(name + "-cell", Core.atlas.find("power-cell"));
         //when linear filtering is on, it's acceptable to use the relatively low-res 'particle' region
         softShadowRegion =
-            squareShape ? Core.atlas.find("square-shadow") :
-            hitSize <= 10f || (Core.settings != null && Core.settings.getBool("linear", true)) ?
-                Core.atlas.find("particle") :
-                Core.atlas.find("circle-shadow");
+                squareShape ? Core.atlas.find("square-shadow") :
+                        hitSize <= 10f || (Core.settings != null && Core.settings.getBool("linear", true)) ?
+                                Core.atlas.find("particle") :
+                                Core.atlas.find("circle-shadow");
 
         outlineRegion = Core.atlas.find(name + "-outline");
         shadowRegion = fullIcon;
@@ -1525,14 +1529,6 @@ public class UnitType extends UnlockableContent{
                 Draw.color(Pal.heal);
                 Lines.line(unit.x - (unit.hitSize() / 2f), unit.y - (unit.hitSize() / 2f), unit.x - (unit.hitSize() / 2f), unit.y + unit.hitSize() * (logicai.controlTimer / logicai.logicControlTimeout - 0.5f));
 
-                Lines.stroke(2f);
-                Draw.color(Pal.items);
-                Lines.line(unit.x - (unit.hitSize() / 2f) - 1f, unit.y - (unit.hitSize() / 2f), unit.x - (unit.hitSize() / 2f) - 1f, unit.y + unit.hitSize() * (logicai.itemTimer / logicai.transferDelay - 0.5f));
-
-                Lines.stroke(2f);
-                Draw.color(Pal.items);
-                Lines.line(unit.x - (unit.hitSize() / 2f) - 1.5f, unit.y - (unit.hitSize() / 2f), unit.x - (unit.hitSize() / 2f) - 1.5f, unit.y + unit.hitSize() * (logicai.payTimer / logicai.transferDelay - 0.5f));
-
                 Draw.reset();
             }
         }
@@ -1558,8 +1554,8 @@ public class UnitType extends UnlockableContent{
         float alpha = unit.shieldAlpha();
         float radius = unit.hitSize() * 1.3f;
         Fill.light(unit.x, unit.y, Lines.circleVertices(radius), radius,
-            Color.clear,
-            Tmp.c2.set(unit.team.color).lerp(Color.white, Mathf.clamp(unit.hitTime() / 2f)).a(0.7f * alpha)
+                Color.clear,
+                Tmp.c2.set(unit.team.color).lerp(Color.white, Mathf.clamp(unit.hitTime() / 2f)).a(0.7f * alpha)
         );
     }
 
@@ -1612,23 +1608,23 @@ public class UnitType extends UnlockableContent{
             Draw.mixcol(Pal.accent, Mathf.absin(Time.time, 5f, 0.1f));
             Draw.alpha(unitTrans);
             Draw.rect(unit.item().fullIcon,
-            unit.x + Angles.trnsx(unit.rotation + 180f, itemOffsetY),
-            unit.y + Angles.trnsy(unit.rotation + 180f, itemOffsetY),
-            size, size, unit.rotation);
+                    unit.x + Angles.trnsx(unit.rotation + 180f, itemOffsetY),
+                    unit.y + Angles.trnsy(unit.rotation + 180f, itemOffsetY),
+                    size, size, unit.rotation);
             Draw.mixcol();
             Draw.alpha(unitTrans);
 
             size = (3f + Mathf.absin(Time.time, 5f, 1f)) * unit.itemTime + 0.5f;
             Draw.color(Pal.accent);
             Draw.rect(itemCircleRegion,
-            unit.x + Angles.trnsx(unit.rotation + 180f, itemOffsetY),
-            unit.y + Angles.trnsy(unit.rotation + 180f, itemOffsetY), size * 2, size * 2);
+                    unit.x + Angles.trnsx(unit.rotation + 180f, itemOffsetY),
+                    unit.y + Angles.trnsy(unit.rotation + 180f, itemOffsetY), size * 2, size * 2);
 
             if(Core.settings.getBool("unitItemCarried") || (unit.isLocal() && !renderer.pixelator.enabled())){
                 Fonts.outline.draw(unit.stack.amount + "",
-                unit.x + Angles.trnsx(unit.rotation + 180f, itemOffsetY),
-                unit.y + Angles.trnsy(unit.rotation + 180f, itemOffsetY) - 3,
-                Pal.accent, 0.25f * unit.itemTime / Scl.scl(1f), false, Align.center
+                        unit.x + Angles.trnsx(unit.rotation + 180f, itemOffsetY),
+                        unit.y + Angles.trnsy(unit.rotation + 180f, itemOffsetY) - 3,
+                        Pal.accent, 0.25f * unit.itemTime / Scl.scl(1f), false, Align.center
                 );
             }
 
@@ -1869,11 +1865,11 @@ public class UnitType extends UnlockableContent{
             Draw.mixcol(Tmp.c1.set(mechLegColor).lerp(Color.white, Mathf.clamp(unit.hitTime)), Math.max(Math.max(0, i * extension / mechStride), unit.hitTime));
             Draw.alpha(unitTrans); //
             Draw.rect(legRegion,
-            unit.x + Angles.trnsx(mech.baseRotation(), extension * i - boostTrns, -boostTrns*i),
-            unit.y + Angles.trnsy(mech.baseRotation(), extension * i - boostTrns, -boostTrns*i),
-            legRegion.width * i * Draw.scl,
-            legRegion.height * Draw.scl - Math.max(-sin * i, 0) * legRegion.height * 0.5f * Draw.scl,
-            mech.baseRotation() - 90 + 35f*i*e);
+                    unit.x + Angles.trnsx(mech.baseRotation(), extension * i - boostTrns, -boostTrns*i),
+                    unit.y + Angles.trnsy(mech.baseRotation(), extension * i - boostTrns, -boostTrns*i),
+                    legRegion.width * i * Draw.scl,
+                    legRegion.height * Draw.scl - Math.max(-sin * i, 0) * legRegion.height * 0.5f * Draw.scl,
+                    mech.baseRotation() - 90 + 35f*i*e);
         }
 
         Draw.mixcol(Color.white, unit.hitTime);
@@ -1957,16 +1953,16 @@ public class UnitType extends UnlockableContent{
             Draw.color(color);
             Draw.alpha(unitTrans);
             Fill.circle(
-            unit.x + ex,
-            unit.y + ey,
-            (radius + Mathf.absin(Time.time, 2f, radius / 4f)) * scale
+                    unit.x + ex,
+                    unit.y + ey,
+                    (radius + Mathf.absin(Time.time, 2f, radius / 4f)) * scale
             );
             Draw.color(type.engineColorInner);
             Draw.alpha(unitTrans);
             Fill.circle(
-            unit.x + ex - Angles.trnsx(rot + rotation, 1f),
-            unit.y + ey - Angles.trnsy(rot + rotation, 1f),
-            (radius + Mathf.absin(Time.time, 2f, radius / 4f)) / 2f  * scale
+                    unit.x + ex - Angles.trnsx(rot + rotation, 1f),
+                    unit.y + ey - Angles.trnsy(rot + rotation, 1f),
+                    (radius + Mathf.absin(Time.time, 2f, radius / 4f)) / 2f  * scale
             );
         }
 

@@ -496,6 +496,7 @@ public class SettingsMenuDialog extends BaseDialog{
         });
         arc.checkPref("showAdvanceToolTable",false);
         arc.checkPref("arcSpecificTable",true);
+        arc.checkPref("logicSupport",true);
         arc.checkPref("powerStatistic", true);
         arc.sliderPref("arccoreitems", 3, 0, 3, 1, s -> {
             if(s==0){return "不显示";}
@@ -503,6 +504,7 @@ public class SettingsMenuDialog extends BaseDialog{
             else if(s==2){return "兵种状态";}
             else{return "显示资源和兵种";}
         });
+        arc.sliderPref("arcCoreItemsCol",5,4,15,1, i -> i + "列");
         arc.checkPref("showFloatingSettings",false);
         arc.sliderPref("arcDetailInfo", 1, 0, 1, 1, s -> {
             if(s==0){return "详细模式";}
@@ -673,6 +675,7 @@ public class SettingsMenuDialog extends BaseDialog{
         specmode.checkPref("modMode", false);
         specmode.sliderPref("itemSelectionHeight",4,4,12, i->i + "行");
         specmode.sliderPref("itemSelectionWidth",4,4,12, i->i + "列");
+        specmode.sliderPref("blockInventoryWidth",3,3,16, i->i + "");
         specmode.checkPref("autoSelSchematic",false);
         specmode.checkPref("researchViewer",false);
         specmode.checkPref("developMode", false);

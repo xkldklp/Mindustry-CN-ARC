@@ -986,7 +986,7 @@ public class MobileInput extends InputHandler implements GestureListener{
         unit.hitbox(rect);
         rect.grow(4f);
 
-        player.boosting = collisions.overlapsTile(rect, EntityCollisions::solid) || !unit.within(targetPos, 85f);
+        player.boosting = collisions.overlapsTile(rect, EntityCollisions::solid) || !unit.within(targetPos, 85f) || Core.settings.getBool("forceBoost");
 
         unit.movePref(movement);
 

@@ -17,6 +17,8 @@ import mindustry.*;
 import mindustry.ai.*;
 import mindustry.ai.types.*;
 import mindustry.annotations.Annotations.*;
+import mindustry.arcModule.District;
+import mindustry.arcModule.DrawUtilities;
 import mindustry.content.*;
 import mindustry.core.*;
 import mindustry.entities.*;
@@ -1175,16 +1177,18 @@ public abstract class InputHandler implements InputProcessor, GestureListener{
     protected void drawSelection(int x1, int y1, int x2, int y2, int maxLength){
         NormalizeDrawResult result = Placement.normalizeDrawArea(Blocks.air, x1, y1, x2, y2, false, maxLength, 1f);
 
-        String arcmsg_BluerintSize = "";
-        arcmsg_BluerintSize = Math.abs(x2 - x1) + 1 + "×" + (Math.abs(y1 - y2) + 1);
+        String arcSelectionSize = "";
+        arcSelectionSize = Math.abs(x2 - x1) + 1 + "×" + (Math.abs(y1 - y2) + 1);
 
-        arcDrawText(arcmsg_BluerintSize,(x1+x2)/2, Math.max(y1,y2)+1);
+        DrawUtilities.arcDrawTextMain(arcSelectionSize,(x1+x2)/2, Math.max(y1,y2)+1);
         Lines.stroke(2f);
 
         Draw.color(Pal.accentBack);
         Lines.rect(result.x, result.y - 1, result.x2 - result.x, result.y2 - result.y);
         Draw.color(Pal.accent);
         Lines.rect(result.x, result.y, result.x2 - result.x, result.y2 - result.y);
+
+        District.applyVoidDistrict(x1,y1,x2,y2);
     }
 
     protected void flushSelectPlans(Seq<BuildPlan> plans){
@@ -1788,37 +1792,6 @@ public abstract class InputHandler implements InputProcessor, GestureListener{
             Tmp.r3.setSize(block.size * tilesize).setCenter(point.x * tilesize + block.offset, point.y * tilesize + block.offset);
         }
     }
-
-
-    private void arcDrawText(String text, int x, int y){
-
-        Color color = getThemeColor();
-        Font font = Fonts.outline;
-        GlyphLayout layout = Pools.obtain(GlyphLayout.class, GlyphLayout::new);
-        boolean ints = font.usesIntegerPositions();
-        font.setUseIntegerPositions(false);
-        font.getData().setScale(1f / 3f / Scl.scl(1f));
-        layout.setText(font, text);
-
-        float width = layout.width;
-
-        font.setColor(color);
-        float dx = x * tilesize, dy = y * tilesize;
-        font.draw(text, dx, dy + layout.height + 1, Align.center);
-        dy -= 1f;
-        Lines.stroke(2f, Color.darkGray);
-        Lines.line(dx - layout.width / 2f - 2f, dy, dx + layout.width / 2f + 1.5f, dy);
-        Lines.stroke(1f, color);
-        Lines.line(dx - layout.width / 2f - 2f, dy, dx + layout.width / 2f + 1.5f, dy);
-
-        font.setUseIntegerPositions(ints);
-        font.setColor(Color.white);
-        font.getData().setScale(1f);
-        Draw.reset();
-        Pools.free(layout);
-    }
-
-
 
     static class PlaceLine{
         public int x, y, rotation;

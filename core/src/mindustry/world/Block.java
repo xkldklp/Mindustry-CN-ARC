@@ -450,6 +450,36 @@ public class Block extends UnlockableContent implements Senseable{
 
         return width;
     }
+
+    public float drawPurePlaceText(String text, int x, int y, boolean valid){
+        if(renderer.pixelator.enabled()) return 0;
+
+        Color color = valid ? Pal.accent : Pal.remove;
+        Font font = Fonts.outline;
+        GlyphLayout layout = Pools.obtain(GlyphLayout.class, GlyphLayout::new);
+        boolean ints = font.usesIntegerPositions();
+        font.setUseIntegerPositions(false);
+        font.getData().setScale(1f / 4f / Scl.scl(1f));
+        layout.setText(font, text);
+
+        float width = layout.width;
+
+        float dx = x * tilesize + offset, dy = y * tilesize + offset + size * tilesize / 2f + 3;
+        font.draw(text, dx, dy + layout.height + 1, Align.center);
+        dy -= 1f;
+        Lines.stroke(2f, Color.darkGray);
+        Lines.line(dx - layout.width / 2f - 2f, dy, dx + layout.width / 2f + 1.5f, dy);
+        Lines.stroke(1f, color);
+        Lines.line(dx - layout.width / 2f - 2f, dy, dx + layout.width / 2f + 1.5f, dy);
+
+        font.setUseIntegerPositions(ints);
+        font.setColor(Color.white);
+        font.getData().setScale(1f);
+        Draw.reset();
+        Pools.free(layout);
+
+        return width;
+    }
     /** Drawn when placing and when hovering over. */
     public void drawOverlay(float x, float y, int rotation){
     }
@@ -580,7 +610,7 @@ public class Block extends UnlockableContent implements Senseable{
     public <T extends Building> void addLiquidBar(Func<T, Liquid> current){
         addBar("liquid", entity -> new Bar(
                 () -> current.get((T)entity) == null || entity.liquids.get(current.get((T)entity)) <= 0.001f ? Core.bundle.get("bar.liquid") :
-                        (current.get((T)entity).localizedName + " " + current.get((T)entity).emoji() + " " + (int)(entity.liquids.get(current.get((T)entity)) * 100) / 100f + (liquidCapacity - entity.liquids.get(current.get((T)entity))<1f ? "": "/" + liquidCapacity)),
+                        UI.simpleFormat(current.get((T)entity).localizedName + " " + current.get((T)entity).emoji(),entity.liquids.get(current.get((T)entity)),liquidCapacity),
                 () -> current.get((T)entity) == null ? Color.clear : current.get((T)entity).barColor(),
                 () -> current.get((T)entity) == null ? 0f : entity.liquids.get(current.get((T)entity)) / liquidCapacity)
         );

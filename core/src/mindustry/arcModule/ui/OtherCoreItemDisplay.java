@@ -170,27 +170,27 @@ public class OtherCoreItemDisplay extends Table {
             teamsTable.row();
             teamsTable.image(Blocks.arc.uiIcon).size(15,15).left().get();
             for(Teams.TeamData team : teams){
-                teamsTable.label(() -> "[#" + team.team.color + "]" + Strings.autoFixed(state.rules.teams.get(team.team).blockDamageMultiplier * state.rules.blockDamageMultiplier,2)).get().setFontScale(fontScl);
+                teamsTable.label(() -> "[#" + team.team.color + "]" + Strings.autoFixed(state.rules.blockDamage(team.team),2)).get().setFontScale(fontScl);
             }
             teamsTable.row();
             teamsTable.image(Blocks.titaniumWall.uiIcon).size(15,15).left().get();
             for(Teams.TeamData team : teams){
-                teamsTable.label(() -> "[#" + team.team.color + "]" + Strings.autoFixed(state.rules.teams.get(team.team).blockHealthMultiplier * state.rules.blockHealthMultiplier,2)).get().setFontScale(fontScl);
+                teamsTable.label(() -> "[#" + team.team.color + "]" + Strings.autoFixed(state.rules.blockHealth(team.team),2)).get().setFontScale(fontScl);
             }
             teamsTable.row();
             teamsTable.image(UnitTypes.corvus.uiIcon).size(15,15).left().get();
             for(Teams.TeamData team : teams){
-                teamsTable.label(() -> "[#" + team.team.color + "]" + Strings.autoFixed(state.rules.teams.get(team.team).unitDamageMultiplier * state.rules.unitDamageMultiplier,2)).get().setFontScale(fontScl);
+                teamsTable.label(() -> "[#" + team.team.color + "]" + Strings.autoFixed(state.rules.unitDamage(team.team),2)).get().setFontScale(fontScl);
             }
             teamsTable.row();
             teamsTable.image(UnitTypes.poly.uiIcon).size(15,15).left().get();
             for(Teams.TeamData team : teams){
-                teamsTable.label(() -> "[#" + team.team.color + "]" + Strings.autoFixed(state.rules.teams.get(team.team).buildSpeedMultiplier * state.rules.buildSpeedMultiplier,2)).get().setFontScale(fontScl);
+                teamsTable.label(() -> "[#" + team.team.color + "]" + Strings.autoFixed(state.rules.buildSpeed(team.team),2)).get().setFontScale(fontScl);
             }
             teamsTable.row();
             teamsTable.image(Blocks.tetrativeReconstructor.uiIcon).size(15,15).left().get();
             for(Teams.TeamData team : teams){
-                teamsTable.label(() -> "[#" + team.team.color + "]" + Strings.autoFixed(state.rules.teams.get(team.team).unitBuildSpeedMultiplier * state.rules.unitBuildSpeedMultiplier,2)).get().setFontScale(fontScl);
+                teamsTable.label(() -> "[#" + team.team.color + "]" + Strings.autoFixed(state.rules.unitBuildSpeed(team.team),2)).get().setFontScale(fontScl);
             }
             teamsTable.row();
         }

@@ -44,6 +44,7 @@ public class UnitFactory extends UnitBlock{
         rotate = true;
         regionRotated1 = 1;
         commandable = true;
+        ambientSound = Sounds.respawning;
 
         config(Integer.class, (UnitFactoryBuild tile, Integer i) -> {
             if(!configurable) return;
@@ -86,7 +87,7 @@ public class UnitFactory extends UnitBlock{
                 return new Bar(Iconc.units + "[red] " + Iconc.cancel, Pal.ammo, e::fraction);
             }
              return new Bar(() -> Iconc.units + " " + Strings.fixed(e.progress * 100f / plans.get(e.currentPlan).time, 0) +  "% | " +
-                     Strings.fixed((plans.get(e.currentPlan).time - e.progress) / (60f * Vars.state.rules.unitBuildSpeedMultiplier * e.timeScale()), 0) + " s"
+                     Strings.fixed((plans.get(e.currentPlan).time - e.progress) / (60f * Vars.state.rules.unitBuildSpeed(e.team) * e.timeScale()), 0) + " s"
                      , () -> Pal.ammo, e::fraction
 
         );
@@ -207,6 +208,11 @@ public class UnitFactory extends UnitBlock{
         }
 
         @Override
+        public boolean shouldActiveSound(){
+            return shouldConsume();
+        }
+
+        @Override
         public double sense(LAccess sensor){
             if(sensor == LAccess.progress) return Mathf.clamp(fraction());
             return super.sense(sensor);
@@ -263,7 +269,7 @@ public class UnitFactory extends UnitBlock{
             Lines.line(x - block.size * tilesize / 2f * 0.6f, y + block.size * tilesize / 2.5f,
                 x + 0.6f * (Mathf.clamp(fraction(), 0f, 1f) - 0.5f) * block.size * tilesize, y + block.size * tilesize / 2.5f);
             Draw.color();
-            this.block.drawText((int)(Mathf.clamp(fraction(), 0f, 1f) * 100) + "% | " + (currentPlan == -1 ? Iconc.cancel : Strings.fixed((plans.get(currentPlan).time - progress) / (60f * Vars.state.rules.unitBuildSpeed(team) * timeScale), 0)), x, y + block.size * tilesize / 2.5f - 5f, true, 0.9f);
+            block.drawText((int)(Mathf.clamp(fraction(), 0f, 1f) * 100) + "% | " + (currentPlan == -1 ? Iconc.cancel : Strings.fixed((plans.get(currentPlan).time - progress) / (60f * Vars.state.rules.unitBuildSpeed(team) * timeScale), 0)), x, y + block.size * tilesize / 2.5f - 5f, true, 0.9f);
         }
 
 
