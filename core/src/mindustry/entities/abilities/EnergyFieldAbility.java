@@ -49,7 +49,7 @@ public class EnergyFieldAbility extends Ability{
 
     @Override
     public String localized(){
-        return "能量场：[stat]"+damage+"[lightgray]伤害~[stat]"+range / Vars.tilesize+"[lightgray]格~[stat]"+maxTargets+"[lightgray]目标";
+        return "能量场：[stat]"+Strings.autoFixed(damage,1)+"[lightgray]伤害|[stat]" + Strings.autoFixed(healPercent,1) + "[lightgray]%修复~[stat]"+range / Vars.tilesize+"[lightgray]格~[stat]"+maxTargets+"[lightgray]目标";
     }
 
     @Override

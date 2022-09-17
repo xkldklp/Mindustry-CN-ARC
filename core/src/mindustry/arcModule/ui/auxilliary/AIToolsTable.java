@@ -38,6 +38,7 @@ public class AIToolsTable extends BaseToolsTable{
 
     @Override
     public void setup(){
+        clear();
         button(Icon.settingsSmall, clearLineNoneTogglei, 30, this::arcAISettingDialog).checked(t -> false);
         aiButton(new ArcMinerAI(), mono, "矿机AI");
         aiButton(new ArcBuilderAI(), poly, "重建AI");

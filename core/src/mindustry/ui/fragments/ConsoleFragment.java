@@ -205,6 +205,7 @@ public class ConsoleFragment extends Table{
     }
 
     public void updateChat(){
+        if(historyPos<0) historyPos = 0;   //未知报错，暂时性修复
         chatfield.setText(history.get(historyPos));
         chatfield.setCursorPosition(chatfield.getText().length());
     }

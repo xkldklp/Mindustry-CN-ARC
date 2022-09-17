@@ -3,24 +3,15 @@ package mindustry.arcModule.ui.dialogs;
 import arc.Core;
 import arc.Events;
 import arc.graphics.Color;
-import arc.input.KeyCode;
 import arc.math.geom.Vec2;
-import arc.scene.event.HandCursorListener;
-import arc.scene.event.InputEvent;
-import arc.scene.event.InputListener;
-import arc.scene.event.Touchable;
 import arc.scene.ui.CheckBox;
 import arc.scene.ui.layout.Table;
 import arc.struct.Seq;
 import arc.util.Nullable;
 import arc.util.Strings;
-import arc.util.Time;
-import arc.util.Tmp;
 import mindustry.Vars;
 import mindustry.arcModule.*;
-import mindustry.arcModule.ai.ArcBuilderAI;
 import mindustry.content.Fx;
-import mindustry.core.World;
 import mindustry.game.EventType;
 import mindustry.gen.Icon;
 import mindustry.gen.Player;
@@ -35,6 +26,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import static mindustry.Vars.*;
+import static mindustry.arcModule.District.districtSettingDialog;
 import static mindustry.ui.Styles.cleart;
 import static mindustry.ui.Styles.nodeArea;
 
@@ -51,12 +43,17 @@ public class MessageDialog extends BaseDialog{
     public MessageDialog(){
         super("ARC-中央监控室");
 
+        voiceControl.voiceControlDialog();
         cont.pane(t -> {
             historyTable = t;
         }).growX().scrollX(false);
 
         addCloseButton();
         buttons.button("设置", Icon.settings, this::arcMsgSettingTable);
+
+        buttons.button("区域规划器",() -> districtSettingDialog());
+
+        buttons.row();
 
         buttons.button("清空", Icon.trash, () -> {
             clearMsg();

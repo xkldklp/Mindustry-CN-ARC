@@ -43,7 +43,6 @@ public class Marker{
     static{
         Events.run(WorldLoadEvent.class, () -> {
             markList.clear();
-            //teamMark = state.rules.pvp;
         });
     }
 

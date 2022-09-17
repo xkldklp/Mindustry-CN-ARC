@@ -83,8 +83,6 @@ public class OverlayRenderer{
     }
 
     public void drawTop(){
-        District.drawDistrict();
-
         if(!player.dead() && ui.hudfrag.shown){
             if(Core.settings.getBool("playerindicators")){
                 for(Player player : Groups.player){
@@ -207,13 +205,6 @@ public class OverlayRenderer{
             }
         }
 
-        /*应该放在这里更好管理，不清楚为啥画不出来*/
-        if(District.districtList.size>0){
-            for(District.advDistrict district : District.districtList){
-                district.draw();
-            }
-        }
-
         if(state.hasSpawns()){
             Lines.stroke(2f);
             Draw.color(Color.gray, Color.lightGray, Mathf.absin(Time.time, 8f, 1f));
@@ -321,6 +312,7 @@ public class OverlayRenderer{
                 }
             }
         }
+        District.drawDistrict();
     }
 
     private static class CoreEdge{

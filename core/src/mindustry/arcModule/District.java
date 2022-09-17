@@ -11,6 +11,7 @@ import arc.scene.ui.Dialog;
 import arc.scene.ui.Slider;
 import arc.scene.ui.TextField;
 import arc.scene.ui.layout.Scl;
+import arc.scene.ui.layout.Table;
 import arc.struct.Seq;
 import arc.util.Log;
 import arc.util.Strings;
@@ -19,7 +20,6 @@ import arc.util.Tmp;
 import mindustry.*;
 import mindustry.arcModule.ui.dialogs.MessageDialog;
 import mindustry.content.StatusEffects;
-import mindustry.content.UnitTypes;
 import mindustry.core.World;
 import mindustry.ctype.ContentType;
 import mindustry.ctype.UnlockableContent;
@@ -248,6 +248,31 @@ public class District{
         }}.show();
     }
 
+    public static void districtSettingDialog(){
+        Dialog disSet = new BaseDialog("规划区设置");
+        Runnable[] rebuild = {null};
+        Table t = disSet.cont;
+        rebuild[0] = () -> {
+            t.clear();
+            if(districtList.size<=0) return;
+            t.add("区域名称");
+            t.add("坐标");
+            t.row();
+            for(advDistrict advDistrict : districtList){
+                t.add(advDistrict.districtType.getName());
+                t.add(advDistrict.getLoc());
+                t.button("[red]×",() -> {
+                    districtList.remove(advDistrict);
+                    rebuild[0].run();
+                });
+                t.row();
+            }
+        };
+        rebuild[0].run();
+        disSet.addCloseButton();
+        disSet.show();
+    }
+
     public static class advDistrict{
         public District.DistictType districtType = new DistictType("");
         public String message;
@@ -267,8 +292,6 @@ public class District{
             this.districtB = new Vec2().set(districtB);
         }
 
-        public advDistrict(){}
-
         public advDistrict(District.DistictType districtType, String message, String creator, Vec2 districtA, Vec2 districtB){
             this(districtType, message, Time.time, creator, districtA, districtB);
         }
@@ -286,6 +309,8 @@ public class District{
             this.districtA = new Vec2().set(voidDistrict.districtA);
             this.districtB = new Vec2().set(voidDistrict.districtB);
         }
+
+        public advDistrict() {}
 
         public String toString(){
             return  (teamMark ? "/t ":"") + versionFixed +
@@ -312,7 +337,7 @@ public class District{
                 Draw.rect(districtType.districtType.fullIcon,districtA.x * tilesize, districtA.y * tilesize, width, height);
             }
             if(districtType.districtName!=null){
-                arcFillTextHead(districtType.districtName,districtA.x,districtB.x,Math.max(districtA.y,districtB.y),0.5f);
+                arcFillTextHead(districtType.districtName,districtA.x,districtB.x,Math.max(districtA.y,districtB.y),0.2f);
             }
 
             Draw.color(Pal.stat,0.7f);
@@ -320,6 +345,10 @@ public class District{
             Lines.stroke(Math.min(Math.abs(width),Math.abs(height)) / tilesize / 10f);
             Lines.rect(districtA.x * tilesize, districtA.y * tilesize, width, height);
             Draw.reset();
+        }
+
+        public String getLoc(){
+            return "(" + (int)districtA.x  + "," + (int)districtA.y  + ") ~ (" + (int)districtB.x + "," + (int)districtB.y + ")";
         }
 
     }

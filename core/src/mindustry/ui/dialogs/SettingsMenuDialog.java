@@ -564,7 +564,7 @@ public class SettingsMenuDialog extends BaseDialog{
         arc.checkPref("unitLogicTimerBars", false);
 
         arc.addCategory("arcRTSSupporter");
-        if(mobile) arc.checkPref("mobileCommandMode",false);
+        if(mobile) arc.checkPref("mobileCommandMode",true);
         arc.checkPref("alwaysShowUnitRTSAi",false);
         arc.sliderPref("rtsWoundUnit",0, 0, 100, 2, s -> s+ "%");
 
@@ -676,10 +676,11 @@ public class SettingsMenuDialog extends BaseDialog{
         specmode.sliderPref("itemSelectionHeight",4,4,12, i->i + "行");
         specmode.sliderPref("itemSelectionWidth",4,4,12, i->i + "列");
         specmode.sliderPref("blockInventoryWidth",3,3,16, i->i + "");
+        specmode.sliderPref("editorBrush",4,3,12,i->i+"");
         specmode.checkPref("autoSelSchematic",false);
         specmode.checkPref("researchViewer",false);
+        specmode.checkPref("atriVoice",false);
         specmode.checkPref("developMode", false);
-        specmode.sliderPref("editorBrush",4,3,12,i->i+"");
         //////////cheating
         cheating.addCategory("arcWeakCheat");
         cheating.checkPref("forceIgnoreAttack",false);
