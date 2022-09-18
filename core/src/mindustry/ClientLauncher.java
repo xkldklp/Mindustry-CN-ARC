@@ -21,6 +21,8 @@ import mindustry.mod.*;
 import mindustry.net.*;
 import mindustry.ui.*;
 
+import java.security.NoSuchAlgorithmException;
+
 import static arc.Core.*;
 import static mindustry.Vars.*;
 
@@ -225,6 +227,12 @@ public abstract class ClientLauncher extends ApplicationCore implements Platform
                 }))));
             }
         }else{
+            try {
+                graphics.setTitle(getWindowTitle());
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            }
+
             asyncCore.begin();
 
             super.update();
@@ -243,6 +251,20 @@ public abstract class ClientLauncher extends ApplicationCore implements Platform
         }
 
         lastTime = Time.nanos();
+    }
+
+    private String getWindowTitle() throws NoSuchAlgorithmException {
+        int enabled = 0;
+        if (mods != null) {
+            for (Mods.LoadedMod mod : mods.mods) {
+                if (mod.enabled()) enabled++;
+            }
+        }
+        return "Mindustry-CN-ARC-XKLDKLP | VERSION " + (Version.arcBuild <= 0 ? "Dev" : Version.arcBuild) + " | " + enabled + "/" + (mods == null ? 0 : mods.mods.size) + " Mods Enable |" +
+                (Core.graphics != null ? Core.graphics.getWidth() + "x" + Core.graphics.getHeight() + " | " : "") +
+                (player != null ? player.name + " | " + getUUID(): "")
+                ;
+
     }
 
     @Override

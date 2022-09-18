@@ -43,7 +43,7 @@ public class Mods implements Loadable{
     private MultiPacker packer;
     private ModClassLoader mainLoader = new ModClassLoader(getClass().getClassLoader());
 
-    Seq<LoadedMod> mods = new Seq<>();
+    public Seq<LoadedMod> mods = new Seq<>();
     private ObjectMap<Class<?>, ModMeta> metas = new ObjectMap<>();
     private boolean requiresReload;
 

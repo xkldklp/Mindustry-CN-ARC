@@ -116,6 +116,7 @@ public class MenuFragment{
             mods = new MobileButton(Icon.book, "@mods", ui.mods::show),
             exit = new MobileButton(Icon.exit, "@quit", () -> Core.app.exit()),
             cn_arc = new MobileButton(Icon.info,"@aboutcn_arc.button",  ui.aboutcn_arc::show),
+            klpMenu = new MobileButton(Icon.info,"klp菜单",  ui.klpMenu::show),
             //mindustrywiki = new MobileButton(Icon.book, "@mindustrywiki.button", ui.mindustrywiki::show),
             updatedialog = new MobileButton(Icon.info,"@updatedialog.button",  ui.updatedialog::show),
             database = new MobileButton(Icon.book, "@database",  ui.database::show),
@@ -142,6 +143,7 @@ public class MenuFragment{
             container.row();
             container.add(achievements);
             container.add(cn_arc);
+            container.add(klpMenu);
             container.add(updatedialog);
             container.add(database);
             //container.add(mindustrywiki);
@@ -165,6 +167,7 @@ public class MenuFragment{
             }).colspan(2);
             container.row();
             container.add(cn_arc);
+            container.add(klpMenu);
             container.add(database);
             container.row();
             container.add(achievements);

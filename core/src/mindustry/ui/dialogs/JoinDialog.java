@@ -21,6 +21,9 @@ import mindustry.net.*;
 import mindustry.net.Packets.*;
 import mindustry.ui.*;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 import static mindustry.Vars.*;
 
 public class JoinDialog extends BaseDialog{
@@ -341,9 +344,21 @@ public class JoinDialog extends BaseDialog{
             t.row();
 
             t.add("uuid").padRight(10);
+
             t.field(Core.settings.getString("uuid"), text -> {
-                Core.settings.put("uuid", text);
+                if (text.length() == 12) {
+                    Core.settings.put("uuid", text);
+                }
             }).grow().pad(8).maxTextLength(12);
+
+            t.button("随机", () -> {
+                byte[] result = new byte[8];
+                new Rand().nextBytes(result);
+                String uuid = new String(Base64Coder.encode(result));
+                Core.settings.put("uuid", uuid);
+                setup();
+            }).size(54f).get();
+            t.row();
 
         }).width(w).height(140f).pad(4);
         cont.row();

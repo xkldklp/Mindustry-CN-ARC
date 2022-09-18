@@ -1,0 +1,1 @@
+gradlew desktop:dist -Pbuildversion=15604003
