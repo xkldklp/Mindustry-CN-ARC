@@ -7,9 +7,12 @@ import arc.scene.ui.TextField;
 import arc.scene.ui.layout.Table;
 import arc.util.Nullable;
 import arc.util.Strings;
+import mindustry.Vars;
 import mindustry.input.Binding;
 
 import static arc.Core.input;
+import static mindustry.Vars.port;
+import static mindustry.core.NetClient.connect;
 
 public class KlpMenuDialog extends BaseDialog{
     Table settings = new Table();
@@ -108,6 +111,21 @@ public class KlpMenuDialog extends BaseDialog{
                     if (i == 5) table.row();
                 }
             }).row();
+            if(Vars.lastServer != null){
+                settings.add("服务器选项").row();
+                settings.table(table -> {
+                    table.button("复制服务器Ip地址", () -> {
+                        Core.app.setClipboardText(Vars.lastServer);
+                    }).tooltip(Vars.lastServer).width(128f).height(64f);
+                    table.button("重进服务器(非sync)", () -> {
+                        String address = Vars.lastServer;
+                        String resaddress = address.contains(":") ? address.split(":")[0] : address;
+                        int resport = address.contains(":") ? Strings.parseInt(address.split(":")[1]) : port;
+                        Vars.net.disconnect();
+                        connect(resaddress,resport);
+                    }).tooltip(Vars.lastServer).width(128f).height(64f);
+                }).row();
+            }
             settings.add("[yellow]------------------多人游戏------------------").row();
         }
         cont.add(pane).center();

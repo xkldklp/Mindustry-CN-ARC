@@ -810,7 +810,7 @@ public class DesktopInput extends InputHandler{
 
                 mouseX = intercept.x;
                 mouseY = intercept.y;
-                player.shooting = !boosted;
+                player.shooting = !settings.getBool("推进转向", false) || !boosted;
 
                 aimPos = intercept;
                 lookAtAngle = unit.angleTo(intercept);
@@ -841,7 +841,7 @@ public class DesktopInput extends InputHandler{
             }
 
             if(Core.input.keyTap(Binding.dropCargo) || (settings.getBool("残血丢下荷载")
-                    && unit.health >= unit.maxHealth * settings.getFloat("残载-血量阈值", 0.25f))
+                    && unit.health <= unit.maxHealth * settings.getFloat("残载-血量阈值", 0.25f))
             ){
                 tryDropPayload();
             }
