@@ -223,7 +223,7 @@ public class OverlayRenderer{
                     }
                 }
             }
-            if (Core.settings.getBool("showFlyerSpawn")) {
+            if (Core.settings.getBool("showFlyerSpawn") && spawner.countSpawns()<20) {
                 for(Tile tile : spawner.getSpawns()) {
                     float angle = Angles.angle(world.width() / 2f, world.height() / 2f, tile.x, tile.y);
                     float trns = Math.max(world.width(), world.height()) * Mathf.sqrt2 * tilesize;

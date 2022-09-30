@@ -225,7 +225,7 @@ public class GenericCrafter extends Block{
                     }
                 }
 
-                if(Core.settings.getInt("blockrenderlevel") >1 && wasVisible && Mathf.chanceDelta(updateEffectChance)){
+                if(Core.settings.getInt("blockRenderLevel") >1 && wasVisible && Mathf.chanceDelta(updateEffectChance)){
                     updateEffect.at(x + Mathf.range(size * 4f), y + Mathf.range(size * 4));
                 }
             }else{
@@ -271,7 +271,7 @@ public class GenericCrafter extends Block{
                 craftEffect.at(x, y);
             }
 
-            if (Core.settings.getInt("blockrenderlevel") > 1) craftEffect.at(x, y);
+            if (Core.settings.getInt("blockRenderLevel") > 1) craftEffect.at(x, y);
             progress %= 1f;
         }
 

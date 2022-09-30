@@ -688,7 +688,7 @@ public class DesktopInput extends InputHandler{
             }
         }
         if (input.keyTap(Binding.toggle_block_render)) {
-            settings.put("blockrenderlevel", (settings.getInt("blockrenderlevel") + 1) % 3);
+            settings.put("blockRenderLevel", (settings.getInt("blockRenderLevel") + 1) % 3);
         }
 
         if (input.keyTap(Binding.superUnitEffect)) {

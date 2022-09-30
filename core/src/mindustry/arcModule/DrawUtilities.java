@@ -157,7 +157,7 @@ public class DrawUtilities {
         return new Effect(lifeTime, e -> {
             color(color);
             stroke((1.5f - e.fin() * 1f) * (range/100));
-            if(e.finpow()<0.8f) Lines.circle(e.x, e.y, e.finpow()/0.8f * range);
+            if(e.fin()<0.7f) Lines.circle(e.x, e.y, (float) ( (1 - Math.pow((0.7f - e.fin())/0.7f,2f) ) * range));
             else {
                 Draw.alpha((1-e.fin()) *5f);
                 Lines.circle(e.x, e.y, range);}

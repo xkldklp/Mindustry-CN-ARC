@@ -608,7 +608,7 @@ public class SettingsMenuDialog extends BaseDialog{
 
         //////////forcehide
         forcehide.addCategory("arcCDisplayBlock");
-        forcehide.sliderPref("blockrenderlevel", 2, 0, 2, 1, s -> {
+        forcehide.sliderPref("blockRenderLevel", 2, 0, 2, 1, s -> {
             if(s==0){return "隐藏全部建筑";}
             else if(s==1){return "只显示建筑状态";}
             else if(s==2){return "全部显示";}

@@ -1,6 +1,7 @@
 package mindustry.arcModule.ui;
 
 import arc.Core;
+import arc.Events;
 import arc.graphics.Color;
 import arc.math.Mathf;
 import arc.math.geom.Vec2;
@@ -16,6 +17,7 @@ import mindustry.content.Items;
 import mindustry.content.StatusEffects;
 import mindustry.content.UnitTypes;
 import mindustry.core.World;
+import mindustry.game.EventType;
 import mindustry.game.Team;
 import mindustry.gen.Icon;
 import mindustry.gen.Payloadc;
@@ -40,9 +42,9 @@ import static mindustry.Vars.*;
 import static mindustry.content.UnitTypes.*;
 import static mindustry.ui.Styles.*;
 
-public class AdvanceToolTable extends Table{
+public class AdvanceToolTable extends Table {
     private boolean show = false;
-    private boolean showGameMode = false, showEntities = false, showTeamChange = false, showCreator = false;
+    private boolean showGameMode = false, showEntities = false, showTeamChange = false, showTimeControl = false, showCreator = false;
 
     //unitFactory
     private int unitCount = 1;
@@ -61,13 +63,21 @@ public class AdvanceToolTable extends Table{
     private float timeAcce = 1f;
     private float elevation = 0f;
 
-    public AdvanceToolTable(){
+    public AdvanceToolTable() {
         rebuild();
+        Events.on(EventType.WorldLoadEvent.class, e -> {
+            if(!state.rules.editor){
+                Core.settings.put("worldCreator",false);
+                Core.settings.put("forcePlacement",false);
+                Core.settings.put("allBlocksReveal",false);
+            }
+        }
+        );
     }
 
-    void rebuild(){
+    void rebuild() {
         clear();
-        if(mobile){
+        if (mobile) {
             table(tBox -> {
                 tBox.background(Tex.buttonEdge3);
                 tBox.button("指挥", cleart, () -> {
@@ -75,11 +85,11 @@ public class AdvanceToolTable extends Table{
                 }).width(80f);
 
                 tBox.button("取消", cleart, () -> {
-                    if(control.input instanceof MobileInput input) input.arcClearPlans();
+                    if (control.input instanceof MobileInput input) input.arcClearPlans();
                 }).width(80f);
             }).left().row();
         }
-        if(!show){
+        if (!show) {
             table(t -> {
                 t.background(Tex.buttonEdge3);
                 t.button("[cyan]工具箱", cleart, () -> {
@@ -88,21 +98,21 @@ public class AdvanceToolTable extends Table{
                 }).left().width(70).expandX();
 
             }).left();
-        }else{
+        } else {
             table(t -> {
-                if(showEntities){
+                if (showEntities) {
                     t.table(tt -> {
                         tt.table(
-                        tBox -> {
-                            tBox.background(Tex.pane);
-                            tBox.button(Items.copper.emoji() + "[acid]+", cleart, () -> {
-                                for(Item item : content.items())
-                                    player.core().items.set(item, player.core().storageCapacity);
-                            }).width(40f).tooltip("[acid]填满核心的所有资源");
-                            tBox.button(Items.copper.emoji() + "[red]-", cleart, () -> {
-                                for(Item item : content.items()) player.core().items.set(item, 0);
-                            }).width(40f).tooltip("[acid]清空核心的所有资源");
-                        }).left();
+                                tBox -> {
+                                    tBox.background(Tex.pane);
+                                    tBox.button(Items.copper.emoji() + "[acid]+", cleart, () -> {
+                                        for (Item item : content.items())
+                                            player.core().items.set(item, player.core().storageCapacity);
+                                    }).width(40f).tooltip("[acid]填满核心的所有资源");
+                                    tBox.button(Items.copper.emoji() + "[red]-", cleart, () -> {
+                                        for (Item item : content.items()) player.core().items.set(item, 0);
+                                    }).width(40f).tooltip("[acid]清空核心的所有资源");
+                                }).left();
 
                         tt.table(tBox -> {
                             tBox.background(Tex.buttonEdge3);
@@ -117,17 +127,8 @@ public class AdvanceToolTable extends Table{
                     }).left().row();
                 }
 
-                if(showCreator){
+                if (showTimeControl) {
                     t.table(tt -> {
-                        tt.table(
-                        tBox -> {
-                            tBox.background(Tex.pane);
-                            tBox.button("创世神", flatToggleMenut, () -> {
-                                Core.settings.put("worldCreator", !Core.settings.getBool("worldCreator"));
-                            }).checked(b -> Core.settings.getBool("worldCreator")).size(70f, 30f);
-
-                        }).left();
-
                         tt.table(tBox -> {
                             tBox.background(Tex.buttonEdge3);
                             tBox.add("沙漏：").left();
@@ -151,24 +152,36 @@ public class AdvanceToolTable extends Table{
                                 Time.setDeltaProvider(() -> Math.min(Core.graphics.getDeltaTime() * 60 * timeAcce, 3 * timeAcce));
                                 ui.announce("当前时间倍率：" + timeAcce);
                             }).tooltip("[acid]恢复原速").size(30f, 30f);
-                                /*tBox.button("[orange]||", cleart, () -> {
-                                    if(state.is(GameState.State.playing)) {state.set(GameState.State.paused);}
-                                    else if(state.is(GameState.State.paused)){
-                                        state.set(GameState.State.playing);
-                                    }
-                                    //ui.announce("当前时间倍率：" + timeAcce);
-                                }).size(30f, 30f);*/
                         }).left();
                     }).left().row();
                 }
 
-                if(showTeamChange){
+                if (showCreator) {
+                    t.table(tt -> {
+                        tt.table(
+                                tBox -> {
+                                    tBox.background(Tex.pane);
+                                    tBox.button("创世神", flatToggleMenut, () -> {
+                                        Core.settings.put("worldCreator", !Core.settings.getBool("worldCreator"));
+                                    }).checked(b -> Core.settings.getBool("worldCreator")).size(70f, 30f);
+                                    tBox.button("强制放置", flatToggleMenut, () -> {
+                                        Core.settings.put("forcePlacement", !Core.settings.getBool("forcePlacement"));
+                                    }).checked(b -> Core.settings.getBool("forcePlacement")).size(70f, 30f);
+                                    tBox.button("解禁", flatToggleMenut, () -> {
+                                        Core.settings.put("allBlocksReveal", !Core.settings.getBool("allBlocksReveal"));
+                                        ui.hudfrag.blockfrag.rebuild();
+                                    }).checked(b -> Core.settings.getBool("allBlocksReveal")).tooltip("[acid]显示并允许建造所有物品").size(50f, 30f);
+                                }).left();
+                    }).left().row();
+                }
+
+                if (showTeamChange) {
                     t.table(tBox -> {
                         tBox.background(Tex.buttonEdge3);
                         tBox.add("队伍：").left();
-                        for(Team team : Team.baseTeams){
+                        for (Team team : Team.baseTeams) {
                             tBox.button(String.format("[#%s]%s", team.color, team.localized()), flatToggleMenut, () -> player.team(team))
-                                .checked(b -> player.team() == team).size(30f, 30f);
+                                    .checked(b -> player.team() == team).size(30f, 30f);
                         }
                         tBox.button("[violet]+", flatToggleMenut, this::teamChangeMenu).checked(b -> {
                             return !Arrays.asList(Team.baseTeams).contains(player.team());
@@ -177,7 +190,7 @@ public class AdvanceToolTable extends Table{
                     }).left().row();
                 }
 
-                if(showGameMode){
+                if (showGameMode) {
                     t.table(tBox -> {
                         tBox.background(Tex.buttonEdge3);
                         tBox.add("规则：").left();
@@ -194,10 +207,6 @@ public class AdvanceToolTable extends Table{
                             state.rules.infiniteResources = !state.rules.infiniteResources;
                         }).checked(b -> state.rules.infiniteResources).size(50f, 30f);
 
-                        tBox.button("解禁", flatToggleMenut, () -> {
-                            Core.settings.put("allBlocksReveal", !Core.settings.getBool("allBlocksReveal"));
-                            ui.hudfrag.blockfrag.rebuild();
-                        }).checked(b -> Core.settings.getBool("allBlocksReveal")).tooltip("[acid]显示并允许建造所有物品").size(50f, 30f);
 
                     }).left().row();
                 }
@@ -219,6 +228,11 @@ public class AdvanceToolTable extends Table{
                         rebuild();
                     }).width(50f);
 
+                    mainBox.button(Blocks.overdriveProjector.emoji(), cleart, () -> {
+                        showTimeControl = !showTimeControl;
+                        rebuild();
+                    }).width(50f);
+
                     mainBox.button((showGameMode ? "[cyan]" : "[acid]") + "规则", cleart, () -> {
                         showGameMode = !showGameMode;
                         rebuild();
@@ -236,13 +250,13 @@ public class AdvanceToolTable extends Table{
         }
     }
 
-    private void teamChangeMenu(){
+    private void teamChangeMenu() {
         BaseDialog dialog = new BaseDialog("队伍选择器");
         Table selectTeam = new Table().top();
 
         dialog.cont.pane(td -> {
-            for(Team team : Team.all){
-                if(team.id % 10 == 6){
+            for (Team team : Team.all) {
+                if (team.id % 10 == 6) {
                     td.row();
                     td.add("队伍：" + team.id + "~" + (team.id + 10));
                 }
@@ -265,7 +279,7 @@ public class AdvanceToolTable extends Table{
         dialog.show();
     }
 
-    private void unitSpawnMenu(){
+    private void unitSpawnMenu() {
         BaseDialog unitFactory = new BaseDialog("单位工厂-ARC");
 
         Table table = unitFactory.cont;
@@ -309,11 +323,11 @@ public class AdvanceToolTable extends Table{
                 }).tooltip("选择玩家当前位置：" + player.tileX() + "," + player.tileY()).height(50f);
 
                 t.button(StatusEffects.blasted.emoji(), () -> {
-                    if(Marker.markList.size == 0) return;
+                    if (Marker.markList.size == 0) return;
 
-                    unitLoc.set(World.toTile(Marker.markList.peek().markPos.x),World.toTile(Marker.markList.peek().markPos.y));
+                    unitLoc.set(World.toTile(Marker.markList.peek().markPos.x), World.toTile(Marker.markList.peek().markPos.y));
                     rebuild[0].run();
-                }).tooltip(Marker.markList.size==0 ? "[red]未标记" : ("选择上个标记点：" + World.toTile(Marker.markList.peek().markPos.x) + "," +  World.toTile(Marker.markList.peek().markPos.y))).height(50f);
+                }).tooltip(Marker.markList.size == 0 ? "[red]未标记" : ("选择上个标记点：" + World.toTile(Marker.markList.peek().markPos.x) + "," + World.toTile(Marker.markList.peek().markPos.y))).height(50f);
             });
 
             table.row();
@@ -323,17 +337,17 @@ public class AdvanceToolTable extends Table{
             table.row();
 
             table.button("[orange]生成！", Icon.modeAttack, () -> {
-                for(var n = 0; n < unitCount; n++){
+                for (var n = 0; n < unitCount; n++) {
                     Tmp.v1.rnd(Mathf.random(unitRandDst * tilesize));
                     Unit unit = cloneUnit(spawnUnit);
-                    if(elevation!=0) unit.elevation = elevation;
+                    if (elevation != 0) unit.elevation = elevation;
                     unit.set(unitLoc.x * tilesize + Tmp.v1.x, unitLoc.y * tilesize + Tmp.v1.y);
                     unitStatus.each((status, statusDuration) -> {
                         unit.apply(status, statusDuration * 60f);
                     });
                     unit.add();
                 }
-                if(control.input instanceof DesktopInput input){
+                if (control.input instanceof DesktopInput input) {
                     input.panning = true;
                 }
                 Core.camera.position.set(unitLoc.x * tilesize, unitLoc.y * tilesize);
@@ -346,7 +360,7 @@ public class AdvanceToolTable extends Table{
         unitFactory.show();
     }
 
-    private void unitFabricator(Unit unit){
+    private void unitFabricator(Unit unit) {
         BaseDialog rebuildFabricatorTable = new BaseDialog("单位加工车间");
         Table table = new Table();
 
@@ -361,13 +375,13 @@ public class AdvanceToolTable extends Table{
                 rebuildTable[0].run();
             }).fillX().minWidth(400f).row();
 
-            if(showUnitSelect){
+            if (showUnitSelect) {
                 table.table(list -> {
                     int i = 0;
-                    for(UnitType units : content.units()){
-                        if(i++ % 8 == 0) list.row();
+                    for (UnitType units : content.units()) {
+                        if (i++ % 8 == 0) list.row();
                         list.button(units.emoji(), cleart, () -> {
-                            if(unit.type != units){
+                            if (unit.type != units) {
                                 changeUnitType(unit, units);
                                 rebuildTable[0].run();
                             }
@@ -382,7 +396,7 @@ public class AdvanceToolTable extends Table{
                 showUnitPro = !showUnitPro;
                 rebuildTable[0].run();
             }).fillX().row();
-            if(showUnitPro){
+            if (showUnitPro) {
                 table.table(t -> {
                     t.table(tt -> {
                         tt.add("[red]血：");
@@ -397,7 +411,7 @@ public class AdvanceToolTable extends Table{
                         }).valid(text -> {
                             return Strings.canParsePositiveInt(text) && Integer.parseInt(text) < Team.all.length;
                         }).maxTextLength(4).get();
-                        for(Team team : Team.baseTeams){
+                        for (Team team : Team.baseTeams) {
                             tt.button("[#" + team.color + "]" + team.localized(), cleart, () -> {
                                 unit.team = team;
                                 rebuildTable[0].run();
@@ -407,8 +421,8 @@ public class AdvanceToolTable extends Table{
                             BaseDialog selectTeamDialog = new BaseDialog("队伍选择器");
                             Table selectTeam = new Table().top();
                             selectTeamDialog.cont.pane(td -> {
-                                for(Team team : Team.all){
-                                    if(team.id % 10 == 6){
+                                for (Team team : Team.all) {
+                                    if (team.id % 10 == 6) {
                                         td.row();
                                         td.add("队伍：" + team.id + "~" + (team.id + 9));
                                     }
@@ -432,17 +446,16 @@ public class AdvanceToolTable extends Table{
                             selectTeamDialog.show();
                         }).tooltip("[acid]更多队伍选择").center().width(50f).row();
                     }).row();
-                    t.table(list-> {
+                    t.table(list -> {
                         list.check("飞行模式    [orange]生成的单位会飞起来", elevation == -1, a -> elevation = 1).center().padBottom(5f).padRight(10f);
 
-                        if(Core.settings.getBool("developMode"))
-                        {
+                        if (Core.settings.getBool("developMode")) {
                             TextField sField = list.field(elevation + "", text -> elevation = Float.parseFloat(text)).
                                     valid(text -> Strings.canParseFloat(text)).tooltip("单位层级").maxTextLength(10).get();
                             list.add("层");
-                            Slider sSlider = list.slider(-10,10,0.05f,0, n -> {
-                                if(elevation != n){//用一种神奇的方式阻止了反复更新
-                                    sField.setText(n+"");
+                            Slider sSlider = list.slider(-10, 10, 0.05f, 0, n -> {
+                                if (elevation != n) {//用一种神奇的方式阻止了反复更新
+                                    sField.setText(n + "");
                                 }
                                 elevation = n;
                             }).get();
@@ -453,22 +466,22 @@ public class AdvanceToolTable extends Table{
             }
 
             StringBuilder unitStatusText = new StringBuilder("单位状态 ");
-            for(StatusEffect effects : content.statusEffects()){
-                if(unitStatus.containsKey(effects)) unitStatusText.append(effects.emoji());
+            for (StatusEffect effects : content.statusEffects()) {
+                if (unitStatus.containsKey(effects)) unitStatusText.append(effects.emoji());
             }
             table.button(unitStatusText.toString(), showStatesEffect ? Icon.upOpen : Icon.downOpen, Styles.togglet, () -> {
                 showStatesEffect = !showStatesEffect;
                 rebuildTable[0].run();
             }).fillX().row();
 
-            if(showStatesEffect){
+            if (showStatesEffect) {
                 table.table(t -> {
                     t.table(list -> {
                         int i = 0;
-                        for(StatusEffect effects : content.statusEffects()){
-                            if(i++ % 8 == 0) list.row();
+                        for (StatusEffect effects : content.statusEffects()) {
+                            if (i++ % 8 == 0) list.row();
                             list.button(effects.emoji(), squareTogglet, () -> {
-                                if(unitStatus.get(effects) == null) unitStatus.put(effects, 600f);
+                                if (unitStatus.get(effects) == null) unitStatus.put(effects, 600f);
                                 else unitStatus.remove(effects);
                                 rebuildTable[0].run();
                             }).size(50f).color(unitStatus.get(effects) == null ? Color.gray : Color.white).tooltip(effects.localizedName);
@@ -478,25 +491,25 @@ public class AdvanceToolTable extends Table{
                     t.row();
 
                     t.table(list -> {
-                        for(StatusEffect effects : content.statusEffects()){
-                            if(!unitStatus.containsKey(effects)) continue;
+                        for (StatusEffect effects : content.statusEffects()) {
+                            if (!unitStatus.containsKey(effects)) continue;
                             list.add(effects.emoji() + effects.localizedName + " ");
-                            if(effects.permanent){
+                            if (effects.permanent) {
                                 list.add("<永久buff>");
-                            }else{
+                            } else {
                                 TextField sField = list.field(checkInf(unitStatus.get(effects)), text -> {
                                     unitStatus.remove(effects);
-                                    if(Objects.equals(text, "Inf")){
+                                    if (Objects.equals(text, "Inf")) {
                                         unitStatus.put(effects, Float.MAX_VALUE);
-                                    }else unitStatus.put(effects, Float.parseFloat(text));
+                                    } else unitStatus.put(effects, Float.parseFloat(text));
                                 }).valid(text -> Objects.equals(text, "Inf") || Strings.canParsePositiveFloat(text)).tooltip("buff持续时间(单位：秒)").maxTextLength(10).get();
                                 list.add("秒");
                                 Slider sSlider = list.slider(0f, statusTime.length - 1f, 1f, statusTimeIndex(unitStatus.get(effects)), n -> {
-                                    if(statusTimeIndex(unitStatus.get(effects)) != n){//用一种神奇的方式阻止了反复更新
-                                        sField.setText(checkInf(statusTime[(int)n]));
+                                    if (statusTimeIndex(unitStatus.get(effects)) != n) {//用一种神奇的方式阻止了反复更新
+                                        sField.setText(checkInf(statusTime[(int) n]));
                                     }
                                     unitStatus.remove(effects);
-                                    unitStatus.put(effects, statusTime[(int)n]);
+                                    unitStatus.put(effects, statusTime[(int) n]);
                                 }).get();
                                 sField.update(() -> sSlider.setValue(statusTimeIndex(unitStatus.get(effects))));
                             }
@@ -507,36 +520,36 @@ public class AdvanceToolTable extends Table{
             }
 
             String unitItemText = "单位物品 ";
-            if(unit.stack.amount > 0 && !showItems){
+            if (unit.stack.amount > 0 && !showItems) {
                 unitItemText += unit.stack.item.emoji() + " " + unit.stack.amount;
             }
             table.button(unitItemText, showItems ? Icon.upOpen : Icon.downOpen, Styles.togglet, () -> {
                 showItems = !showItems;
                 rebuildTable[0].run();
             }).fillX().row();
-            if(showItems){
+            if (showItems) {
                 table.table(pt -> {
                     pt.table(ptt -> {
                         int i = 0;
-                        for(Item item : content.items()){
+                        for (Item item : content.items()) {
                             ptt.button(item.emoji(), cleart, () -> {
                                 unit.stack.item = item;
-                                if(unit.stack.amount == 0){
+                                if (unit.stack.amount == 0) {
                                     unit.stack.amount = unit.itemCapacity();
                                 }
                                 rebuildTable[0].run();
                             }).size(50f).left().tooltip(item.localizedName);
-                            if(++i % 6 == 0) ptt.row();
+                            if (++i % 6 == 0) ptt.row();
                         }
                     });
-                    if(unit.stack.amount > 0){
+                    if (unit.stack.amount > 0) {
                         pt.row();
                         pt.table(ptt -> {
                             ptt.add(unit.stack.item.emoji() + " 数量：");
                             ptt.field(String.valueOf(unit.stack.amount), text -> {
                                 unit.stack.amount = Integer.parseInt(text);
                             }).valid(value -> {
-                                if(!Strings.canParsePositiveInt(value)) return false;
+                                if (!Strings.canParsePositiveInt(value)) return false;
                                 int val = Integer.parseInt(value);
                                 return 0 < val && val <= unit.type.itemCapacity;
                             }).maxTextLength(4);
@@ -554,9 +567,9 @@ public class AdvanceToolTable extends Table{
                 }).row();
             }
 
-            if(unit instanceof Payloadc pay){
+            if (unit instanceof Payloadc pay) {
                 StringBuilder unitPayloadText = new StringBuilder("单位背包 ");
-                for(Payload payload : pay.payloads()){
+                for (Payload payload : pay.payloads()) {
                     unitPayloadText.append(payload.content().emoji());
                 }
                 table.button(unitPayloadText.toString(), showPayload ? Icon.upOpen : Icon.downOpen, Styles.togglet, () -> {
@@ -565,23 +578,23 @@ public class AdvanceToolTable extends Table{
                 }).fillX().checked(showPayload).row();
             }
 
-            if(showPayload){
+            if (showPayload) {
                 table.table(p -> {
-                    if(unit instanceof Payloadc pay){
+                    if (unit instanceof Payloadc pay) {
                         p.table(pt -> {
                             pay.payloads().each(payload -> {
-                                if(payload instanceof Payloadc payloadUnit){
+                                if (payload instanceof Payloadc payloadUnit) {
                                     pt.button(payload.content().emoji() + "[red]*", squareTogglet, () -> {
                                         pay.payloads().remove(payload);
                                         rebuildTable[0].run();
                                     }).color(payloadUnit.team().color).size(50f).left();
-                                }else{
+                                } else {
                                     pt.button(payload.content().emoji(), squareTogglet, () -> {
                                         pay.payloads().remove(payload);
                                         rebuildTable[0].run();
                                     }).size(50f).left();
                                 }
-                                if(pay.payloads().indexOf(payload) % 8 == 7) pt.row();
+                                if (pay.payloads().indexOf(payload) % 8 == 7) pt.row();
                             });
                         }).row();
 
@@ -590,15 +603,15 @@ public class AdvanceToolTable extends Table{
                             rebuildTable[0].run();
                         }).width(300f).row();
 
-                        if(showSelectPayload){
+                        if (showSelectPayload) {
                             p.table(list -> {
                                 int i = 0;
-                                for(UnitType units : content.units()){
+                                for (UnitType units : content.units()) {
                                     list.button(units.emoji(), () -> {
                                         pay.addPayload(new UnitPayload(units.create(unit.team)));
                                         rebuildTable[0].run();
                                     }).size(50f).tooltip(units.localizedName);
-                                    if(++i % 8 == 0) list.row();
+                                    if (++i % 8 == 0) list.row();
                                 }
                             });
                             p.row();
@@ -608,11 +621,11 @@ public class AdvanceToolTable extends Table{
                                     rebuildTable[0].run();
                                 }).width(200f);
                                 pt.button("?", () -> ui.showInfo("""
-                                使用说明：携带的单位存在一个序列，每个单位可以具备特定的属性。
-                                [cyan]自递归[white]是指根据当前的配置生成一个单位，并储存到载荷序列上
-                                这一单位具备所有目前设置的属性，包括buff、物品和载荷。
-                                合理使用自递归可以发掘无限的可能性
-                                [orange][警告]可能导致地图损坏！请备份地图后再使用！""")).size(50f);
+                                        使用说明：携带的单位存在一个序列，每个单位可以具备特定的属性。
+                                        [cyan]自递归[white]是指根据当前的配置生成一个单位，并储存到载荷序列上
+                                        这一单位具备所有目前设置的属性，包括buff、物品和载荷。
+                                        合理使用自递归可以发掘无限的可能性
+                                        [orange][警告]可能导致地图损坏！请备份地图后再使用！""")).size(50f);
                             }).row();
                         }
 
@@ -621,17 +634,17 @@ public class AdvanceToolTable extends Table{
                             rebuildTable[0].run();
                         }).width(300f).row();
 
-                        if(showPayloadBlock){
+                        if (showPayloadBlock) {
                             p.table(list -> {
                                 int i = 0;
-                                for(Block payBlock : content.blocks()){
-                                    if(!payBlock.isVisible() || !payBlock.isAccessible() || payBlock.isFloor())
+                                for (Block payBlock : content.blocks()) {
+                                    if (!payBlock.isVisible() || !payBlock.isAccessible() || payBlock.isFloor())
                                         continue;
                                     list.button(payBlock.emoji(), () -> {
                                         pay.addPayload(new BuildPayload(payBlock, unit.team));
                                         rebuildTable[0].run();
                                     }).size(50f).tooltip(payBlock.localizedName);
-                                    if(++i % 8 == 0) list.row();
+                                    if (++i % 8 == 0) list.row();
                                 }
                             });
                         }
@@ -654,66 +667,66 @@ public class AdvanceToolTable extends Table{
         rebuildFabricatorTable.show();
     }
 
-    private Unit cloneExactUnit(Unit unit){
+    private Unit cloneExactUnit(Unit unit) {
         Unit reUnit = unit.type.create(unit.team);
         reUnit.health = unit.health;
         reUnit.shield = unit.shield;
         reUnit.stack = unit.stack;
 
-        for(StatusEffect effects : content.statusEffects()){
-            if(unit.getDuration(effects) > 0f) reUnit.apply(effects, unit.getDuration(effects));
+        for (StatusEffect effects : content.statusEffects()) {
+            if (unit.getDuration(effects) > 0f) reUnit.apply(effects, unit.getDuration(effects));
         }
 
-        if(unit instanceof Payloadc pay && reUnit instanceof Payloadc rePay){
+        if (unit instanceof Payloadc pay && reUnit instanceof Payloadc rePay) {
             pay.payloads().each(rePay::addPayload);
         }
         return reUnit;
     }
 
-    private Unit cloneUnit(Unit unit){
+    private Unit cloneUnit(Unit unit) {
         Unit reUnit = unit.type.create(unit.team);
         reUnit.health = unit.health;
         reUnit.shield = unit.shield;
         reUnit.stack = unit.stack;
 
-        if(unit instanceof Payloadc pay && reUnit instanceof Payloadc rePay){
+        if (unit instanceof Payloadc pay && reUnit instanceof Payloadc rePay) {
             pay.payloads().each(rePay::addPayload);
         }
         return reUnit;
     }
 
-    private void resetUnitType(Unit unit, UnitType unitType){
+    private void resetUnitType(Unit unit, UnitType unitType) {
         elevation = 0;
         unit.type = unitType;
         unit.health = unitType.health;
         unit.shield = 0;
         unit.stack.amount = 0;
-        if(unit instanceof Payloadc pay){
+        if (unit instanceof Payloadc pay) {
             pay.payloads().clear();
         }
         unitStatus.clear();
     }
 
-    private void changeUnitType(Unit unit, UnitType unitType){
+    private void changeUnitType(Unit unit, UnitType unitType) {
         unit.type = unitType;
         unit.health = unitType.health;
         unit.shield = 0;
-        if(unit.stack.amount > unit.itemCapacity()){
+        if (unit.stack.amount > unit.itemCapacity()) {
             unit.stack.amount = unit.itemCapacity();
         }
         unitStatus.clear();
     }
 
-    private String checkInf(float value){
-        if(value == Float.MAX_VALUE){
+    private String checkInf(float value) {
+        if (value == Float.MAX_VALUE) {
             return "Inf";
         }
         return Strings.autoFixed(value, 1);
     }
 
-    private int statusTimeIndex(float time){
-        for(int i = statusTime.length - 1; i >= 0; i--){
-            if(statusTime[i] <= time){
+    private int statusTimeIndex(float time) {
+        for (int i = statusTime.length - 1; i >= 0; i--) {
+            if (statusTime[i] <= time) {
                 return i;
             }
         }

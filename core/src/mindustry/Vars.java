@@ -43,9 +43,11 @@ public class Vars implements Loadable{
     public static String arcVersion = Version.arcBuild + "";
     public static String arcVersionPrefix = "<ARC~" + Version.arcBuild + ">";
     public static int changeLogRead = 18;
-
     public static Seq<District.advDistrict> districtList = new Seq<>();
     public static String userContentURL = "https://raw.fastgit.org";
+
+    /** 开始游玩时间 */
+    public static Long startPlayTime = Time.millis();
 
     /** 服务器远程控制允许或移除作弊功能 */
     public static Boolean arcCheatServer = false;

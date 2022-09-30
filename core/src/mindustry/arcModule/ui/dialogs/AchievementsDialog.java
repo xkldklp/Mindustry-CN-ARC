@@ -39,11 +39,11 @@ public class AchievementsDialog extends BaseDialog {
     private Table SStatTable;
 
 
-    public AchievementsDialog(){
+    public AchievementsDialog() {
         super("ARC-统计与成就");
 
 
-        cont.pane(t->{
+        cont.pane(t -> {
             SStatTable = t;
             t.row();
             browserTable = t;
@@ -54,33 +54,33 @@ public class AchievementsDialog extends BaseDialog {
         onResize(this::rebuildBrowser);
     }
 
-    private void rebuildBrowser(){
-        int cols = (int)Math.max(Core.graphics.getWidth() / Scl.scl(480), 1);
+    private void rebuildBrowser() {
+        int cols = (int) Math.max(Core.graphics.getWidth() / Scl.scl(480), 1);
         SStatTable.clear();
         browserTable.clear();
 
-        SStatTable.add("统计").color(getThemeColor()).pad(cols/2).center().row();
+        SStatTable.add("统计").color(getThemeColor()).pad(cols / 2).center().row();
         SStatTable.image().color(getThemeColor()).fillX().row();
-        SStatTable.table(t->{
-            for (SStat stat : SStat.values()){
+        SStatTable.table(t -> {
+            for (SStat stat : SStat.values()) {
                 String name = Core.bundle.get("sstat." + stat.name() + ".name");
                 t.add(name).left();
-                if(stat.name() == "arcPlayTime") t.add("                 "+ formatTime(stat.get())).left();
-                else t.add("                 "+stat.get()).left();
+                if (stat.name() == "arcPlayTime") t.add("                 " + formatTime(stat.get())).left();
+                else t.add("                 " + stat.get()).left();
                 t.row();
             }
         });
 
         browserTable.row();
-        browserTable.add("成就").color(getThemeColor()).pad(cols/2).center().row();
+        browserTable.add("成就").color(getThemeColor()).pad(cols / 2).center().row();
         browserTable.image().color(getThemeColor()).fillX().row();
-        browserTable.table(t->{
+        browserTable.table(t -> {
             int i = 0;
             float s = 64f;
 
-            for( Achievement ach : Achievement.all){
+            for (Achievement ach : Achievement.all) {
                 String name = Core.bundle.get("achievement." + ach.name() + ".name");
-                String desc = (ach.isAchieved()?"[stat]":"") + Core.bundle.get("achievement." + ach.name() + ".desc");
+                String desc = (ach.isAchieved() ? "[stat]" : "") + Core.bundle.get("achievement." + ach.name() + ".desc");
                 //if( !Strings.matches(searchTxt, name) && !Strings.matches(searchTxt, desc) ) continue;
 
                 t.button(con -> {
@@ -88,7 +88,7 @@ public class AchievementsDialog extends BaseDialog {
                     con.margin(0f);
                     con.left();
 
-                    con.add(new BorderImage(){
+                    con.add(new BorderImage() {
                         TextureRegion last;
 
                         {
@@ -98,7 +98,7 @@ public class AchievementsDialog extends BaseDialog {
                         }
 
                         @Override
-                        public void draw(){
+                        public void draw() {
                             super.draw();
 
                             //TODO draw the sprite of the achievement
@@ -134,9 +134,10 @@ public class AchievementsDialog extends BaseDialog {
                             "\n[lightgray]" + desc
                     ).width(358f).wrap().grow().pad(4f, 2f, 4f, 6f).top().left().labelAlign(Align.topLeft);
 
-                }, Styles.flatBordert,() -> {}).padRight(4f);
+                }, Styles.flatBordert, () -> {
+                }).padRight(4f);
 
-                if(++i % cols == 0) t.row();
+                if (++i % cols == 0) t.row();
             }
 
 
@@ -144,7 +145,7 @@ public class AchievementsDialog extends BaseDialog {
 
     }
 
-    private String formatTime(int time){
+    private String formatTime(int time) {
         StringBuilder outTime = new StringBuilder();
         int h = time / 3600;
         int m = (time / 60) % 60;

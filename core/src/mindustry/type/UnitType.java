@@ -1208,24 +1208,24 @@ public class UnitType extends UnlockableContent{
         initUnitTransp();
         initLegTransp();
 
-        unitTrans = (float)Core.settings.getInt("unitTransparency") / 100f;
+        unitTrans = (float) Core.settings.getInt("unitTransparency") / 100f;
         legTrans = unitTrans;
 
-        Mechc mech = unit instanceof Mechc ? (Mechc)unit : null;
+        Mechc mech = unit instanceof Mechc ? (Mechc) unit : null;
         float z = unit.elevation > 0.5f ? (lowAltitude ? Layer.flyingUnitLow : Layer.flyingUnit) : groundLayer + Mathf.clamp(hitSize / 4000f, 0, 0.01f);
 
-        boolean draw_unit = (unit.maxHealth + unit.shield) > (float)Core.settings.getInt("minhealth_unitshown");
-        boolean draw_minunithealthbar = (unit.maxHealth + unit.shield) > (float)Core.settings.getInt("minhealth_unithealthbarshown");
+        boolean draw_unit = (unit.maxHealth + unit.shield) > (float) Core.settings.getInt("minhealth_unitshown");
+        boolean DrawMinHealthBar = (unit.maxHealth + unit.shield) > (float) Core.settings.getInt("minhealth_unithealthbarshown");
 
-        if(!draw_unit){
+        if (!draw_unit) {
             unitTrans = 0f;
-            draw_minunithealthbar = false;
+            DrawMinHealthBar = false;
         }
-        if(arcInfoControl(unit.team())) {
+        if (arcInfoControl(unit.team())) {
             //玩家操控的单位具有炫酷特效
             if (Core.settings.getInt("superUnitEffect") != 0 && unit.controller() == Vars.player) {
                 unitTrans = 100f;
-                draw_minunithealthbar = true;
+                DrawMinHealthBar = true;
 
                 float curStroke = (float) Core.settings.getInt("playerEffectCurStroke") / 10f;
                 Color effectcolor = getPlayerEffectColor();
@@ -1250,10 +1250,10 @@ public class UnitType extends UnlockableContent{
                 Draw.reset();
             } else if (Core.settings.getInt("superUnitEffect") == 2 && unit.controller() instanceof Player) {
                 unitTrans = 100f;
-                draw_minunithealthbar = true;
+                DrawMinHealthBar = true;
 
                 float curStroke = (float) Core.settings.getInt("playerEffectCurStroke") / 10f;
-                Color effectcolor = unit.team.color;
+                Color effectColor = unit.team.color;
 
                 float sectorRad = 0.14f, rotateSpeed = 0.5f;
                 int sectors = 5;
@@ -1261,7 +1261,7 @@ public class UnitType extends UnlockableContent{
                 Lines.stroke(Lines.getStroke() * curStroke);
 
                 Draw.z(Layer.effect - 2f);
-                Draw.color(effectcolor);
+                Draw.color(effectColor);
 
                 Tmp.v1.trns(unit.rotation - 90, unit.x, unit.y).add(unit.x, unit.y);
                 float rx = Tmp.v1.x, ry = Tmp.v1.y;
@@ -1278,11 +1278,11 @@ public class UnitType extends UnlockableContent{
 
             } else if (Core.settings.getBool("alwaysShowPlayerUnit") && (unit.controller() instanceof Player || unit.controller().isBeingControlled(player.unit()))) {
                 unitTrans = 100f;
-                draw_minunithealthbar = true;
+                DrawMinHealthBar = true;
                 Draw.color(unit.team.color);
                 Draw.alpha((float) Core.settings.getInt("unitweapon_range") / 100f);
                 Lines.dashCircle(unit.x, unit.y, maxRange);
-            } else if (draw_minunithealthbar) {
+            } else if (DrawMinHealthBar) {
                 float alertRange = (float) Core.settings.getInt("unitAlertRange");
                 boolean turretAlert = alertRange > 0 && (alertRange >= 30f ||
                         ((!player.unit().isNull() && player.unit().targetable(unit.team)) || (control.input.commandMode && control.input.selectedUnits.size > 0)));
@@ -1351,6 +1351,9 @@ public class UnitType extends UnlockableContent{
             }
 
         }
+
+        if(unitTrans == 0) return;
+
         if(unit.controller().isBeingControlled(player.unit())){
             drawControl(unit);
         }
@@ -1452,7 +1455,7 @@ public class UnitType extends UnlockableContent{
         float y_corr = 0f ;
         if (unit.hitSize<30f && unit.hitSize>20f && unit.controller().isBeingControlled(player.unit())) y_corr = 2f;
         if(Core.settings.getBool("unitHealthBar")){
-            if(draw_minunithealthbar && (unit.health < unit.maxHealth || unit.shield > 0)){
+            if(DrawMinHealthBar && (unit.health < unit.maxHealth || unit.shield > 0)){
                 Draw.reset();
                 Lines.stroke(4f);
                 Draw.color(unit.team.color, 0.5f);

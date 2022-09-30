@@ -4,8 +4,10 @@ import arc.Core;
 import arc.Graphics.*;
 import arc.Graphics.Cursor.*;
 import arc.func.*;
+import arc.graphics.Color;
 import arc.math.*;
 import arc.math.geom.*;
+import arc.scene.ui.Label;
 import arc.scene.ui.layout.*;
 import arc.struct.Bits;
 import arc.struct.*;
@@ -29,6 +31,7 @@ import java.io.*;
 import java.util.zip.*;
 
 import static mindustry.Vars.*;
+import static mindustry.logic.LogicDialog.*;
 
 public class LogicBlock extends Block{
     private static final int maxByteLen = 1024 * 500;
@@ -227,6 +230,12 @@ public class LogicBlock extends Block{
         public boolean checkedDuplicates = false;
         //dynamic only for privileged processors
         public int ipt = instructionsPerTick;
+
+        Table settingTable = new Table();
+        boolean showSettingTable = false;
+        boolean showContent = false;
+
+        float counter = 0f;
 
         /** Block of code to run after load. */
         public @Nullable Runnable loadBlock;
@@ -564,18 +573,77 @@ public class LogicBlock extends Block{
             return other != null && other.isValid() && (privileged || (!other.block.privileged && other.team == team && other.within(this, range + other.block.size*tilesize/2f))) && !(other instanceof ConstructBuild);
         }
 
-        @Override
-        public void buildConfiguration(Table table){
+        private void rebuildSettingTable() {
+            settingTable.clear();
+            if (!showSettingTable) return;
+            settingTable.setColor(Color.lightGray);
+            settingTable.update(() -> {
+                counter += Time.delta;
+                if (counter > period && refreshing) {
+                    counter = 0;
+                }
+            });
+            settingTable.table(t -> {
+                t.button(Icon.copy, Styles.cleari, () -> {
+                    Core.app.setClipboardText(code);
+                }).size(40);
+                t.button(Icon.download, Styles.cleari, () -> {
+                    code = Core.app.getClipboardText().replace("\r\n", "\n");
+                }).size(40);
+                t.button(Icon.trash, Styles.cleari, () -> {
+                    code = "";
+                }).size(40);
+                t.button(Icon.info, Styles.cleari, () -> {
+                    showContent = !showContent;
+                    rebuildSettingTable();
+                }).size(40);
+            });
+            if (showContent && !code.isEmpty()) {
+                settingTable.row();
+                settingTable.pane(t -> {
+                    for (var s : executor.vars) {
+                        String text = arcVarsText(s);
+                        t.table(tt -> {
+                            tt.labelWrap(s.name + "").color(arcVarsColor(s)).width(100f);
+                            Label label = tt.labelWrap(" : " + text).width(200f).get();
+                            tt.update(() -> {
+                                if (counter + Time.delta > period && refreshing) {
+                                    label.setText(arcVarsText(s));
+                                }
+                            });
+                        });
+                        t.row();
+                    }
+                }).maxHeight(400f);
 
-            if(!accessible()){
+            }
+        }
+
+        @Override
+        public void buildConfiguration(Table table) {
+
+            if (!accessible()) {
                 //go away
                 deselect();
                 return;
             }
-
-            table.button(Icon.pencil, Styles.cleari, () -> {
-                ui.logic.show(code, executor, privileged, code -> configure(compress(code, relativeConnections())));
-            }).size(40);
+            if (Core.settings.getBool("logicSupport")){
+                table.table(t -> {
+                    t.button(Icon.pencil, Styles.cleari, () -> {
+                        ui.logic.show(code, executor, privileged, code -> configure(compress(code, relativeConnections())));
+                    }).size(40);
+                    t.button(Icon.settings, Styles.cleari, () -> {
+                        showSettingTable = !showSettingTable;
+                        rebuildSettingTable();
+                    }).size(40);
+                });
+            }else{
+                table.button(Icon.pencil, Styles.cleari, () -> {
+                    ui.logic.show(code, executor, privileged, code -> configure(compress(code, relativeConnections())));
+                }).size(40);
+            }
+            table.row();
+            table.add(settingTable);
         }
 
         @Override

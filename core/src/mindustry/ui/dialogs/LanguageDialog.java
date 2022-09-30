@@ -46,7 +46,6 @@ public class LanguageDialog extends BaseDialog{
     "th", "ไทย",
     "zh_CN", "简体中文",
     "zh_TW", "正體中文",
-    "zh_ARC","学术端配置",
     "ja", "日本語",
     "ko", "한국어",
     "router", "router"

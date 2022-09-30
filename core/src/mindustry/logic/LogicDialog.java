@@ -27,11 +27,11 @@ public class LogicDialog extends BaseDialog{
     public LCanvas canvas;
     Cons<String> consumer = s -> {};
     boolean privileged;
-    float period = 15f;
+    public static float period = 15f;
     float counter = 0f;
     Table varTable = new Table();
     Table mainTable = new Table();
-    boolean refreshing = true;
+    public static boolean refreshing = true;
 
     @Nullable LExecutor executor;
 
@@ -124,10 +124,8 @@ public class LogicDialog extends BaseDialog{
             varTable.pane(t->{
                 if(executor==null) return;
                 for(var s : executor.vars){
-                    //if((s.constant && !showConstant) || (!s.constant && showConstant)) continue;
                     if(s.name.startsWith("___")) continue;
-                    String text = s.isobj ? PrintI.toString(s.objval) : Math.abs(s.numval - (long)s.numval) < 0.00001 ? (long)s.numval + "" : s.numval + "";
-                    //if(text == "null" && excludeNull) continue;
+                    String text = arcVarsText(s);
                     t.table(tt->{
                         tt.background(Tex.whitePane);
 
@@ -148,7 +146,7 @@ public class LogicDialog extends BaseDialog{
                             });
                             tv.update(()->{
                                 if(counter + Time.delta>period && refreshing){
-                                    varPro.setText(s.isobj ? PrintI.toString(s.objval) : Math.abs(s.numval - (long)s.numval) < 0.00001 ? (long)s.numval + "" : s.numval + "");
+                                    varPro.setText(arcVarsText(s));
                                 }
                             });
                         }).padLeft(20f);
@@ -163,13 +161,17 @@ public class LogicDialog extends BaseDialog{
                 }
             }).width(400f).padLeft(20f);
     }
-    private Color arcVarsColor(Var s){
+
+    public static String arcVarsText(Var s){
+        return s.isobj ? PrintI.toString(s.objval) : Math.abs(s.numval - (long)s.numval) < 0.00001 ? (long)s.numval + "" : s.numval + "";
+    }
+    public static Color arcVarsColor(Var s){
         if(s.constant && s.name.startsWith("@")) return Color.goldenrod;
         else if (s.constant) return Color.tan;
         else return typeColor(s,new Color());
     }
 
-    private Color typeColor(Var s, Color color){
+    private static Color typeColor(Var s, Color color){
         return color.set(
             !s.isobj ? Pal.place :
             s.objval == null ? Color.darkGray :

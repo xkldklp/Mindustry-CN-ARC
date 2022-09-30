@@ -126,8 +126,8 @@ public class HudSettingsTable extends Table{
                 sp.row();
                 sp.table(t -> {
                     t.button("[cyan]块",textStyle, () ->{
-                        int blockrenderlevel = Core.settings.getInt("blockrenderlevel");
-                        Core.settings.put("blockrenderlevel", (blockrenderlevel+1) % 3);
+                        int blockRenderLevel = Core.settings.getInt("blockRenderLevel");
+                        Core.settings.put("blockRenderLevel", (blockRenderLevel+1) % 3);
                     }).size(30,30).tooltip("建筑显示");
                     t.button("[cyan]兵",textStyle, () ->{
                         unitTransparency = unitHide? unitTransparency : Core.settings.getInt("unitTransparency");

@@ -49,7 +49,7 @@ public class MapInfoTable extends BaseToolsTable{
             }
         }).tooltip("切换跟踪玩家");
         button(Icon.starSmall, clearAccentNonei, ui.achievements::show).tooltip("统计与成就");
-        button(Icon.editSmall,clearAccentNonei,this::uiTable).tooltip("ui大全");
+        if(!mobile) button(Icon.editSmall,clearAccentNonei,this::uiTable).tooltip("ui大全");
     }
 
     private void floorStatisticDialog(){
@@ -58,7 +58,8 @@ public class MapInfoTable extends BaseToolsTable{
         table.clear();
 
         table.table(c -> {
-            c.add("<---[cyan]地表矿[]--->").row();
+            c.add("地表矿").color(getThemeColor()).center().fillX().row();
+            c.image().color(getThemeColor()).fillX().row();
             c.table(list -> {
                 int i = 0;
                 for(Block block : content.blocks().select(b -> b instanceof Floor f && !f.wallOre && f.itemDrop != null)){
@@ -68,7 +69,8 @@ public class MapInfoTable extends BaseToolsTable{
                 }
             }).row();
 
-            c.add("<---[cyan]墙矿[]--->").row();
+            c.add("墙矿").color(getThemeColor()).center().fillX().row();
+            c.image().color(getThemeColor()).fillX().row();
             c.table(list -> {
                 int i = 0;
                 for(Block block : content.blocks().select(b -> ((b instanceof Floor f && f.wallOre) || b instanceof StaticWall) && b.itemDrop != null)){
@@ -78,7 +80,8 @@ public class MapInfoTable extends BaseToolsTable{
                 }
             }).row();
 
-            c.add("<---[cyan]液体[]--->").row();
+            c.add("液体").color(getThemeColor()).center().fillX().row();
+            c.image().color(getThemeColor()).fillX().row();
             c.table(list -> {
                 int i = 0;
                 for(Block block : content.blocks().select(b -> ((b instanceof Floor f && f.liquidDrop != null)))){

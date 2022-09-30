@@ -428,7 +428,7 @@ public class Turret extends ReloadTurret{
         @Override
         public void drawSelect(){
             super.drawSelect();
-            if(targetPos.x != 0 && targetPos.y !=0){
+            if(targetPos.x != 0 && targetPos.y !=0 && Mathf.dst(targetPos.x,targetPos.y)<5e5){
                 Lines.stroke(1f);
                 Lines.dashLine(x, y, targetPos.x, targetPos.y, (int)(Mathf.len(targetPos.x - x, targetPos.y - y) / 8));
                 Lines.dashCircle(targetPos.x, targetPos.y, 8);

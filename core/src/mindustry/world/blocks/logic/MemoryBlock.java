@@ -94,7 +94,7 @@ public class MemoryBlock extends Block{
 
         @Override
         public void buildConfiguration(Table table){
-            if(!accessible()){
+            if(!Core.settings.getBool("showOtherTeamState") && !accessible()){
                 //go away
                 deselect();
                 return;

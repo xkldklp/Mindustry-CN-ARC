@@ -282,7 +282,7 @@ public class BlockRenderer{
     }
 
     public void drawShadows(){
-        if (Core.settings.getInt("blockrenderlevel") == 0) return;
+        if (Core.settings.getInt("blockRenderLevel") == 0) return;
         if(!shadowEvents.isEmpty()){
             Draw.flush();
 
@@ -397,6 +397,7 @@ public class BlockRenderer{
     }
 
     public void drawBlocks(){
+        if (Core.settings.getInt("blockRenderLevel") == 0) return;
         Team pteam = player.team();
 
         drawDestroyed();
@@ -413,7 +414,7 @@ public class BlockRenderer{
 
             //comment wasVisible part for hiding?
             if(block != Blocks.air && (visible || build.wasVisible)){
-                if (settings.getInt("blockrenderlevel") > 1) block.drawBase(tile);
+                if (settings.getInt("blockRenderLevel") > 1) block.drawBase(tile);
                 Draw.reset();
                 Draw.z(Layer.block);
 
