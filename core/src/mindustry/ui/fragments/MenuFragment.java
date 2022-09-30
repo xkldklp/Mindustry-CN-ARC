@@ -237,7 +237,10 @@ public class MenuFragment{
                 ),
                 new Buttoni("@achievements", Icon.star, ui.achievements::show),
                 new Buttoni("@mods", Icon.book, ui.mods::show),
-                new Buttoni("@settings", Icon.settings, ui.settings::show),
+                new Buttoni("@settings", Icon.settings,
+                        new Buttoni("@settings", Icon.settings, ui.settings::show),
+                        new Buttoni("KlpMenu", Icon.settings, ui.klpMenu::show)
+                        ),
                 new Buttoni("@aboutcn_arc.button", Icon.info, ui.aboutcn_arc::show),
                 new Buttoni("@quit", Icon.exit, Core.app::exit)
             );

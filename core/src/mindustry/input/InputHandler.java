@@ -331,6 +331,8 @@ public abstract class InputHandler implements InputProcessor, GestureListener{
         Item item = unit.item();
         int accepted = build.acceptStack(item, unit.stack.amount, unit);
 
+        unit.aim(build.x, build.y);
+
         Call.transferItemTo(unit, item, accepted, unit.x, unit.y, build);
 
         Events.fire(new DepositEvent(build, player, item, accepted));

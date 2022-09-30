@@ -55,9 +55,6 @@ public class Vars implements Loadable{
     /** 服务器ip地址 */
     public static @Nullable String lastServer = null;
 
-    /** 开始游玩时间 */
-    public static Long startPlayTime = Time.millis();
-
     /** pr-5921  Used in blocks with selection menus such sorters for how large the menu should be */
     public static int blockSelectionRows = 5, blockSelectionColumns = 6;
     /** Whether the game failed to launch last time. */

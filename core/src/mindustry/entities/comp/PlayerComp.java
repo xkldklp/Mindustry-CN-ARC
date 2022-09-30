@@ -367,9 +367,13 @@ abstract class PlayerComp implements UnitController, Entityc, Syncc, Timerc, Dra
         indexer.eachBlock(player.team(), player.x, player.y, itemTransferRange,
             build -> build.acceptStack(player.unit().item(), player.unit().stack.amount, player.unit()) > 0 && (
                     (build.block instanceof Turret && Core.settings.getBool("一键装填-炮台", false) ||
-                            (build.block instanceof GenericCrafter && Core.settings.getBool("一键装填-工厂", false)))),
+                            (build.block instanceof GenericCrafter && Core.settings.getBool("一键装填-工厂", false)))) &&
+                    (build.within(Core.input.mouseWorldX(), Core.input.mouseWorldY(),  3 * tilesize) ||
+                            !(Core.settings.getBool("一键装填-wz模式", false) && (
+                                    Core.settings.getBool("自由鼠标", false) ||
+                                    Core.settings.getBool("按住一键装填自由鼠标", false)
+                            ))),
             build -> {
-                player.unit().aim(build.x,build.y);
                 Call.transferInventory(player, build);
             }
         );

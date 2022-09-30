@@ -263,7 +263,7 @@ public abstract class ClientLauncher extends ApplicationCore implements Platform
         long time = (Time.millis() - startPlayTime) / 1000;
         return "Mindustry-CN-ARC-XKLDKLP | VERSION " + (Version.arcBuild <= 0 ? "Dev" : Version.arcBuild) + " | " + enabled + "/" + (mods == null ? 0 : mods.mods.size) + " Mods Enable |" +
                 (Core.graphics != null ? Core.graphics.getWidth() + "x" + Core.graphics.getHeight() + " | " : "") +
-                (player != null ? player.name + " | " + getUUID() + " | ": "") +
+                (player != null ? player.name + " | " + (settings.getBool("uuidShow", true) ? getUUID() + " | ": "") : "") +
                 (lastServer != null ? lastServer + " | ": "") +
                 ("你已游玩" + time / 1140 + " 时 " + time % 1140 / 60 + " 分 " + time % 1140 % 60 + " 秒")
                 ;

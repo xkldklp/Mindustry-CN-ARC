@@ -75,7 +75,6 @@ public class BlockInventoryFragment{
 
         //take everything
         if(player.unit().stack.item != lastItem) {
-            player.unit().aim(build.x,build.y);
             Call.transferInventory(player, build);
         }
         int amount = Math.min(requested, player.unit().maxAccepted(lastItem));

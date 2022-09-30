@@ -58,9 +58,6 @@ public class ScriptTable extends BaseToolsTable{
             Core.settings.put("removePan", !ab);
             ui.arcInfo("已" + (ab?"取消":"开启") + "强制追踪控制单位");
         }, b -> Core.settings.getBool("removePan"));
-        scriptButton(Items.copper.uiIcon, "一键放置", () -> {
-            player.dropItems();
-        });
     }
 
     private void scriptButton(Drawable region, String describe, Runnable runnable, Boolf<ImageButton> checked){
