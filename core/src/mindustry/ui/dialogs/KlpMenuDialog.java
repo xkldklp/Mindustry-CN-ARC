@@ -52,7 +52,7 @@ public class KlpMenuDialog extends BaseDialog{
             addCheckSetting("角度锁定", "角度锁定", "使你单位的角度锁定，只能由射击更改角度", unitRotateTable);
             addCheckSetting("建筑时不会面朝建筑", "建筑时不会面朝建筑", "船辅拯救者", unitRotateTable);
             addCheckSetting("瞬间转向", "瞬间转向", "使单位无需转头时间，瞬间转向", unitRotateTable);
-            addCheckSetting("推进转向", "推进转向", "推进时也可转向", unitRotateTable);
+            addCheckSetting("推进转向", "推进转向", "推进时看着鼠标方向", unitRotateTable);
             addSliderSetting("单位转向速度", "单位转向速度", 0f, 5f, 20, 1f, "单位转向速度倍率", unitRotateTable);
         }
         settings.add(unitRotateTable).row();

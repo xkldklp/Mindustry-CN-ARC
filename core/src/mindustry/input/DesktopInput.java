@@ -851,7 +851,7 @@ public class DesktopInput extends InputHandler{
         else {
             target = null;
         }
-        if (((type.omniMovement || settings.getBool("没有角度移动",false) && !settings.getBool("没爱角度移动",false))&& type.faceTarget && unit.isShooting) || settings.getBool("强制看向鼠标",false)) {
+        if (((type.omniMovement || settings.getBool("没有角度移动",false) && !settings.getBool("没爱角度移动",false))&& type.faceTarget && unit.isShooting) || (settings.getBool("强制看向鼠标",false) || ((settings.getBool("推进转向",false) && boosted)))) {
             unit.lookAt(lookAtAngle);
         }
         else {

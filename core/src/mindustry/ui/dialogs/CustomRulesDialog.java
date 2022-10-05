@@ -149,17 +149,7 @@ public class CustomRulesDialog extends BaseDialog{
         number("@rules.dropzoneradius", false, f -> rules.dropZoneRadius = f * tilesize, () -> rules.dropZoneRadius / tilesize, () -> true);
 
         title("@rules.title.resourcesbuilding");
-        check("@rules.infiniteresources", b -> {
-            rules.infiniteResources = b;
-
-            //reset to serpulo if any env was enabled
-            if(!b && rules.hiddenBuildItems.isEmpty()){
-                rules.env = Planets.serpulo.defaultEnv;
-                rules.hiddenBuildItems.clear();
-                rules.hiddenBuildItems.addAll(Planets.serpulo.hiddenItems);
-                setup();
-            }
-        }, () -> rules.infiniteResources);
+        check("@rules.infiniteresources", b -> rules.infiniteResources = b, () -> rules.infiniteResources);
         check("@rules.onlydepositcore", b -> rules.onlyDepositCore = b, () -> rules.onlyDepositCore);
         check("@rules.reactorexplosions", b -> rules.reactorExplosions = b, () -> rules.reactorExplosions);
         check("@rules.schematic", b -> rules.schematicsAllowed = b, () -> rules.schematicsAllowed);
@@ -183,20 +173,14 @@ public class CustomRulesDialog extends BaseDialog{
         main.button("@bannedblocks", () -> showBanned("@bannedblocks", ContentType.block, rules.bannedBlocks, Block::showUnlock)).left().width(300f).row();
         main.button("@revealedblocks", () -> showBanned("@revealedblocks", ContentType.block, rules.revealedBlocks, Block::showUnlock)).left().width(300f).row();
 
-        //TODO objectives would be nice
-        if(experimental && false){
-            main.button("@objectives", () -> {
-
-            }).left().width(300f).row();
-        }
 
         title("@rules.title.unit");
-        //check("@rules.unitammo", b -> rules.unitAmmo = b, () -> rules.unitAmmo);
+        check("@rules.unitammo", b -> rules.unitAmmo = b, () -> rules.unitAmmo);
         check("@rules.unitcapvariable", b -> rules.unitCapVariable = b, () -> rules.unitCapVariable);
         numberi("@rules.unitcap", f -> rules.unitCap = f, () -> rules.unitCap, -999, 999);
         number("@rules.unitdamagemultiplier", f -> rules.unitDamageMultiplier = f, () -> rules.unitDamageMultiplier);
-        number("@rules.unitbuildspeedmultiplier", f -> rules.unitBuildSpeedMultiplier = f, () -> rules.unitBuildSpeedMultiplier, 0f, 50f);
-        number("@rules.unitcostmultiplier", f -> rules.unitCostMultiplier = f, () -> rules.unitCostMultiplier);
+        number("@rules.unitbuildspeedmultiplier", f -> rules.unitBuildSpeedMultiplier = f, () -> rules.unitBuildSpeedMultiplier, 0f, 500f);
+        number("@rules.unitcostmultiplier", f -> rules.unitCostMultiplier = f, () -> rules.unitCostMultiplier, 0f, 50f);
 
         main.button("@bannedunits", () -> showBanned("@bannedunits", ContentType.unit, rules.bannedUnits, u -> !u.isHidden())).left().width(300f).row();
 
@@ -286,13 +270,8 @@ public class CustomRulesDialog extends BaseDialog{
             }
 
             t.button("@rules.anyenv", style, () -> {
-                if(!rules.infiniteResources){
-                    //unlocalized for now
-                    ui.showInfo("[accent]'Any' environment, or 'mixed tech', is no longer allowed outside of sandbox.[]\n\nReasoning: Serpulo and Erekir tech were never meant to be used in the same map. They are not compatible or remotely balanced.\nI have received far too many complains in this regard.");
-                }else{
-                    rules.env = Vars.defaultEnv;
-                    rules.hiddenBuildItems.clear();
-                }
+                rules.env = Vars.defaultEnv;
+                rules.hiddenBuildItems.clear();
             }).group(group).checked(b -> rules.hiddenBuildItems.size == 0);
         }).left().fill(false).expand(false, false).row();
 
@@ -303,12 +282,14 @@ public class CustomRulesDialog extends BaseDialog{
                 Team team = Team.get(teamId);
                 team.rules().cheat = true;
             }
-                }).width(256f).height(32f).row();
+            setup();
+        }).width(256f).height(32f).row();
         main.button("所有队伍关闭无限火力", () -> {
             for(int teamId =0;teamId<Core.settings.getInt("moreCustomTeam");teamId+=1){
                 Team team = Team.get(teamId);
                 team.rules().cheat = false;
             }
+            setup();
         }).width(256f).height(32f).row();
 
         team("@rules.playerteam", t -> rules.defaultTeam = t, () -> rules.defaultTeam);
@@ -330,18 +311,18 @@ public class CustomRulesDialog extends BaseDialog{
 
                 check("@rules.aiCoreSpawn", b -> teams.aiCoreSpawn = b, () -> teams.aiCoreSpawn);
                 check("@rules.rtsai", b -> teams.rtsAi = b, () -> teams.rtsAi, () -> finalTeam != rules.defaultTeam);
-                numberi("@rules.rtsminsquadsize", f -> teams.rtsMinSquad = f, () -> teams.rtsMinSquad, () -> teams.rtsAi, 0, 100);
-                numberi("@rules.rtsmaxsquadsize", f -> teams.rtsMaxSquad = f, () -> teams.rtsMaxSquad, () -> teams.rtsAi, 1, 1000);
+                numberi("@rules.rtsminsquadsize", f -> teams.rtsMinSquad = f, () -> teams.rtsMinSquad, () -> teams.rtsAi, 0, 1000);
+                numberi("@rules.rtsmaxsquadsize", f -> teams.rtsMaxSquad = f, () -> teams.rtsMaxSquad, () -> teams.rtsAi, 1, 10000);
                 number("@rules.rtsminattackweight", f -> teams.rtsMinWeight = f, () -> teams.rtsMinWeight, () -> teams.rtsAi);
                 check("@rules.cheat", b -> teams.cheat = b, () -> teams.cheat);
                 check("@rules.infiniteAmmo",b -> teams.infiniteAmmo = b, () -> teams.infiniteAmmo);
                 check("@rules.infiniteresources", b -> teams.infiniteResources = b, () -> teams.infiniteResources);
 
-                number("@rules.buildspeedmultiplier", f -> teams.buildSpeedMultiplier = f, () -> teams.buildSpeedMultiplier, 0.001f, 50f);
+                number("@rules.buildspeedmultiplier", f -> teams.buildSpeedMultiplier = f, () -> teams.buildSpeedMultiplier, 0.001f, 500f);
                 number("@rules.blockhealthmultiplier", f -> teams.blockHealthMultiplier = f, () -> teams.blockHealthMultiplier);
                 number("@rules.blockdamagemultiplier", f -> teams.blockDamageMultiplier = f, () -> teams.blockDamageMultiplier);
                 number("@rules.unitdamagemultiplier", f -> teams.unitDamageMultiplier = f, () -> teams.unitDamageMultiplier);
-                number("@rules.unitbuildspeedmultiplier", f -> teams.unitBuildSpeedMultiplier = f, () -> teams.unitBuildSpeedMultiplier, 0.001f, 50f);
+                number("@rules.unitbuildspeedmultiplier", f -> teams.unitBuildSpeedMultiplier = f, () -> teams.unitBuildSpeedMultiplier, 0.001f, 500f);
                 number("@rules.unitcostmultiplier", f -> teams.unitCostMultiplier = f, () -> teams.unitCostMultiplier);
 
                 main = wasMain;
@@ -395,7 +376,7 @@ public class CustomRulesDialog extends BaseDialog{
             t.field((prov.get()) + "", s -> cons.get(Strings.parseInt(s)))
                 .update(a -> a.setDisabled(!condition.get()))
                 .padRight(100f)
-                    .valid(f -> Strings.parseInt(f) >= -999999 && Strings.parseInt(f) <= 999999999).width(120f).left();
+                    .valid(f -> Strings.parseInt(f) >= -Integer.MAX_VALUE && Strings.parseInt(f) <= Integer.MAX_VALUE).width(120f).left();
         }).padTop(0).row();
     }
 
