@@ -134,7 +134,7 @@ public class JoinDialog extends BaseDialog{
         for(Server server : servers){
             if(server.lastHost != null){
                 int ServerVersion = server.lastHost.version;
-                if(Core.settings.getBool("showAccessibleServer") &&((ServerVersion != Version.build && Version.build != -1 && ServerVersion != -1) ||(ServerVersion < 136 && ServerVersion!=-1))) continue;
+                if(Core.settings.getBool("showAccessibleServer") && (ServerVersion != Version.build && Version.build != -1 && ServerVersion != -1)) continue;
             }
             //why are java lambdas this bad
             Button[] buttons = {null};

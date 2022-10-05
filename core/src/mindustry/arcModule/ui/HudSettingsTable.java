@@ -15,6 +15,7 @@ import arc.scene.*;
 import arc.scene.ui.ImageButton.*;
 import arc.struct.*;
 import arc.util.*;
+import mindustry.content.StatusEffects;
 import mindustry.game.EventType;
 import mindustry.input.*;
 import mindustry.entities.Lightning;
@@ -143,12 +144,17 @@ public class HudSettingsTable extends Table{
                     t.button("[cyan]雾",textStyle, () ->{
                         state.rules.fog = !state.rules.fog;
                     }).checked(a->state.rules.fog).size(30,30).tooltip("战争迷雾");
+                    t.button("[violet]锁",textStyle,()->{
+                        Core.settings.put("removeLogicLock", !Core.settings.getBool("removeLogicLock"));
+                        control.input.logicCutscene = false;
+                        ui.arcInfo("已移除逻辑视角锁定");
+                    }).checked(a->Core.settings.getBool("removeLogicLock")).size(30,30).tooltip("逻辑锁定");
                 }).left();
                 sp.row();
                 sp.table(t -> {
                     t.button("[red]灯",textStyle, () -> {
-                        enableLight = !enableLight;
-                    }).checked(a->enableLight).size(30,30).name("灯光").tooltip("[cyan]开灯啊！");
+                        state.rules.lighting = !state.rules.lighting;
+                    }).checked(a->state.rules.lighting).size(30,30).name("灯光").tooltip("[cyan]开灯啊！");
                     t.button("[acid]效",textStyle, () ->{
                         Core.settings.put("effects", !Core.settings.getBool("effects"));
                     }).checked(a->Core.settings.getBool("effects")).size(30,30).tooltip("特效显示");
@@ -161,11 +167,10 @@ public class HudSettingsTable extends Table{
                     t.button("[acid]天",textStyle, () ->{
                         Core.settings.put("showweather", !Core.settings.getBool("showweather"));
                     }).checked(a->Core.settings.getBool("showweather")).size(30,30).tooltip("天气显示");
-                    t.button("[violet]锁",textStyle,()->{
-                        Core.settings.put("removeLogicLock", !Core.settings.getBool("removeLogicLock"));
-                        control.input.logicCutscene = false;
-                        ui.arcInfo("已移除逻辑视角锁定");
-                    }).checked(a->Core.settings.getBool("removeLogicLock")).size(30,30).tooltip("逻辑锁定");
+                    if(settings.getBool("developMode"))
+                    t.button(StatusEffects.burning.emoji(), textStyle, () ->{
+                        state.rules.fire = !state.rules.fire;
+                    }).checked(a->state.rules.fire).size(30,30).tooltip("太燃了");
                 }).left();
                 sp.row();
                 sp.add(sets);

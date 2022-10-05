@@ -274,7 +274,7 @@ public class MobileInput extends InputHandler implements GestureListener{
         });
 
         group.fill(t -> {
-            t.visible(() -> !showCancel() && block == null && !settings.getBool("showAdvanceToolTable"));
+            t.visible(() -> !showCancel() && block == null && !hasSchem() && !settings.getBool("showAdvanceToolTable"));
             t.bottom().left();
             t.button("@command", Icon.units, Styles.squareTogglet, () -> {
                 commandMode = !commandMode;

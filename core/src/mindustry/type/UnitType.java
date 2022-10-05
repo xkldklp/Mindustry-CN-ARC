@@ -215,8 +215,12 @@ public class UnitType extends UnlockableContent{
     hidden = false,
     /** if true, this unit is for internal use only and does not have a sprite generated. */
     internal = false,
+    /** If false, this unit is not pushed away from map edges. */
+    bounded = true,
     /** if true, this unit is detected as naval - do NOT assign this manually! Initialized in init() */
     naval = false,
+    /** if false, RTS AI controlled units do not automatically attack things while moving. This is automatically assigned. */
+    autoFindTarget = true,
 
     /** if true, this modded unit always has a -outline region generated for its base. Normally, outlines are ignored if there are no top = false weapons. */
     alwaysCreateOutline = false,
@@ -231,7 +235,9 @@ public class UnitType extends UnlockableContent{
     /** if false, the unit shield (usually seen in waves) is not drawn. */
     drawShields = true,
     /** if false, the unit body is not drawn. */
-    drawBody = true;
+    drawBody = true,
+    /** if false, the unit is not drawn on the minimap. */
+    drawMinimap = true;
 
     /** If `flying` and this is true, the unit can appear on the title screen */
     public boolean onTitleScreen = true;
@@ -435,6 +441,7 @@ public class UnitType extends UnlockableContent{
         super(name);
 
         constructor = EntityMapping.map(this.name);
+        selectionSize = 30f;
     }
 
     public UnitController createController(Unit unit){
@@ -775,6 +782,9 @@ public class UnitType extends UnlockableContent{
             lightRadius = Math.max(60f, hitSize * 2.3f);
         }
 
+        //if a status effects slows a unit when firing, don't shoot while moving.
+        autoFindTarget = !weapons.contains(w -> w.shootStatus.speedMultiplier < 0.99f);
+
         clipSize = Math.max(clipSize, lightRadius * 1.1f);
         singleTarget = weapons.size <= 1 && !forceMultiTarget;
 
@@ -994,6 +1004,8 @@ public class UnitType extends UnlockableContent{
     public void createIcons(MultiPacker packer){
         super.createIcons(packer);
 
+        sample = constructor.get();
+
         var toOutline = new Seq<TextureRegion>();
         getRegionsToOutline(toOutline);
 
@@ -1028,13 +1040,12 @@ public class UnitType extends UnlockableContent{
             }
 
             for(Weapon weapon : weapons){
-                if(!weapon.name.isEmpty() && (minfo.mod == null || weapon.name.startsWith(minfo.mod.name)) && !(!weapon.top && packer.isOutlined(weapon.name))){
-                    makeOutline(PageType.main, packer, weapon.region, !weapon.top, outlineColor, outlineRadius);
+                if(!weapon.name.isEmpty() && (minfo.mod == null || weapon.name.startsWith(minfo.mod.name)) && (weapon.top || !packer.isOutlined(weapon.name) || weapon.parts.contains(p -> p.under))){
+                    makeOutline(PageType.main, packer, weapon.region, !weapon.top || weapon.parts.contains(p -> p.under), outlineColor, outlineRadius);
                 }
             }
         }
 
-        //TODO test
         if(sample instanceof Tankc){
             PixmapRegion pix = Core.atlas.getPixmap(treadRegion);
 
@@ -1101,7 +1112,7 @@ public class UnitType extends UnlockableContent{
         //find reconstructor
         var rec = (Reconstructor)content.blocks().find(b -> b instanceof Reconstructor re && re.upgrades.contains(u -> u[1] == this));
 
-        if(rec != null && Structs.find(rec.consumers, i -> i instanceof ConsumeItems) instanceof ConsumeItems ci){
+        if(rec != null && rec.findConsumer(i -> i instanceof ConsumeItems) instanceof ConsumeItems ci){
             if(prevReturn != null){
                 prevReturn[0] = rec.upgrades.find(u -> u[1] == this)[0];
             }
@@ -1418,10 +1429,6 @@ public class UnitType extends UnlockableContent{
             drawShield(unit);
         }
 
-        if(mech != null){
-            unit.trns(-legOffset.x, -legOffset.y);
-        }
-
         //TODO how/where do I draw under?
         if(parts.size > 0){
             for(int i = 0; i < parts.size; i++){
@@ -1447,6 +1454,10 @@ public class UnitType extends UnlockableContent{
                 Draw.reset();
                 a.draw(unit);
             }
+        }
+
+        if(mech != null){
+            unit.trns(-legOffset.x, -legOffset.y);
         }
 
         Draw.reset();
@@ -1595,7 +1606,7 @@ public class UnitType extends UnlockableContent{
     public void drawSoftShadow(float x, float y, float rotation, float alpha){
         Draw.color(0, 0, 0, 0.4f * alpha);
         float rad = 1.6f;
-        float size = Math.max(region.width, region.height) * Draw.scl;
+        float size = Math.max(region.width, region.height) * region.scl();
         Draw.rect(softShadowRegion, x, y, size * rad * Draw.xscl, size * rad * Draw.yscl, rotation - 90);
         Draw.color();
     }
@@ -1616,11 +1627,12 @@ public class UnitType extends UnlockableContent{
             Draw.mixcol();
             Draw.alpha(unitTrans);
 
-            size = (3f + Mathf.absin(Time.time, 5f, 1f)) * unit.itemTime + 0.5f;
+            size = ((3f + Mathf.absin(Time.time, 5f, 1f)) * unit.itemTime + 0.5f) * 2;
             Draw.color(Pal.accent);
             Draw.rect(itemCircleRegion,
-                    unit.x + Angles.trnsx(unit.rotation + 180f, itemOffsetY),
-                    unit.y + Angles.trnsy(unit.rotation + 180f, itemOffsetY), size * 2, size * 2);
+            unit.x + Angles.trnsx(unit.rotation + 180f, itemOffsetY),
+            unit.y + Angles.trnsy(unit.rotation + 180f, itemOffsetY),
+            size, size);
 
             if(Core.settings.getBool("unitItemCarried") || (unit.isLocal() && !renderer.pixelator.enabled())){
                 Fonts.outline.draw(unit.stack.amount + "",
@@ -1739,7 +1751,7 @@ public class UnitType extends UnlockableContent{
 
                 for(int side : Mathf.signs){
                     Tmp.v1.set(xOffset * side, yOffset).rotate(unit.rotation - 90);
-                    Draw.rect(region, unit.x + Tmp.v1.x / 4f, unit.y + Tmp.v1.y / 4f, treadRect.width / 4f, region.height / 4f, unit.rotation - 90);
+                    Draw.rect(region, unit.x + Tmp.v1.x / 4f, unit.y + Tmp.v1.y / 4f, treadRect.width / 4f, region.height * region.scale / 4f, unit.rotation - 90);
                 }
             }
         }
@@ -1751,7 +1763,7 @@ public class UnitType extends UnlockableContent{
 
         Leg[] legs = unit.legs();
 
-        float ssize = footRegion.width * Draw.scl * 1.5f;
+        float ssize = footRegion.width * footRegion.scl() * 1.5f;
         float rotation = unit.baseRotation();
         float invDrown = 1f - unit.drownTime;
 
@@ -1788,10 +1800,10 @@ public class UnitType extends UnlockableContent{
                 Draw.rect(footRegion, leg.base.x, leg.base.y, position.angleTo(leg.base));
             }
 
-            Lines.stroke(legRegion.height * Draw.scl * flips);
+            Lines.stroke(legRegion.height * legRegion.scl() * flips);
             Lines.line(legRegion, position.x, position.y, leg.joint.x, leg.joint.y, false);
 
-            Lines.stroke(legBaseRegion.height * Draw.scl * flips);
+            Lines.stroke(legBaseRegion.height * legRegion.scl() * flips);
             Lines.line(legBaseRegion, leg.joint.x + Tmp.v1.x, leg.joint.y + Tmp.v1.y, leg.base.x, leg.base.y, false);
 
             if(jointRegion.found()){
@@ -1867,11 +1879,11 @@ public class UnitType extends UnlockableContent{
             Draw.mixcol(Tmp.c1.set(mechLegColor).lerp(Color.white, Mathf.clamp(unit.hitTime)), Math.max(Math.max(0, i * extension / mechStride), unit.hitTime));
             Draw.alpha(unitTrans); //
             Draw.rect(legRegion,
-                    unit.x + Angles.trnsx(mech.baseRotation(), extension * i - boostTrns, -boostTrns*i),
-                    unit.y + Angles.trnsy(mech.baseRotation(), extension * i - boostTrns, -boostTrns*i),
-                    legRegion.width * i * Draw.scl,
-                    legRegion.height * Draw.scl - Math.max(-sin * i, 0) * legRegion.height * 0.5f * Draw.scl,
-                    mech.baseRotation() - 90 + 35f*i*e);
+            unit.x + Angles.trnsx(mech.baseRotation(), extension * i - boostTrns, -boostTrns*i),
+            unit.y + Angles.trnsy(mech.baseRotation(), extension * i - boostTrns, -boostTrns*i),
+            legRegion.width * legRegion.scl() * i,
+            legRegion.height * legRegion.scl() * (1 - Math.max(-sin * i, 0) * 0.5f),
+            mech.baseRotation() - 90 + 35f*i*e);
         }
 
         Draw.mixcol(Color.white, unit.hitTime);

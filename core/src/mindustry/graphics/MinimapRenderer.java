@@ -148,7 +148,7 @@ public class MinimapRenderer{
 
         if(unitDetailsIcon){
             for(Unit unit : units){
-                if(unit.inFogTo(player.team())) continue;
+                if(unit.inFogTo(player.team()) || !unit.type.drawMinimap) continue;
 
                 float rx = !withLabels ? (unit.x - rect.x) / rect.width * w : unit.x / (world.width() * tilesize) * w;
                 float ry = !withLabels ? (unit.y - rect.y) / rect.width * h : unit.y / (world.height() * tilesize) * h;
@@ -164,7 +164,7 @@ public class MinimapRenderer{
         }
         else{
             for(Unit unit : units){
-                if(unit.inFogTo(player.team())) continue;
+                if(unit.inFogTo(player.team()) || !unit.type.drawMinimap) continue;
 
                 float rx = !withLabels ? (unit.x - rect.x) / rect.width * w : unit.x / (world.width() * tilesize) * w;
                 float ry = !withLabels ? (unit.y - rect.y) / rect.width * h : unit.y / (world.height() * tilesize) * h;
@@ -183,7 +183,7 @@ public class MinimapRenderer{
                     float rx = !withLabels ? (player.x - rect.x) / rect.width * w : player.x / (world.width() * tilesize) * w;
                     float ry = !withLabels ? (player.y - rect.y) / rect.width * h : player.y / (world.height() * tilesize) * h;
 
-                    drawLabel(x + rx, y + ry, player.name, player.team().color);
+                    drawLabel(x + rx, y + ry, player.name, player.color);
                 }
             }
         }
@@ -273,7 +273,7 @@ public class MinimapRenderer{
         if(!worldSpace){
             position.sub(rect.x, rect.y).scl(lastW / rect.width, lastH / rect.height);
         }else{
-            position.scl(1f / world.unitWidth(), 1f / world.unitHeight()).scl(lastW, lastH);
+            position.scl(lastW / world.unitWidth(), lastH / world.unitHeight());
         }
 
         return position.add(lastX, lastY);

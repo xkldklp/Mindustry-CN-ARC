@@ -1,3 +1,51 @@
+[cyan]------------------------[v139-10/5]---------------------------
+v7 is now moving into the beta stage. The campaign system has been (mostly) stabilized, and all that remains in terms of content is approximately 5 more Erekir maps.
+
+Fixed neoplasm being incinerated when contacting slag-bearing blocks
+
+Fixed tank units not working correctly in mods
+
+Fixed ground units moving too "smoothly" around corners
+
+Misc balancing
+
+Made Corvus and Vela no longer stop to shoot when commanded to a target
+
+Made internal 'Canvas' block show up on Erekir - not particularly useful, but some may find it interesting
+
+Made liquid tanks/containers solid and targetable by turrets again
+
+Made mirror filter support increments smaller than 45 degrees (contributed by @hortiSquash)
+
+Made neoplasm slightly more dangerous / spread faster
+
+Removed the 'unit ammo' rule from custom game selection - this rule never worked properly on Erekir, is not balanced, and is seldom used
+
+Improved planet selection UI
+
+Improved item/block selection UI in certain blocks (contributed by @MEEPofFaith)
+
+Added Heat Router block (Code contributed by @l-Luna, sprites by @kapzduke)
+
+Added unit cost multiplier rule (Code partially contributed by @Ilya246)
+
+Misc improvements to AI behavior in "RTS" maps
+
+Mixed tech is now disabled as an option in new maps; the two tech trees are not meant to be used together - no, I will not be changing this back
+
+API change: Made Separator class use a drawer field like GenericCrafter
+
+Added several new maps [Campaign]
+
+Added first-time planet/campaign selection dialog [Campaign]
+
+Made 'global items' of Erekir and Serpulo separate [Campaign]
+
+Removed Tantros from solar system, visually [Campaign]
+
+Removed shield breaker block [Campaign]
+
+
 [cyan]------------------------[v138-8/30]---------------------------
 Fixed an exploit allowing logic-controlled units to transfer items with no cooldown
 Fixed objectives edit dialog being broken with UI scaling

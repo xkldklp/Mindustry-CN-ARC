@@ -15,6 +15,7 @@ import mindustry.world.draw.*;
 public class HeatConductor extends Block{
     public float visualMaxHeat = 15f;
     public DrawBlock drawer = new DrawDefault();
+    public boolean splitHeat = false;
 
     public HeatConductor(String name){
         super(name);
@@ -91,7 +92,7 @@ public class HeatConductor extends Block{
 
         @Override
         public float heatFrac(){
-            return heat / visualMaxHeat;
+            return (heat / visualMaxHeat) / (splitHeat ? 3f : 1);
         }
     }
 }

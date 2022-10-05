@@ -111,7 +111,7 @@ public class Marker{
         if(text.contains("[YELLOW][集合]")&& text.contains("[WHITE]\"[WHITE]\",输入\"[gold]go[WHITE]\"前往")){
 
             int typeStart = text.indexOf("[WHITE]发起集合([RED]");
-            int typeEnd = text.indexOf("[WHITE])[WHITE]");
+            int typeEnd = text.indexOf("[WHITE])");
             if(typeStart == -1 || typeEnd == -1){
                 return false;
             }

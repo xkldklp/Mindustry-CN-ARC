@@ -1,5 +1,6 @@
 package mindustry.world.blocks.sandbox;
 
+import arc.*;
 import arc.graphics.g2d.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
@@ -47,6 +48,11 @@ public class ItemSource extends Block{
     }
 
     @Override
+    protected TextureRegion[] icons(){
+        return new TextureRegion[]{Core.atlas.find("source-bottom"), region};
+    }
+
+    @Override
     public void drawPlanConfig(BuildPlan plan, Eachable<BuildPlan> list){
         drawPlanConfigCenter(plan, plan.config, "center", true);
     }
@@ -62,16 +68,16 @@ public class ItemSource extends Block{
 
         @Override
         public void draw(){
-            super.draw();
-
             if(outputItem == null){
-                Draw.rect("cross", x, y);
+                Draw.rect("cross-full", x, y);
             }else{
                 Draw.color(outputItem.color);
-                Draw.rect("center", x, y);
+                Fill.square(x, y, tilesize/2f - 0.00001f);
                 Draw.color();
                 if(Core.settings.getBool("arcchoiceuiIcon"))    Draw.rect(outputItem.uiIcon, x, y,4f,4f);
             }
+
+            super.draw();
         }
 
         @Override
@@ -91,7 +97,7 @@ public class ItemSource extends Block{
 
         @Override
         public void buildConfiguration(Table table){
-            ItemSelection.buildTable(ItemSource.this, table, content.items(), () -> outputItem, this::configure);
+            ItemSelection.buildTable(ItemSource.this, table, content.items(), () -> outputItem, this::configure, selectionRows, selectionColumns);
         }
 
         @Override

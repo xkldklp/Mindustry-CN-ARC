@@ -14,6 +14,7 @@ import mindustry.annotations.Annotations.*;
 import mindustry.content.*;
 import mindustry.ctype.*;
 import mindustry.entities.*;
+import mindustry.entities.part.*;
 import mindustry.game.EventType.*;
 import mindustry.game.*;
 import mindustry.gen.*;
@@ -190,6 +191,8 @@ public class BulletType extends Content implements Cloneable{
     public int despawnUnitCount = 1;
     /** Random offset distance from the original bullet despawn/hit coordinate. */
     public float despawnUnitRadius = 0.1f;
+    /** Extra visual parts for this bullet. */
+    public Seq<DrawPart> parts = new Seq<>();
 
     /** Color of trail behind bullet. */
     public Color trailColor = Pal.missileYellowBack;
@@ -487,7 +490,9 @@ public class BulletType extends Content implements Cloneable{
     }
 
     public void draw(Bullet b){
-        if (Core.settings.getBool("bulletShow")){drawTrail(b);}
+        if (!Core.settings.getBool("bulletShow")) return;
+        drawTrail(b);
+        drawParts(b);
     }
 
     public void drawTrail(Bullet b){
@@ -500,8 +505,19 @@ public class BulletType extends Content implements Cloneable{
         }
     }
 
+    public void drawParts(Bullet b){
+        if(parts.size > 0){
+            DrawPart.params.set(b.fin(), 0f, 0f, 0f, 0f, 0f, b.x, b.y, b.rotation());
+            DrawPart.params.life = b.fin();
+
+            for(int i = 0; i < parts.size; i++){
+                parts.get(i).draw(DrawPart.params);
+            }
+        }
+    }
+
     public void drawLight(Bullet b){
-        if(lightOpacity <= 0f || lightRadius <= 0f|| !Core.settings.getBool("bulletShow") ) return;
+        if(lightOpacity <= 0f || lightRadius <= 0f) return;
         Drawf.light(b, lightRadius, lightColor, lightOpacity);
     }
 

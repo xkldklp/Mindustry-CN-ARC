@@ -140,6 +140,7 @@ public class CustomRulesDialog extends BaseDialog{
         title("@rules.title.waves");
         check("@rules.waves", b -> rules.waves = b, () -> rules.waves);
         check("@rules.wavetimer", b -> rules.waveTimer = b, () -> rules.waveTimer);
+        check("@rules.wavesending", b -> rules.waveSending = b, () -> rules.waveSending);
         check("@rules.waitForWaveToEnd", b -> rules.waitEnemies = b, () -> rules.waitEnemies);
         number("@rules.winWave", b -> rules.winWave = (int)b, () -> (int)rules.winWave);
         number("@rules.wavespacing", false, f -> rules.waveSpacing = f * 60f, () -> rules.waveSpacing / 60f, () -> rules.waveTimer, 1, Float.MAX_VALUE);
@@ -148,7 +149,17 @@ public class CustomRulesDialog extends BaseDialog{
         number("@rules.dropzoneradius", false, f -> rules.dropZoneRadius = f * tilesize, () -> rules.dropZoneRadius / tilesize, () -> true);
 
         title("@rules.title.resourcesbuilding");
-        check("@rules.infiniteresources", b -> rules.infiniteResources = b, () -> rules.infiniteResources);
+        check("@rules.infiniteresources", b -> {
+            rules.infiniteResources = b;
+
+            //reset to serpulo if any env was enabled
+            if(!b && rules.hiddenBuildItems.isEmpty()){
+                rules.env = Planets.serpulo.defaultEnv;
+                rules.hiddenBuildItems.clear();
+                rules.hiddenBuildItems.addAll(Planets.serpulo.hiddenItems);
+                setup();
+            }
+        }, () -> rules.infiniteResources);
         check("@rules.onlydepositcore", b -> rules.onlyDepositCore = b, () -> rules.onlyDepositCore);
         check("@rules.reactorexplosions", b -> rules.reactorExplosions = b, () -> rules.reactorExplosions);
         check("@rules.schematic", b -> rules.schematicsAllowed = b, () -> rules.schematicsAllowed);
@@ -180,11 +191,12 @@ public class CustomRulesDialog extends BaseDialog{
         }
 
         title("@rules.title.unit");
-        check("@rules.unitammo", b -> rules.unitAmmo = b, () -> rules.unitAmmo);
+        //check("@rules.unitammo", b -> rules.unitAmmo = b, () -> rules.unitAmmo);
         check("@rules.unitcapvariable", b -> rules.unitCapVariable = b, () -> rules.unitCapVariable);
         numberi("@rules.unitcap", f -> rules.unitCap = f, () -> rules.unitCap, -999, 999);
         number("@rules.unitdamagemultiplier", f -> rules.unitDamageMultiplier = f, () -> rules.unitDamageMultiplier);
         number("@rules.unitbuildspeedmultiplier", f -> rules.unitBuildSpeedMultiplier = f, () -> rules.unitBuildSpeedMultiplier, 0f, 50f);
+        number("@rules.unitcostmultiplier", f -> rules.unitCostMultiplier = f, () -> rules.unitCostMultiplier);
 
         main.button("@bannedunits", () -> showBanned("@bannedunits", ContentType.unit, rules.bannedUnits, u -> !u.isHidden())).left().width(300f).row();
 
@@ -204,10 +216,10 @@ public class CustomRulesDialog extends BaseDialog{
 
         if(experimental){
             check("@rules.limitarea", b -> rules.limitMapArea = b, () -> rules.limitMapArea);
-            numberi("x", x -> state.rules.limitX = x, () -> state.rules.limitX, () -> state.rules.limitMapArea, 0, 10000);
-            numberi("y", y -> state.rules.limitY = y, () -> state.rules.limitY, () -> state.rules.limitMapArea, 0, 10000);
-            numberi("w", w -> state.rules.limitWidth = w, () -> state.rules.limitWidth, () -> state.rules.limitMapArea, 0, 10000);
-            numberi("h", h -> state.rules.limitHeight = h, () -> state.rules.limitHeight, () -> state.rules.limitMapArea, 0, 10000);
+            numberi("x", x -> rules.limitX = x, () -> rules.limitX, () -> rules.limitMapArea, 0, 10000);
+            numberi("y", y -> rules.limitY = y, () -> rules.limitY, () -> rules.limitMapArea, 0, 10000);
+            numberi("w", w -> rules.limitWidth = w, () -> rules.limitWidth, () -> rules.limitMapArea, 0, 10000);
+            numberi("h", h -> rules.limitHeight = h, () -> rules.limitHeight, () -> rules.limitMapArea, 0, 10000);
         }
 
         main.button(b -> {
@@ -270,13 +282,18 @@ public class CustomRulesDialog extends BaseDialog{
                     rules.env = planet.defaultEnv;
                     rules.hiddenBuildItems.clear();
                     rules.hiddenBuildItems.addAll(planet.hiddenItems);
-                }).group(group).checked(rules.env == planet.defaultEnv);
+                }).group(group).checked(b -> rules.env == planet.defaultEnv);
             }
 
             t.button("@rules.anyenv", style, () -> {
-                rules.env = Vars.defaultEnv;
-                rules.hiddenBuildItems.clear();
-            }).group(group).checked(rules.hiddenBuildItems.size == 0);
+                if(!rules.infiniteResources){
+                    //unlocalized for now
+                    ui.showInfo("[accent]'Any' environment, or 'mixed tech', is no longer allowed outside of sandbox.[]\n\nReasoning: Serpulo and Erekir tech were never meant to be used in the same map. They are not compatible or remotely balanced.\nI have received far too many complains in this regard.");
+                }else{
+                    rules.env = Vars.defaultEnv;
+                    rules.hiddenBuildItems.clear();
+                }
+            }).group(group).checked(b -> rules.hiddenBuildItems.size == 0);
         }).left().fill(false).expand(false, false).row();
 
         title("@rules.title.teams");
@@ -325,6 +342,7 @@ public class CustomRulesDialog extends BaseDialog{
                 number("@rules.blockdamagemultiplier", f -> teams.blockDamageMultiplier = f, () -> teams.blockDamageMultiplier);
                 number("@rules.unitdamagemultiplier", f -> teams.unitDamageMultiplier = f, () -> teams.unitDamageMultiplier);
                 number("@rules.unitbuildspeedmultiplier", f -> teams.unitBuildSpeedMultiplier = f, () -> teams.unitBuildSpeedMultiplier, 0.001f, 50f);
+                number("@rules.unitcostmultiplier", f -> teams.unitCostMultiplier = f, () -> teams.unitCostMultiplier);
 
                 main = wasMain;
             }, () -> shown[0]).growX().row();
