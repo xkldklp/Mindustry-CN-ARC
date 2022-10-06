@@ -390,6 +390,14 @@ public class SettingsMenuDialog extends BaseDialog{
         game.checkPref("logichints", true);
         game.checkPref("console", false);
 
+        graphics.sliderPref("menuPic", 1, 1, 5, 1, s -> {
+            if(s==1){return "klp-1";}
+            else if(s==2){return "虚无-1";}
+            else if(s==3){return "klp-3";}
+            else if(s==4){return "klp-4";}
+            else{return "klp-5";}
+        });
+
         graphics.addCategory("arcCOverview");
         graphics.stringInput("themeColor", "ffd37f");
 
