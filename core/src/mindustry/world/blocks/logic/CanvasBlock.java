@@ -1,5 +1,6 @@
 package mindustry.world.blocks.logic;
 
+import arc.Core;
 import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.input.*;
@@ -113,14 +114,19 @@ public class CanvasBlock extends Block{
         }
 
         @Override
-        public void draw(){
+        public void draw() {
             super.draw();
 
-            if(texture == null){
+            if (texture == null) {
                 updateTexture();
             }
             Tmp.tr1.set(texture);
-            Draw.rect(Tmp.tr1, x, y, size * tilesize - padding, size * tilesize - padding);
+            if (Core.settings.getBool("arclogicbordershow")) {
+                Draw.rect(Tmp.tr1, x, y, size * tilesize - padding, size * tilesize - padding);
+            } else {
+                Draw.rect(Tmp.tr1, x, y, size * tilesize, size * tilesize);
+            }
+
         }
 
         @Override

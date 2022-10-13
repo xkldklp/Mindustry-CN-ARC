@@ -15,25 +15,27 @@ import mindustry.ui.*;
 import static mindustry.Vars.*;
 import static mindustry.arcModule.ui.RStyles.*;
 
-public class AuxilliaryTable extends Table{
+public class AuxilliaryTable extends Table {
     private boolean show = true;
     private boolean showMark = true;
+
+    public static boolean teamMark = false;
 
     public MarkType markType = Marker.mark;
     public Element mobileHitter = new Element();
 
     private final BaseToolsTable[] toolsTables = new BaseToolsTable[]{
-    new MapInfoTable(), new WaveInfoTable(), new AIToolsTable(), new ScriptTable(), new MobileToolTable()
+            new MapInfoTable(), new WaveInfoTable(), new AIToolsTable(), new ScriptTable(), new MobileToolTable()
     };
 
-    public AuxilliaryTable(){
+    public AuxilliaryTable() {
         setup();
 
         rebuild();
 
-        mobileHitter.addListener(new ElementGestureListener(20, 0.4f, Marker.heatTime / 60f, 0.15f){
+        mobileHitter.addListener(new ElementGestureListener(20, 0.4f, Marker.heatTime / 60f, 0.15f) {
             @Override
-            public boolean longPress(Element actor, float x, float y){
+            public boolean longPress(Element actor, float x, float y) {
                 Marker.mark(markType, Core.input.mouseWorld());
 
                 mobileHitter.remove();
@@ -42,7 +44,7 @@ public class AuxilliaryTable extends Table{
             }
 
             @Override
-            public void fling(InputEvent event, float velocityX, float velocityY, KeyCode button){
+            public void fling(InputEvent event, float velocityX, float velocityY, KeyCode button) {
                 mobileHitter.remove();
                 ui.announce("[yellow]你已退出标记模式");
             }
@@ -50,64 +52,67 @@ public class AuxilliaryTable extends Table{
 
         mobileHitter.fillParent = true;
 
-        if(!mobile){
+        if (!mobile) {
             update(() -> {
-                if(Core.input.keyTap(Binding.point) && !Core.scene.hasField()){
+                if (Core.input.keyTap(Binding.point) && !Core.scene.hasField()) {
                     Marker.mark(markType, Core.input.mouseWorld());
                 }
             });
         }
     }
 
-    public void setup(){
-        for(BaseToolsTable table : toolsTables){
+    public void setup() {
+        for (BaseToolsTable table : toolsTables) {
             table.setup();
         }
     }
 
-    public void toggle(){
+    public void toggle() {
         show = !show;
         rebuild();
     }
 
-    void rebuild(){
+    void rebuild() {
         clear();
 
         table(Styles.black3, buttons -> {
             buttons.button("[acid]辅助器", clearLineNoneTogglet, this::toggle).size(80f, 40f).tooltip("关闭辅助器");
 
-            if(show){
-                for(BaseToolsTable table : toolsTables){
+            if (show) {
+                for (BaseToolsTable table : toolsTables) {
                     table.addButton(buttons);
                 }
-                buttons.button("♐",clearLineNoneTogglet,()->{showMark = !showMark;rebuild();}).checked(showMark).size(40f, 40f).tooltip("标记");
+                buttons.button("♐", clearLineNoneTogglet, () -> {
+                    showMark = !showMark;
+                    rebuild();
+                }).checked(showMark).size(40f, 40f).tooltip("标记");
             }
         }).fillX();
 
         row();
 
-        if(show){
+        if (show) {
             table(black1, body -> {
-                for(BaseToolsTable table : toolsTables){
+                for (BaseToolsTable table : toolsTables) {
                     body.collapser(table, table::shown).padTop(3).left().row();
                 }
-                if(showMark){
+                if (showMark) {
                     body.table(t -> {
-                        if(mobile){
+                        if (mobile) {
                             t.button("♐ >", clearLineNonet, () -> {
                                 ui.hudGroup.addChild(mobileHitter);
                                 ui.announce("[cyan]你已进入标记模式,长按屏幕可进行一次标记(外划可以退出).");
                             }).height(40).width(70f).tooltip("开启手机标记");
                         }
 
-                        for(MarkType type : Marker.markTypes){
+                        for (MarkType type : Marker.markTypes) {
                             t.button(type.tinyName(), clearLineNoneTogglet, () -> markType = type)
                                     .checked(b -> markType == type).size(40).tooltip(type.describe);
                         }
                         t.button("D", clearLineNoneTogglet, () -> District.unitSpawnMenu())
                                 .checked(b -> false).size(40).tooltip("区域规划器");
-                        t.button("T", clearLineNoneTogglet, () -> Marker.teamMark = !Marker.teamMark)
-                                .checked(b -> Marker.teamMark).size(40).tooltip("前缀添加/t");
+                        t.button("T", clearLineNoneTogglet, () -> teamMark = !teamMark)
+                                .checked(b -> teamMark).size(40).tooltip("前缀添加/t");
                     }).left();
                 }
             }).fillX().left();

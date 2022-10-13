@@ -10,33 +10,34 @@ _[Wiki](https://mindustrygame.github.io/wiki)_
 _[Javadoc](https://mindustrygame.github.io/docs/)_ 
 _[Original](https://github.com/Anuken/Mindustry)_ 
 
-_[前往最新构建版](https://github.com/Jackson11500/Mindustry-CN-ARC-Builds)_
+Q群： 697981760 、602885791
+
+_[下载最新版本|前往最新构建版](https://github.com/Jackson11500/Mindustry-CN-ARC-Builds)_ 
+_[download latest version](https://github.com/Jackson11500/Mindustry-CN-ARC-Builds)_
 
 ## 学术端介绍
-制作团队：Mindustry PVP 学术交流群
+完全功能提升性改端，提供各种辅助显示和功能，提供一端化完美解决方案。\
+包含大量游戏原版不显示机制，强烈建议至少已比较了解mindustry基础流程的玩家使用\
+初次使用有较长的适应时间，往往需要数小时熟悉功能和调整成自己舒服的设置，如无法接受请回退原版。\
 
-更多的工厂显示！从超速范围到工作细节！\
-更多的兵种显示！从攻击范围到单位血量！\
-更多的辅助功能！从地图属性到蓝图大小！\
-更多的地图设置！从更多队伍到强化波次！\
-强化核心数据库！给大量工厂和兵种配备详细机制用法讲解！
+学术端功能可参考这人视频 -> https://space.bilibili.com/135508593/
 
-# 作者声明
-关于更详细的游戏说明/机制，欢迎跟我补充。我们希望做一个真正的核心数据库
 ## 主要负责人
 [violet]Lucky_Clover
 ## 代码
-[green]Root[blue]Channel[white]、[blue]MyIndustry2[white]、[blue]xkldklp[white]、[violet]Lucky_Clover、
-[yellow]miner[white]、blac8、[yellow]wayzer、[brown]Xor
+v3学术端制作团队：[violet]Lucky_Clover[white]、blac8、[blue]xkldklp[white]、[yellow]miner\
+v2-支持：[green]Root[blue]Channel[white]、[blue]MyIndustry2[white]、[yellow]wayzer、[brown]Xor
 ## 翻译
 [lightblue]Somall_dumpling
 ## 工作器件补充说明
 [yellow]Carrot
 
 # 发布|fork|自改端声明
-如果fork本端，请在Vars.arcVersion后面加上你自己的子版本号，或者你私仓版本的代号（如3.0.1selfclient) \
+如果fork本端，请在Vars.arcVersion后面加上你自己的子版本号，或者你私仓版本的代号（如30123selfclient) \
 如果需要公开发布你自行修改的版本，请联系Lucky Clover \
-不鼓励传播到国外！未经授权请不要转载或搬运到任何游戏平台或论坛！允许在Q群内传播 \
+不鼓励传播到国外！未经授权请不要转载或搬运到任何游戏平台或论坛！允许在Q群内传播  \
+仅适配简中且为硬编码，并不打算做多语言兼容。(太麻烦了) \
+Only support for simplified Chinese, would not support any other languague.
 
 # 下面是anuke-mindustry的说明
 

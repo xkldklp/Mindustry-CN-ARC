@@ -237,6 +237,8 @@ public class LogicBlock extends Block{
 
         float counter = 0f;
 
+        boolean linkSimplify = false;
+
         /** Block of code to run after load. */
         public @Nullable Runnable loadBlock;
 
@@ -557,7 +559,7 @@ public class LogicBlock extends Block{
             for(LogicLink l : links){
                 Building build = world.build(l.x, l.y);
                 if(l.active && validLink(build)){
-                    build.block.drawPlaceText(l.name + "[" + i++ + "]", build.tileX(), build.tileY(), true);
+                    build.block.drawPlaceText(linkSimplify ? i++ + "" : l.name + "[" + i++ + "]", build.tileX(), build.tileY(), true);
                 }
             }
         }
@@ -586,12 +588,19 @@ public class LogicBlock extends Block{
             settingTable.table(t -> {
                 t.button(Icon.copy, Styles.cleari, () -> {
                     Core.app.setClipboardText(code);
+                    ui.arcInfo("已复制逻辑");
                 }).size(40);
                 t.button(Icon.download, Styles.cleari, () -> {
                     code = Core.app.getClipboardText().replace("\r\n", "\n");
+                    ui.arcInfo("已导入逻辑(仅单机生效)");
                 }).size(40);
                 t.button(Icon.trash, Styles.cleari, () -> {
                     code = "";
+                    ui.arcInfo("已清除逻辑(仅单机生效)");
+                }).size(40);
+                t.button(Icon.chatSmall, Styles.cleari, () -> {
+                    linkSimplify = !linkSimplify;
+                    ui.arcInfo(linkSimplify ? "仅显示linkindex" : "显示方块名和linkindex");
                 }).size(40);
                 t.button(Icon.info, Styles.cleari, () -> {
                     showContent = !showContent;
@@ -602,6 +611,7 @@ public class LogicBlock extends Block{
                 settingTable.row();
                 settingTable.pane(t -> {
                     for (var s : executor.vars) {
+                        if(s.name.startsWith("___")) continue;
                         String text = arcVarsText(s);
                         t.table(tt -> {
                             tt.labelWrap(s.name + "").color(arcVarsColor(s)).width(100f);

@@ -15,8 +15,9 @@ import mindustry.gen.*;
 import mindustry.input.DesktopInput;
 
 import static mindustry.Vars.*;
+import static mindustry.arcModule.RFuncs.getPrefix;
 
-public class Marker{
+public class Marker {
     /** 冷却时间*/
     public static final float heatTime = 0f;
     /** 滞留时间*/
@@ -36,118 +37,117 @@ public class Marker{
     );
 
     public static boolean isLocal;
-    public static boolean teamMark = false;
 
     public static final Seq<MarkElement> markList = new Seq<>();
 
-    static{
+    static {
         Events.run(WorldLoadEvent.class, () -> {
             markList.clear();
         });
     }
 
-    public static void mark(MarkType type, float x, float y){
+    public static void mark(MarkType type, float x, float y) {
         mark(type, Tmp.v1.set(x, y), true);
     }
 
-    public static void mark(MarkType type, float x, float y, boolean sendMessage){
+    public static void mark(MarkType type, float x, float y, boolean sendMessage) {
         mark(type, Tmp.v1.set(x, y), sendMessage);
     }
 
-    public static void mark(MarkType type, Vec2 pos){
+    public static void mark(MarkType type, Vec2 pos) {
         mark(type, pos, true);
     }
 
-    public static void mark(MarkType type, Vec2 pos, boolean sendMessage){
-        if(markList.size>0 && (Time.time - markList.peek().time)<heatTime){
+    public static void mark(MarkType type, Vec2 pos, boolean sendMessage) {
+        if (markList.size > 0 && (Time.time - markList.peek().time) < heatTime) {
             Vars.ui.announce("请不要频繁标记!");
             return;
         }
 
-        markList.add(new MarkElement(type,pos));
+        markList.add(new MarkElement(type, pos));
 
         type.showEffect(pos);
 
-        if(sendMessage){
+        if (sendMessage) {
             isLocal = true;
             type.sendMessage(pos);
         }
     }
 
-    public static boolean resolveMessage(String text){
-        if(isLocal){
+    public static boolean resolveMessage(String text) {
+        if (isLocal) {
             isLocal = false;
             return true;
         }
 
-            MarkType markType = null;
-            int Indexer = -1;
+        MarkType markType = null;
+        int Indexer = -1;
 
-            for(MarkType markType1 : markTypes){
-                if (text.contains("<" + markType1.name + ">") || text.contains("<" + markType1.localizedName + ">")) {
-                    markType = markType1;
-                    Indexer = text.indexOf("<" + markType1.name + ">");
-                }
+        for (MarkType markType1 : markTypes) {
+            if (text.contains("<" + markType1.name + ">") || text.contains("<" + markType1.localizedName + ">")) {
+                markType = markType1;
+                Indexer = text.indexOf("<" + markType1.name + ">");
+            }
+        }
+
+        if (Indexer > 10 && markType != null) {
+            /* Parse position */
+            String posStr = text.substring(text.indexOf('(', Indexer + 1));
+
+            Vec2 pos = Tmp.v1;
+
+            try {
+                pos.fromString(posStr);
+            } catch (Throwable e) {
+                Log.err("Cannot resolve position from " + posStr);
+                return false;
             }
 
-            if(Indexer>10 && markType!=null){
-                /* Parse position */
-                String posStr = text.substring(text.indexOf('(', Indexer + 1));
+            mark(markType, pos.scl(tilesize), false);
+            ui.MessageDialog.addMsg(new MessageDialog.advanceMsg(MessageDialog.arcMsgType.markLoc, text, pos));
+            return true;
+        }
 
-                Vec2 pos = Tmp.v1;
-
-                try{
-                    pos.fromString(posStr);
-                }catch(Throwable e){
-                    Log.err("Cannot resolve position from " + posStr);
-                    return false;
-                }
-
-                mark(markType, pos.scl(tilesize), false);
-                ui.MessageDialog.addMsg(new MessageDialog.advanceMsg(MessageDialog.arcMsgType.markLoc,text,pos));
-                return true;
-            }
-
-        if(text.contains("[YELLOW][集合]")&& text.contains("[WHITE]\"[WHITE]\",输入\"[gold]go[WHITE]\"前往")){
+        if (text.contains("[YELLOW][集合]") && text.contains("[WHITE]\"[WHITE]\",输入\"[gold]go[WHITE]\"前往")) {
 
             int typeStart = text.indexOf("[WHITE]发起集合([RED]");
             int typeEnd = text.indexOf("[WHITE])");
-            if(typeStart == -1 || typeEnd == -1){
+            if (typeStart == -1 || typeEnd == -1) {
                 return false;
             }
 
             /* Parse position */
-            String posStr = text.substring(typeStart + 17 , typeEnd);
+            String posStr = text.substring(typeStart + 17, typeEnd);
 
             Vec2 pos = Tmp.v1;
 
-            try{
+            try {
                 pos.fromString("(" + posStr + ")");
-            }catch(Throwable e){
+            } catch (Throwable e) {
                 Log.err("Cannot resolve position from " + posStr);
                 return false;
             }
 
             mark(findLocalizedName("集合"), pos.scl(tilesize), false);
-            ui.MessageDialog.addMsg(new MessageDialog.advanceMsg(MessageDialog.arcMsgType.markLoc,text,pos));
+            ui.MessageDialog.addMsg(new MessageDialog.advanceMsg(MessageDialog.arcMsgType.markLoc, text, pos));
             return true;
         }
         return false;
 
     }
 
-    public static MarkType findType(String name){
+    public static MarkType findType(String name) {
         return markTypes.find(maskType -> maskType.name.equals(name));
     }
 
-    public static MarkType findLocalizedName(String localizedName){
+    public static MarkType findLocalizedName(String localizedName) {
         return markTypes.find(maskType -> maskType.localizedName.equals(localizedName));
     }
 
-    public static void lockonLastMark(){
-        if(markList.size == 0) return;
+    public static void lockonLastMark() {
+        if (markList.size == 0) return;
 
-        if(control.input instanceof DesktopInput input){
+        if (control.input instanceof DesktopInput input) {
             input.panning = true;
         }
 
@@ -156,7 +156,7 @@ public class Marker{
         markList.peek().showEffect();
     }
 
-    public static class MarkType{
+    public static class MarkType {
         private final String name;
 
         public String localizedName;
@@ -165,11 +165,11 @@ public class Marker{
         private final Effect effect;
         public final Color color;
 
-        public MarkType(String name, Effect effect){
+        public MarkType(String name, Effect effect) {
             this(name, effect, Color.white);
         }
 
-        public MarkType(String name, Effect effect, Color color){
+        public MarkType(String name, Effect effect, Color color) {
             this.name = name;
             this.effect = effect;
             this.color = color;
@@ -178,51 +178,49 @@ public class Marker{
             describe = Core.bundle.get("marker." + name + ".name", "unknown");
         }
 
-        public String shortName(){
+        public String shortName() {
             return "[#" + color + "]" + localizedName;
         }
 
-        public String tinyName(){
-            return "[#" + color + "]" + localizedName.substring(0,1);
+        public String tinyName() {
+            return "[#" + color + "]" + localizedName.substring(0, 1);
         }
 
-        public void showEffect(Vec2 pos){
+        public void showEffect(Vec2 pos) {
             effect.arcCreate(pos.x, pos.y, 0, color, null);
         }
 
-        public void sendMessage(Vec2 pos){
-            String text = (teamMark ? "/t ":"") + versionFixed +
-                    "[#" + color + "]" + "<" + name + ">" +
-                    "[white]" + ": " +
-                    "(" + World.toTile(pos.x) + "," + World.toTile(pos.y)+")";
+        public void sendMessage(Vec2 pos) {
+            String text = getPrefix(color,name) +
+                    "(" + World.toTile(pos.x) + "," + World.toTile(pos.y) + ")";
             Call.sendChatMessage(text);
-            ui.MessageDialog.addMsg(new MessageDialog.advanceMsg(MessageDialog.arcMsgType.markLoc,text,pos));
+            ui.MessageDialog.addMsg(new MessageDialog.advanceMsg(MessageDialog.arcMsgType.markLoc, text, pos));
         }
 
     }
 
-    public static class MarkElement{
+    public static class MarkElement {
         public MarkType markType;
         public float time;
         public String player;
         public Vec2 markPos;
 
-        public MarkElement(MarkType markType,Vec2 markPos){
-            this(markType,"",markPos);
+        public MarkElement(MarkType markType, Vec2 markPos) {
+            this(markType, "", markPos);
         }
 
-        public MarkElement(MarkType markType,String player,Vec2 markPos){
-            this(markType,Time.time,player,markPos);
+        public MarkElement(MarkType markType, String player, Vec2 markPos) {
+            this(markType, Time.time, player, markPos);
         }
 
-        public MarkElement(MarkType markType,float time,String player,Vec2 markPos){
+        public MarkElement(MarkType markType, float time, String player, Vec2 markPos) {
             this.markType = markType;
             this.time = time;
             this.player = player;
             this.markPos = new Vec2().set(markPos);
         }
 
-        public void showEffect(){
+        public void showEffect() {
             markType.showEffect(markPos);
         }
 

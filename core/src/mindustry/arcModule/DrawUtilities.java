@@ -25,8 +25,10 @@ import static mindustry.Vars.getThemeColor;
 import static mindustry.Vars.tilesize;
 
 public class DrawUtilities {
-    /**Trans From minerTool*/
-    public static float arcDrawText(String text, float scl, float dx, float dy, Color color, int halign){
+    /**
+     * Trans From minerTool
+     */
+    public static float arcDrawText(String text, float scl, float dx, float dy, Color color, int halign) {
         Font font = Fonts.outline;
         GlyphLayout layout = Pools.obtain(GlyphLayout.class, GlyphLayout::new);
         boolean ints = font.usesIntegerPositions();
@@ -48,7 +50,7 @@ public class DrawUtilities {
         return height;
     }
 
-    public static float arcDrawText(String text, float scl, float dx, float dy, int halign){
+    public static float arcDrawText(String text, float scl, float dx, float dy, int halign) {
         Font font = Fonts.outline;
         GlyphLayout layout = Pools.obtain(GlyphLayout.class, GlyphLayout::new);
         boolean ints = font.usesIntegerPositions();
@@ -58,7 +60,7 @@ public class DrawUtilities {
 
         float height = layout.height;
 
-        font.draw(text, dx + layout.width/2, dy + layout.height/2, halign);
+        font.draw(text, dx + layout.width / 2, dy + layout.height / 2, halign);
 
         font.setUseIntegerPositions(ints);
         font.setColor(Color.white);
@@ -69,18 +71,18 @@ public class DrawUtilities {
         return height;
     }
 
-    private void arcFillTextMain(String text, float x1, float y1, float x2, float y2,float ratio){
+    private void arcFillTextMain(String text, float x1, float y1, float x2, float y2, float ratio) {
 
         Color color = getThemeColor();
         Font font = Fonts.outline;
         GlyphLayout layout = Pools.obtain(GlyphLayout.class, GlyphLayout::new);
         boolean ints = font.usesIntegerPositions();
         font.setUseIntegerPositions(false);
-        font.getData().setScale(Math.abs(x2 - x1)/text.length() / 2f / Scl.scl(1f) * ratio);
+        font.getData().setScale(Math.abs(x2 - x1) / text.length() / 2f / Scl.scl(1f) * ratio);
         layout.setText(font, text);
 
         font.setColor(color);
-        float cx = (x1 + x2)/2 * tilesize, cy = (y1 + y2)/2 * tilesize;
+        float cx = (x1 + x2) / 2 * tilesize, cy = (y1 + y2) / 2 * tilesize;
         font.draw(text, cx, cy, Align.center);
         font.setUseIntegerPositions(ints);
         font.setColor(Color.white);
@@ -89,17 +91,17 @@ public class DrawUtilities {
         Pools.free(layout);
     }
 
-    public static void arcFillTextHead(String text, float x1,float x2, float y,float ratio){
+    public static void arcFillTextHead(String text, float x1, float x2, float y, float ratio) {
 
         Font font = Fonts.outline;
         GlyphLayout layout = Pools.obtain(GlyphLayout.class, GlyphLayout::new);
         boolean ints = font.usesIntegerPositions();
         font.setUseIntegerPositions(false);
-        font.getData().setScale(Math.abs(x2 - x1)/text.length() / 2f / Scl.scl(1f) * ratio);
+        font.getData().setScale(Math.abs(x2 - x1) / Math.max(text.length(), 1f) / 2f / Scl.scl(1f) * ratio);
         layout.setText(font, text);
 
         //font.setColor(Color.goldenrod);
-        float cx = (x1 + x2)/2 * tilesize, cy = y * tilesize - 5f;
+        float cx = (x1 + x2) / 2 * tilesize, cy = y * tilesize - 5f;
         font.draw(text, cx, cy, Align.center);
         font.setUseIntegerPositions(ints);
         font.setColor(Color.white);
@@ -108,7 +110,7 @@ public class DrawUtilities {
         Pools.free(layout);
     }
 
-    public static void arcDrawTextMain(String text, int x, int y){
+    public static void arcDrawTextMain(String text, int x, int y) {
 
         Color color = getThemeColor();
         Font font = Fonts.outline;
@@ -134,33 +136,34 @@ public class DrawUtilities {
         Pools.free(layout);
     }
 
-    public static void arcDrawTextMain(String text, float x, float y){
-        arcDrawTextMain(text,(int)x,(int)y);
+    public static void arcDrawTextMain(String text, float x, float y) {
+        arcDrawTextMain(text, (int) x, (int) y);
     }
 
-    public static Effect arcBuildEffect(Building build){
-        if(build == null || !Core.settings.getBool("arcPlacementEffect")) return new Effect();
-        if(build.block instanceof BaseTurret baseTurret && build.health > Core.settings.getInt("blockbarminhealth"))
-            return createBuildEffect(120f,baseTurret.range,build.team.color);
-        else if(build.block instanceof MendProjector mendProjector)
-            return createBuildEffect(120f,mendProjector.range, Pal.heal);
-        else if(build.block instanceof OverdriveProjector overdriveProjector)
-            return createBuildEffect(120f,overdriveProjector.range,overdriveProjector.baseColor);
-        else if(build.block instanceof CoreBlock block)
-            return createBuildEffect(180f,block.fogRadius * tilesize,build.team.color);
-        else if(build.block instanceof Radar radar)
-            return createBuildEffect(180f,radar.fogRadius * tilesize,build.team.color);
+    public static Effect arcBuildEffect(Building build) {
+        if (build == null || !Core.settings.getBool("arcPlacementEffect")) return new Effect();
+        if (build.block instanceof BaseTurret baseTurret && build.health > Core.settings.getInt("blockbarminhealth"))
+            return createBuildEffect(120f, baseTurret.range, build.team.color);
+        else if (build.block instanceof MendProjector mendProjector)
+            return createBuildEffect(120f, mendProjector.range, Pal.heal);
+        else if (build.block instanceof OverdriveProjector overdriveProjector)
+            return createBuildEffect(120f, overdriveProjector.range, overdriveProjector.baseColor);
+        else if (build.block instanceof CoreBlock block)
+            return createBuildEffect(180f, block.fogRadius * tilesize, build.team.color);
+        else if (build.block instanceof Radar radar)
+            return createBuildEffect(180f, radar.fogRadius * tilesize, build.team.color);
         else return new Effect();
     }
 
-    public static Effect createBuildEffect(float lifeTime,float range,Color color){
+    public static Effect createBuildEffect(float lifeTime, float range, Color color) {
         return new Effect(lifeTime, e -> {
             color(color);
-            stroke((1.5f - e.fin() * 1f) * (range/100));
-            if(e.fin()<0.7f) Lines.circle(e.x, e.y, (float) ( (1 - Math.pow((0.7f - e.fin())/0.7f,2f) ) * range));
+            stroke((1.5f - e.fin() * 1f) * (range / 100));
+            if (e.fin() < 0.7f) Lines.circle(e.x, e.y, (float) ((1 - Math.pow((0.7f - e.fin()) / 0.7f, 2f)) * range));
             else {
-                Draw.alpha((1-e.fin()) *5f);
-                Lines.circle(e.x, e.y, range);}
+                Draw.alpha((1 - e.fin()) * 5f);
+                Lines.circle(e.x, e.y, range);
+            }
         });
     }
 

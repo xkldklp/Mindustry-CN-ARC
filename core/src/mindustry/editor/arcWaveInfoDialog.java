@@ -223,8 +223,10 @@ public class arcWaveInfoDialog extends BaseDialog{
                     }).size(handerSize);
 
                     TextField sField = buttons.field((arcWaveIndex + 1) + "", text -> {
-                        arcWaveIndex = Integer.parseInt(text) - 1;
-                        setup();
+                        if (Strings.canParseInt(text)) {
+                            arcWaveIndex = Integer.parseInt(text) - 1;
+                            setup();
+                        }
                     }).get();
 
                     buttons.button(">", cleart, () -> {

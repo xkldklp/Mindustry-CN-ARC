@@ -13,6 +13,7 @@ import mindustry.world.meta.*;
 
 import static arc.Core.*;
 import static mindustry.Vars.*;
+import static mindustry.arcModule.RFuncs.getPrefix;
 
 public class ContentInfoDialog extends BaseDialog{
 
@@ -128,14 +129,14 @@ public class ContentInfoDialog extends BaseDialog{
         show();
     }
 
-    private String arcItemInfo(UnlockableContent content,boolean description){
-        String builder = arcVersionPrefix;
-        builder+="标记了"+content.localizedName+content.emoji();
-        builder+="("+content.name+")";
-        if(content.description != null && description){
-            builder+="。介绍: "+content.description;
+    private String arcItemInfo(UnlockableContent content, boolean description) {
+        StringBuilder builder = getPrefix("sky", "Content");
+        builder.append("标记了" + content.localizedName + content.emoji());
+        builder.append("(" + content.name + ")");
+        if (content.description != null && description) {
+            builder.append("。介绍: " + content.description);
         }
-        return builder;
+        return builder.toString();
     }
 
 }

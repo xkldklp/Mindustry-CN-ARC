@@ -18,6 +18,7 @@ import mindustry.net.Packets.*;
 import mindustry.ui.*;
 
 import static mindustry.Vars.*;
+import static mindustry.arcModule.RFuncs.getPrefix;
 import static mindustry.input.InputHandler.follow;
 
 public class PlayerListFragment{
@@ -286,7 +287,7 @@ public class PlayerListFragment{
     }
 
     private String arcAtPlayer(String name){
-        StringBuilder builder = new StringBuilder(arcVersionPrefix);
+        StringBuilder builder = new StringBuilder(getPrefix("coral","AT"));
         builder.append("戳了").append(name).append("[white]一下，并提醒你留意对话框");
         return builder.toString();
     }

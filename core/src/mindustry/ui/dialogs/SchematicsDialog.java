@@ -16,8 +16,8 @@ import arc.scene.utils.*;
 import arc.struct.*;
 import arc.util.*;
 import mindustry.*;
+import mindustry.arcModule.toolpack.picToMindustry;
 import mindustry.content.Blocks;
-import mindustry.content.Items;
 import mindustry.content.Planets;
 import mindustry.content.UnitTypes;
 import mindustry.ctype.*;
@@ -29,7 +29,6 @@ import mindustry.type.*;
 import mindustry.ui.*;
 import mindustry.world.Block;
 import mindustry.world.blocks.production.GenericCrafter;
-import mindustry.world.meta.Env;
 import mindustry.world.meta.StatUnit;
 
 import java.util.regex.*;
@@ -79,12 +78,14 @@ public class SchematicsDialog extends BaseDialog{
         shouldPause = true;
         addCloseButton();
         buttons.button("@schematic.import", Icon.download, this::showImport);
+        buttons.row();
         buttons.button("[cyan]蓝图档案馆", Icon.link, () -> {
             if(!Core.app.openURI(blueprintlink)){
                 ui.showErrorMessage("@linkfail");
                 Core.app.setClipboardText(blueprintlink);
             }
         });
+        buttons.button("[violet]转换器[white] " + Blocks.canvas.emoji() + Blocks.logicDisplay.emoji() + Blocks.sorter.emoji(),Icon.image, picToMindustry::new);
         shown(this::setup);
         onResize(this::setup);
 

@@ -93,31 +93,32 @@ public class LogicDialog extends BaseDialog{
                 });
             });
             t.row();
-            t.table(tt->{
-                tt.button(Icon.cancelSmall,Styles.cleari,()->{
-                    Core.settings.put("logicSupport",!Core.settings.getBool("logicSupport"));
+            t.table(tt -> {
+                tt.button(Icon.cancelSmall, Styles.cleari, () -> {
+                    Core.settings.put("logicSupport", !Core.settings.getBool("logicSupport"));
                     ui.arcInfo("[orange]已关闭逻辑辅助器！");
                     rebuildMain();
                 }).size(50f);
-                tt.button(Icon.refreshSmall,Styles.cleari,()->{
+                tt.button(Icon.refreshSmall, Styles.cleari, () -> {
                     executor.build.updateCode(executor.build.code);
                     varsTable();
                     ui.arcInfo("[orange]已更新逻辑显示！");
                 }).size(50f);
-                tt.button(Icon.pauseSmall,Styles.cleari,()->{
+                tt.button(Icon.pauseSmall, Styles.cleari, () -> {
                     refreshing = !refreshing;
-                    ui.arcInfo("[orange]已" + (refreshing?"开启":"关闭") + "逻辑刷新");
+                    ui.arcInfo("[orange]已" + (refreshing ? "开启" : "关闭") + "逻辑刷新");
                 }).checked(refreshing).size(50f);
-                tt.button(Icon.rightOpenOutSmall,Styles.cleari,()->{
-                    Core.settings.put("rectJumpLine",!Core.settings.getBool("rectJumpLine"));
-                    ui.arcInfo("[orange]已" + (refreshing?"开启":"关闭") + "方形跳转线");
+                tt.button(Icon.rightOpenOutSmall, Styles.cleari, () -> {
+                    Core.settings.put("rectJumpLine", !Core.settings.getBool("rectJumpLine"));
+                    ui.arcInfo("[orange]已" + (refreshing ? "开启" : "关闭") + "方形跳转线");
                     this.canvas.rebuild();
                 }).checked(refreshing).size(50f);
-                /*
-                tt.button(Icon.trash,Styles.cleari,()->{
-                    excludeNull = !excludeNull;
-                    ui.arcInfo("已" + (excludeNull?"关闭":"开启") + "null排除");
-                }).checked(excludeNull).size(50f);*/
+
+                tt.button(Icon.playSmall, Styles.cleari, () -> {
+                    if (state.isPaused()) state.set(State.playing);
+                    else state.set(State.paused);
+                    ui.arcInfo(state.isPaused() ? "已暂停" : "已继续游戏");
+                }).checked(state.isPaused()).size(50f);
             });
         });
         varTable.row();
