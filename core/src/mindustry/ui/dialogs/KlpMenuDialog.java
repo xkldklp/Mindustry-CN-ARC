@@ -78,6 +78,8 @@ public class KlpMenuDialog extends BaseDialog{
             addCheckSetting("牵引光束反向拉扯", "牵引光束反向拉扯", "反着来!", unitPhyTable);
             addSliderSetting("牵引光束拉扯倍率", "牵引光束拉扯倍率", 0f, 2f, 8, 1f, "抗拉扯！", unitPhyTable);
             addSliderSetting("地图边界拓展", "地图边界拓展", 0f, 250f / 8, 30, 0f, "拓展后单位不会在拓展后边界受到神秘力量(31格外会瞬间死亡！)", unitPhyTable);
+            addSliderSetting("屏障立场进入程度", "屏障立场进入程度", 0f, 1.5f, 30, 0f, "屏障立场可进入程度(单位碰撞箱)", unitPhyTable);
+
         }
         settings.add(unitPhyTable).row();
 

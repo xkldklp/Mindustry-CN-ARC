@@ -198,14 +198,6 @@ public class CustomRulesDialog extends BaseDialog{
         check("@rules.staticFog", b -> rules.staticFog = b, () -> rules.staticFog);
         check("@rules.lighting", b -> rules.lighting = b, () -> rules.lighting);
 
-        if(experimental){
-            check("@rules.limitarea", b -> rules.limitMapArea = b, () -> rules.limitMapArea);
-            numberi("x", x -> rules.limitX = x, () -> rules.limitX, () -> rules.limitMapArea, 0, 10000);
-            numberi("y", y -> rules.limitY = y, () -> rules.limitY, () -> rules.limitMapArea, 0, 10000);
-            numberi("w", w -> rules.limitWidth = w, () -> rules.limitWidth, () -> rules.limitMapArea, 0, 10000);
-            numberi("h", h -> rules.limitHeight = h, () -> rules.limitHeight, () -> rules.limitMapArea, 0, 10000);
-        }
-
         main.button(b -> {
             b.left();
             b.table(Tex.pane, in -> {
@@ -242,6 +234,7 @@ public class CustomRulesDialog extends BaseDialog{
         check("@rules.unitPayloadUpdate",b->rules.unitPayloadUpdate = b,()->rules.unitPayloadUpdate);
         check("@rules.showSpawns",b->rules.showSpawns = b,()->rules.showSpawns);
         check("@rules.possessionAllowed", b -> rules.possessionAllowed = b, () -> rules.possessionAllowed);
+        check("@rules.ghostBlocks", b -> rules.ghostBlocks = b, () -> rules.ghostBlocks);
         main.button("@hiddenBuildItems", () -> showBanned("@hiddenBuildItems", ContentType.item, rules.hiddenBuildItems, Item::showUnlock)).left().width(300f).row();
 
         check("@rules.limitarea", b -> rules.limitMapArea = b, () -> rules.limitMapArea);
@@ -274,6 +267,14 @@ public class CustomRulesDialog extends BaseDialog{
                 rules.hiddenBuildItems.clear();
             }).group(group).checked(b -> rules.hiddenBuildItems.size == 0);
         }).left().fill(false).expand(false, false).row();
+
+        number("@rules.dragMultiplier", f -> state.rules.dragMultiplier = f, () -> state.rules.dragMultiplier);
+
+        check("@rules.borderDarkness",b -> rules.borderDarkness = b, () -> rules.borderDarkness);
+        number("@rules.backgroundSpeed", f -> state.rules.backgroundSpeed = f, () -> state.rules.backgroundSpeed);
+        number("@rules.backgroundScl", f -> state.rules.backgroundScl = f, () -> state.rules.backgroundScl);
+        number("@rules.backgroundOffsetX", f -> state.rules.backgroundOffsetX = f, () -> state.rules.backgroundOffsetX);
+        number("@rules.backgroundOffsetY", f -> state.rules.backgroundOffsetY = f, () -> state.rules.backgroundOffsetY);
 
         title("@rules.title.teams");
 
@@ -384,10 +385,10 @@ public class CustomRulesDialog extends BaseDialog{
         main.table(t -> {
             t.left();
             t.add(text).left().padRight(5)
-            .update(a -> a.setColor(condition.get() ? Color.white : Color.gray));
+                .update(a -> a.setColor(condition.get() ? Color.white : Color.gray));
             t.field((integer ? (int)prov.get() : prov.get()) + "", s -> cons.get(Strings.parseFloat(s)))
-            .padRight(100f)
-            .update(a -> a.setDisabled(!condition.get()))
+                .padRight(100f)
+                .update(a -> a.setDisabled(!condition.get()))
             //.valid(f -> Strings.canParsePositiveFloat(f) && Strings.parseFloat(f) >= min && Strings.parseFloat(f) <= max).width(120f).left();
             .valid(f ->  Strings.parseFloat(f) >= -Float.MAX_VALUE && Strings.parseFloat(f) <= Float.MAX_VALUE).width(120f).left();
         }).padTop(0);
