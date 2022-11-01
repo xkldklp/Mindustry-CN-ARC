@@ -56,7 +56,8 @@ public class CoreBlock extends StorageBlock{
 
         //support everything
         replaceable = false;
-        rebuildable = false;
+        //TODO should AI ever rebuild this?
+        //rebuildable = false;
     }
 
     @Remote(called = Loc.server)
@@ -454,11 +455,11 @@ public class CoreBlock extends StorageBlock{
         }
 
         @Override
-        public float handleDamage(float amount){
+        public void damage(float amount){
             if(player != null && team == player.team()){
                 Events.fire(Trigger.teamCoreDamage);
             }
-            return amount;
+            super.damage(amount);
         }
 
         @Override

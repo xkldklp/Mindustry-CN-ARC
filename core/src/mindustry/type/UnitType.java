@@ -221,7 +221,11 @@ public class UnitType extends UnlockableContent{
     naval = false,
     /** if false, RTS AI controlled units do not automatically attack things while moving. This is automatically assigned. */
     autoFindTarget = true,
+    /** if true, this unit will always shoot while moving regardless of slowdown */
+    alwaysShootWhenMoving = false,
 
+    /** whether this unit has a hover tooltip */
+    hoverable = true,
     /** if true, this modded unit always has a -outline region generated for its base. Normally, outlines are ignored if there are no top = false weapons. */
     alwaysCreateOutline = false,
     /** if true, this unit has a square shadow. */
@@ -634,7 +638,7 @@ public class UnitType extends UnlockableContent{
     }
 
     public boolean isBanned(){
-        return state.rules.bannedUnits.contains(this);
+        return state.rules.isBanned(this);
     }
 
     @Override
@@ -668,7 +672,7 @@ public class UnitType extends UnlockableContent{
         stats.add(Stat.armor, armor);
         stats.add(Stat.speed, speed * 60f / tilesize, StatUnit.tilesSecond);
         stats.add(Stat.rotateSpeed,rotateSpeed);
-        stats.add(Stat.size, hitSize / tilesize, StatUnit.blocksSquared);
+        stats.add(Stat.size, StatValues.squared(hitSize / tilesize, StatUnit.blocks));
         stats.add(Stat.unitItemCapacity, itemCapacity);
         stats.add(Stat.unitrange, (int)(maxRange / tilesize), StatUnit.blocks);
         stats.add(Stat.ammoType, ammoType.icon());
@@ -711,7 +715,7 @@ public class UnitType extends UnlockableContent{
             stats.addPercent(Stat.buildSpeed, buildSpeed);
         }
         if(sample instanceof Payloadc){
-            stats.add(Stat.payloadCapacity, StatValues.squared(Mathf.sqrt(payloadCapacity / (tilesize * tilesize)), StatUnit.blocksSquared));
+            stats.add(Stat.payloadCapacity, StatValues.squared(Mathf.sqrt(payloadCapacity / (tilesize * tilesize)), StatUnit.blocks));
         }
 
         var reqs = getFirstRequirements();
@@ -783,7 +787,7 @@ public class UnitType extends UnlockableContent{
         }
 
         //if a status effects slows a unit when firing, don't shoot while moving.
-        autoFindTarget = !weapons.contains(w -> w.shootStatus.speedMultiplier < 0.99f);
+        autoFindTarget = !weapons.contains(w -> w.shootStatus.speedMultiplier < 0.99f) || alwaysShootWhenMoving;
 
         clipSize = Math.max(clipSize, lightRadius * 1.1f);
         singleTarget = weapons.size <= 1 && !forceMultiTarget;

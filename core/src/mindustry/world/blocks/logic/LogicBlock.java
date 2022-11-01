@@ -86,6 +86,11 @@ public class LogicBlock extends Block{
         });
     }
 
+    @Override
+    public boolean checkForceDark(Tile tile){
+        return !accessible();
+    }
+
     public boolean accessible(){
         //return !privileged || state.rules.editor|| state.playtestingMap != null;
         return !privileged || state.rules.editor|| state.playtestingMap != null || arcInfoControl();
@@ -591,11 +596,12 @@ public class LogicBlock extends Block{
                     ui.arcInfo("已复制逻辑");
                 }).size(40);
                 t.button(Icon.download, Styles.cleari, () -> {
-                    code = Core.app.getClipboardText().replace("\r\n", "\n");
+                    updateCode(Core.app.getClipboardText().replace("\r\n", "\n"));
                     ui.arcInfo("已导入逻辑(仅单机生效)");
                 }).size(40);
                 t.button(Icon.trash, Styles.cleari, () -> {
                     code = "";
+                    updateCode(code);
                     ui.arcInfo("已清除逻辑(仅单机生效)");
                 }).size(40);
                 t.button(Icon.chatSmall, Styles.cleari, () -> {

@@ -49,6 +49,8 @@ public class Drill extends Block{
     public Effect drillEffect = Fx.mine;
     /** Drill effect randomness. Block size by default. */
     public float drillEffectRnd = -1f;
+    /** Chance of displaying the effect. Useful for extremely fast drills. */
+    public float drillEffectChance = 1f;
     /** Speed the drill bit rotates at. */
     public float rotateSpeed = 2f;
     /** Effect randomly played while drilling. */
@@ -76,6 +78,7 @@ public class Drill extends Block{
         ambientSoundVolume = 0.018f;
         //drills work in space I guess
         envEnabled |= Env.space;
+        flags = EnumSet.of(BlockFlag.drill);
     }
 
     @Override
@@ -324,7 +327,7 @@ public class Drill extends Block{
 
                 progress %= delay;
 
-                if(Core.settings.getInt("blockRenderLevel")>1 && wasVisible) drillEffect.at(x + Mathf.range(drillEffectRnd), y + Mathf.range(drillEffectRnd), dominantItem.color);
+                if(Core.settings.getInt("blockRenderLevel")>1 && wasVisible && Mathf.chanceDelta(updateEffectChance * warmup)) drillEffect.at(x + Mathf.range(drillEffectRnd), y + Mathf.range(drillEffectRnd), dominantItem.color);
             }
         }
 

@@ -647,7 +647,7 @@ public class MobileInput extends InputHandler implements GestureListener{
         }else if(mode == breaking && validBreak(linked.x,linked.y) && !hasPlan(linked)){
             //add to selection queue if it's a valid BREAK position
             selectPlans.add(new BuildPlan(linked.x, linked.y));
-        }else if((commandMode && selectedUnits.size > 0) || commandBuild != null){
+        }else if((commandMode && selectedUnits.size > 0) || commandBuildings.size > 0){
             //handle selecting units with command mode
             commandTap(x, y);
         }else if(commandMode){
@@ -716,7 +716,7 @@ public class MobileInput extends InputHandler implements GestureListener{
         selectedUnits.removeAll(u -> !u.isCommandable() || !u.isValid());
 
         if(!commandMode){
-            commandBuild = null;
+            commandBuildings.clear();
             selectedUnits.clear();
         }
 

@@ -23,9 +23,6 @@ public class Marker {
     /** 滞留时间*/
     public static final float retainTime = 1800f;
 
-    public static final String preFixed = "<ARC";
-    public static final String versionFixed = preFixed + Vars.arcVersion + ">";
-
     public static MarkType mark, gatherMark, attackMark, defenseMark, quesMark;
 
     public static Seq<MarkType> markTypes = Seq.with(
@@ -41,9 +38,7 @@ public class Marker {
     public static final Seq<MarkElement> markList = new Seq<>();
 
     static {
-        Events.run(WorldLoadEvent.class, () -> {
-            markList.clear();
-        });
+        Events.run(WorldLoadEvent.class, markList::clear);
     }
 
     public static void mark(MarkType type, float x, float y) {
@@ -90,7 +85,7 @@ public class Marker {
             }
         }
 
-        if (Indexer > 10 && markType != null) {
+        if (Indexer > 10) {
             /* Parse position */
             String posStr = text.substring(text.indexOf('(', Indexer + 1));
 

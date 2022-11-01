@@ -104,10 +104,6 @@ public class MapInfoDialog extends BaseDialog{
                             arcAddBoolLable(islimit, "[@TDDrop]");
                         }).left();
                         td.row();
-                        td.check("无中生有 [acid]工厂仅需电力不需要资源即可生产", arcreadBoolLable("[@voidProduce]"), islimit -> {
-                            arcAddBoolLable(islimit, "[@voidProduce]");
-                        }).left();
-                        td.row();
                         td.check("水漫金山 [acid]蓝队核心会释放洪水淹没你的核心", arcreadBoolLable("[@floodV2]"), islimit -> {
                             arcAddBoolLable(islimit, "[@flood]");
                         }).left();

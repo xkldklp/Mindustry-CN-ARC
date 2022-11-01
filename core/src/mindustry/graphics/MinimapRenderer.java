@@ -286,7 +286,7 @@ public class MinimapRenderer{
     public @Nullable TextureRegion getRegion(){
         if(texture == null) return null;
 
-        float sz = Mathf.clamp(baseSize * zoom, baseSize, Math.min(world.width(), world.height()));
+        float sz = Mathf.clamp(baseSize * zoom, baseSize, Math.max(world.width(), world.height()));
         float dx = (Core.camera.position.x / tilesize);
         float dy = (Core.camera.position.y / tilesize);
         dx = Mathf.clamp(dx, sz, world.width() - sz);

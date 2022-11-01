@@ -1,5 +1,6 @@
 package mindustry.world.blocks.defense;
 
+import arc.*;
 import arc.Core;
 import arc.func.*;
 import arc.graphics.*;
@@ -12,6 +13,7 @@ import mindustry.annotations.Annotations.*;
 import mindustry.content.*;
 import mindustry.core.UI;
 import mindustry.entities.*;
+import mindustry.game.EventType.*;
 import mindustry.game.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
@@ -221,6 +223,9 @@ public class ForceProjector extends Block{
                 broken = true;
                 buildup = shieldHealth;
                 shieldBreakEffect.at(x, y, realRadius(), team.color);
+                if(team != state.rules.defaultTeam){
+                    Events.fire(Trigger.forceProjectorBreak);
+                }
             }
 
             if(hit > 0f){
