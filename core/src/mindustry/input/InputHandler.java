@@ -247,11 +247,7 @@ public abstract class InputHandler implements InputProcessor, GestureListener{
                     ai.commandPosition(posTarget);
                 }
                 unit.lastCommanded = player.coloredName();
-                
-                //remove when other player command
-                if(!headless && player != Vars.player){
-                    control.input.selectedUnits.remove(unit);
-                }
+
             }
         }
 
@@ -849,8 +845,8 @@ public abstract class InputHandler implements InputProcessor, GestureListener{
                 Call.commandUnits(player, ids, attack instanceof Building b ? b : null, attack instanceof Unit u ? u : null, target);
             }
 
-            if(commandBuild != null){
-                Call.commandBuilding(player, commandBuild, target);
+            if(commandBuildings.size > 0){
+                Call.commandBuilding(player, commandBuildings.mapInt(b -> b.pos()).toArray(), target);
             }
         }
     }
