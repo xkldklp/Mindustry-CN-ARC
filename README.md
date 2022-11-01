@@ -1,15 +1,3 @@
-![Logo](core/assets-raw/sprites/ui/logo.png)
-
-[![Build Status](https://github.com/Anuken/Mindustry/workflows/Tests/badge.svg?event=push)](https://github.com/Anuken/Mindustry/actions)
-[![Discord](https://img.shields.io/discord/391020510269669376.svg?logo=discord&logoColor=white&logoWidth=20&labelColor=7289DA&label=Discord&color=17cf48)](https://discord.gg/mindustry)  
-
-The automation tower defense RTS, written in Java.
-
-_[Trello Board](https://trello.com/b/aE2tcUwF/mindustry-40-plans)_  
-_[Wiki](https://mindustrygame.github.io/wiki)_  
-_[Javadoc](https://mindustrygame.github.io/docs/)_ 
-_[Original](https://github.com/Anuken/Mindustry)_ 
-
 ## KLP改版学术端!
 很多奇怪功能，按右shift进行配置。\
 仅推荐大佬级玩家使用。\
@@ -59,7 +47,7 @@ _Running:_ `./gradlew desktop:run`
 _Building:_ `./gradlew desktop:dist`  
 _Sprite Packing:_ `./gradlew tools:pack`
 
-### Server
+## Server
 
 WHY?
 ## Android
