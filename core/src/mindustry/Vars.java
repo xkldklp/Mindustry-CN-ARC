@@ -41,7 +41,7 @@ import static arc.Core.*;
 public class Vars implements Loadable{
     /** ARC */
     public static String arcVersion = Version.arcBuild + "";
-    public static String arcVersionPrefix = "<ARC~" + Version.arcBuild + ">";
+    public static String arcVersionPrefix = "<ARC~" + Version.arcBuild + ">";
     public static int changeLogRead = 18;
     public static Seq<District.advDistrict> districtList = new Seq<>();
     public static String userContentURL = "https://raw.fastgit.org";
@@ -358,6 +358,9 @@ public class Vars implements Loadable{
 
         String uuid = Core.settings.getString("uuid", "o");
         changeLogRead = Math.abs(Integer.parseInt(("" + uuid.hashCode()).substring(0, 2)));
+
+        arcVersion = Version.arcBuild <= 0 ? "Dev" : String.valueOf(Version.arcBuild);
+        arcVersionPrefix = "<ARC" + Iconc.unitCrawler + "~" + arcVersion + ">";
     }
 
     /** Checks if a launch failure occurred.
