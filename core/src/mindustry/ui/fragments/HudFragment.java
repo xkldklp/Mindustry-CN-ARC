@@ -62,7 +62,7 @@ public class HudFragment{
     private Table lastUnlockLayout;
     private long lastToast;
 
-    private boolean showSkipwave = Core.settings.getBool("overrideSkipWave");
+    private Table arcStatus = new Table();
 
     public void build(Group parent){
         auxilliaryTable = new AuxilliaryTable();
@@ -109,6 +109,7 @@ public class HudFragment{
             otherCoreItemDisplay.updateTeamList();
             auxilliaryTable.toggle();
             hideObjectives = false;
+            rebuildArcStatus();
             if(minimapSlider != null){
                 minimapSlider.setRange(0.1f, Math.min(world.width(), world.height()) / 16f / 2f);
             }
@@ -185,6 +186,13 @@ public class HudFragment{
             cont.top().left();
 
             if(mobile){
+                //for better inset visuals
+                cont.rect((x, y, w, h) -> {
+                    if(Core.scene.marginTop > 0){
+                        Tex.paneRight.draw(x, y, w, Core.scene.marginTop);
+                    }
+                }).fillX().row();
+
                 cont.table(select -> {
                     select.name = "mobile buttons";
                     select.left();
@@ -1017,188 +1025,140 @@ public class HudFragment{
     }
 
 
-    private Table makeStatusTableArc(){
+    private Table makeStatusTableArc() {
         Table table = new Table(buttonEdge4);
-
-        var rightStyle = new ImageButtonStyle(){{
-            over = buttonRightOver;
-            down = buttonRightDown;
-            up = buttonRight;
-            disabled = buttonRightDisabled;
-            imageDisabledColor = Color.clear;
-            imageUpColor = Color.white;
-        }};
 
         table.name = "waves";
 
         table.marginTop(0).marginBottom(4).marginLeft(4);
 
-        Runnable[] rebuild = {null};
-        rebuild[0] = () -> {
-            table.clear();
-            table.table(t -> {
-                t.margin(0);
-                t.clicked(() -> {
-                    if (!player.dead() && mobile) {
-                        Call.unitClear(player);
-                        control.input.recentRespawnTimer = 1f;
-                        control.input.controlledType = null;
-                    }
-                });
-                //t.image(() -> player.icon()).scaling(Scaling.bounded).grow().maxWidth(20f);
-                t.image(() -> player.icon()).size(iconMed);
-                t.row();
-                t.add(new Bar(
-                        () -> {
-                            if (player.unit().shield > 0) {
-                                return UI.formatAmount((long) player.unit().health) + "[gray]+[white]" + UI.formatAmount((long) player.unit().shield);
-                            } else {
-                                return UI.formatAmount((long) player.unit().health);
-                            }
-                        },
-                        () -> Pal.health,
-                        () -> Math.min(player.unit().health / player.unit().maxHealth, 1))).height(18).growX();
-                t.row();
-                //if(state.rules.unitAmmo){}
-                t.add(new Bar(
-                        () -> {
-                            if (state.rules.unitAmmo)
-                                return player.unit().type.ammoType.icon() + (int) player.unit().ammo + "/" + player.unit().type.ammoCapacity;
-                            else return player.unit().type.ammoType.icon();
-                        },
-                        () -> player.unit().type.ammoType.barColor(),
-                        () -> {
-                            if (state.rules.unitAmmo) return player.unit().ammo / player.unit().type.ammoCapacity;
-                            else return 1;
-                        })).height(18).growX();//.visible(state.rules.unitAmmo)
-                t.row();
-                //
-
-            }).size(120f, 80).padRight(4);
-
-            if (arcShowObjectives) {
-                table.labelWrap(() -> {
-                    //不清楚地图是否会中途添加任务系统，所以只能随时rebuild
-                    if (arcShowObjectives != (state.rules.objectives.any() || state.rules.mission != null)) {
-                        arcShowObjectives = (state.rules.objectives.any() || state.rules.mission != null);
-                        rebuild[0].run();
-                    }
-
-                        if(state.rules.objectives.any()){
-                            StringBuilder objBuilder  = new StringBuilder();
-                            boolean first = true;
-                            for(var obj : state.rules.objectives){
-                                if(!obj.qualified()) continue;
-
-                                String text = obj.text();
-                                if(text != null){
-                                    if(!first) objBuilder.append('\n');
-                                    objBuilder.append(text);
-
-                                    first = false;
-                                }
-                            }
-                            if (objBuilder != null) {
-                                if (hideObjectives && objBuilder.length()>25){
-                                    return objBuilder.substring(0,20) + "...";
-                                }
-                                return objBuilder;
-                            }
-
-                            return objBuilder;
-                        }
-
-                    //mission overrides everything
-                    if (state.rules.mission != null) {
-                        if (hideObjectives && state.rules.mission.length()>25){
-                            return state.rules.mission.substring(0,20) + "...";
-                        }
-                        return state.rules.mission;
-                    }
-                    return "任务读取失败";
+        table.table(t -> {
+            t.margin(0);
+            t.clicked(() -> {
+                if (!player.dead() && mobile) {
+                    Call.unitClear(player);
+                    control.input.recentRespawnTimer = 1f;
+                    control.input.controlledType = null;
                 }
-                ).growX().pad(8f);
-                table.clicked(() -> {
-                    hideObjectives = !hideObjectives;
-                    if(state.rules.objectives.any()){
-                        StringBuilder text = new StringBuilder();
-
-                        boolean first = true;
-                        for(var obj : state.rules.objectives){
-                            if(!obj.qualified()) continue;
-
-                            String details = obj.details();
-                            if(details != null){
-                                if(!first) text.append('\n');
-                                text.append(details);
-
-                                first = false;
-                            }
-                        }
-
-                        //TODO this, as said before, could be much better.
-                        ui.showInfo(text.toString());
-                    }
-                    rebuild[0].run();
-                });
-
-            } else {
-                table.table(t -> {
-                    t.add(new Bar(
-                            () -> Calwaveshower(),
-                            () -> Color.valueOf("ccffcc"),
-                            () -> {
-                                if (arcShowObjectives != (state.rules.objectives.any() || state.rules.mission != null)) {
-                                    arcShowObjectives = (state.rules.objectives.any() || state.rules.mission != null);
-                                    rebuild[0].run();
-                                }
-
-                                if (CalWinWave() >= 1 && CalWinWave() >= state.wave)
-                                    return state.wave / (float) CalWinWave();
-                                else return 1f;
-
-                            })).height(18).growX().row();
-                    t.add(new Bar(
-                            () -> Calwavetimeremain(),
-                            () -> Color.valueOf("F5DEB3"),
-                            () -> state.wavetime / state.rules.waveSpacing)).height(18).growX().row();
-                    t.add(new Bar(
-                            () -> {
-                                if (Vars.spawner.countSpawns() <= 1 || state.rules.mode() == Gamemode.pvp) {
-                                    return "[orange]" + state.enemies + "[gray](+" + CalwaveEnemy(state.wave - 1) + ")";
-                                } else if (CalwaveEnemy(state.wave - 1) > 0) {
-                                    return "[orange]" + state.enemies + "[gray](+" + CalwaveEnemy(state.wave - 1) + "×" + Vars.spawner.countSpawns() + ")";
-                                } else {
-                                    return "[orange]" + state.enemies + "[gray](+0)";
-                                }
-                            },
-                            () -> Color.valueOf("F4A460"),
-                            () -> state.enemies / ((float) CalwaveEnemy(state.wave - 2) * Vars.spawner.countSpawns()))).height(18).growX();
-                }).growX().pad(8f);
-            }
-            if(showSkipwave){
-                table.button(Icon.play,clearNonei, 30f, () -> {
-                    if(net.client() && player.admin){
-                        Call.adminRequest(player, AdminAction.wave);
-                    }else{
-                        logic.skipWave();
-                    }
-                }).growY().fillX().right().width(40f);
-            }
-
-            // Power bar display
-            if (Core.settings.getBool("powerStatistic")) {
-                table.row();
-                table.add(PowerInfo.getBars()).growX().colspan(table.getColumns());
-            }
-
-            table.update(()->{
-                if(showSkipwave != (Core.settings.getBool("overrideSkipWave") || canSkipWave()))
-                {showSkipwave = Core.settings.getBool("overrideSkipWave") || canSkipWave();rebuild[0].run();}
             });
-        };
-        rebuild[0].run();
+            t.image(() -> player.icon()).size(iconMed);
+            t.row();
+            t.add(new Bar(
+                    () -> {
+                        if (player.unit().shield > 0) {
+                            return UI.formatAmount((long) player.unit().health) + "[gray]+[white]" + UI.formatAmount((long) player.unit().shield);
+                        } else {
+                            return UI.formatAmount((long) player.unit().health);
+                        }
+                    },
+                    () -> Pal.health,
+                    () -> Math.min(player.unit().health / player.unit().maxHealth, 1))).height(18).growX();
+            t.row();
+            t.add(new Bar(
+                    () -> {
+                        if (state.rules.unitAmmo)
+                            return player.unit().type.ammoType.icon() + (int) player.unit().ammo + "/" + player.unit().type.ammoCapacity;
+                        else return player.unit().type.ammoType.icon();
+                    },
+                    () -> player.unit().type.ammoType.barColor(),
+                    () -> {
+                        if (state.rules.unitAmmo) return player.unit().ammo / player.unit().type.ammoCapacity;
+                        else return 1;
+                    })).height(18).growX();
+            t.row();
+
+        }).size(120f, 80).padRight(4);
+
+        rebuildArcStatus();
+        table.add(arcStatus).growX().pad(4f);
+
+        // Power bar display
+        if (Core.settings.getBool("powerStatistic")) {
+            table.row();
+            table.add(PowerInfo.getBars()).growX().colspan(table.getColumns());
+        }
         return table;
+    }
+
+    private void rebuildArcStatus() {
+        arcStatus.clear();
+
+        boolean showSkipWave = canSkipWave();
+
+        arcStatus.clicked(() -> {
+            hideObjectives = !hideObjectives;
+            rebuildArcStatus();
+        });
+
+        if (!getStatusText().isEmpty()) {
+            arcStatus.labelWrap(() -> hideObjectives ? getStatusText().substring(0, 20) : getStatusText()).width(showSkipWave? 150f : 190f);
+        } else {
+            arcStatus.table(tt->{
+                tt.update(() -> {
+                    if (!getStatusText().isEmpty()) rebuildArcStatus();
+                });
+                tt.add(new Bar(
+                        () -> calWaveShower(),
+                        () -> Color.valueOf("ccffcc"),
+                        () -> {
+                            if (CalWinWave() >= 1 && CalWinWave() >= state.wave)
+                                return state.wave / (float) CalWinWave();
+                            else return 1f;
+                        })).height(18).growX().row();
+                tt.add(new Bar(
+                        () -> calWaveTimer(),
+                        () -> Color.valueOf("F5DEB3"),
+                        () -> state.wavetime / state.rules.waveSpacing)).height(18).growX().row();
+                tt.add(new Bar(
+                        () -> {
+                            if (Vars.spawner.countSpawns() <= 1 || state.rules.mode() == Gamemode.pvp) {
+                                return "[orange]" + state.enemies + "[gray](+" + calWaveEnemy(state.wave - 1) + ")";
+                            } else if (calWaveEnemy(state.wave - 1) > 0) {
+                                return "[orange]" + state.enemies + "[gray](+" + calWaveEnemy(state.wave - 1) + "×" + Vars.spawner.countSpawns() + ")";
+                            } else {
+                                return "[orange]" + state.enemies + "[gray](+0)";
+                            }
+                        },
+                        () -> Color.valueOf("F4A460"),
+                        () -> state.enemies / ((float) calWaveEnemy(state.wave - 2) * Vars.spawner.countSpawns()))).height(18).growX();
+            }).width(showSkipWave? 150f : 190f);
+        }
+        arcStatus.update(() -> {
+            if (showSkipWave !=  canSkipWave()) rebuildArcStatus();
+        });
+
+        if (canSkipWave()) {
+            arcStatus.button(Icon.play, clearNonei, 30f, () -> {
+                if (net.client() && player.admin) {
+                    Call.adminRequest(player, AdminAction.wave);
+                } else {
+                    logic.skipWave();
+                }
+            }).growY().fillX().right().width(40f);
+        }
+    }
+
+    public String getStatusText() {
+        StringBuilder objBuilder = new StringBuilder();
+
+        if (state.rules.objectives.any()) {
+            boolean first = true;
+            for (var obj : state.rules.objectives) {
+                if (!obj.qualified()) continue;
+
+                String text = obj.text();
+                if (text != null) {
+                    if (!first) objBuilder.append('\n');
+                    objBuilder.append(text);
+
+                    first = false;
+                }
+            }
+        }
+        if (objBuilder.length() == 0 && state.rules.mission != null)
+            objBuilder.append(state.rules.mission);
+
+        return objBuilder.toString();
     }
 
     private void addInfoTable(Table table){
@@ -1243,10 +1203,10 @@ public class HudFragment{
     }
 
     private boolean canSkipWave(){
-        return state.rules.waves && state.rules.waveSending && ((net.server() || player.admin) || !net.active()) && state.enemies == 0 && !spawner.isSpawning();
+        return Core.settings.getBool("overrideSkipWave") || state.rules.waves && state.rules.waveSending && ((net.server() || player.admin) || !net.active()) && state.enemies == 0 && !spawner.isSpawning();
     }
 
-    private String Calwaveshower(){
+    private String calWaveShower(){
         StringBuilder builder = new StringBuilder();
 
 
@@ -1272,25 +1232,25 @@ public class HudFragment{
         return builder.toString();
     }
 
-    private String Calwavetimeremain(){
-        StringBuilder wavetimeremain = new StringBuilder();
-        wavetimeremain.append("[orange]");
+    private String calWaveTimer(){
+        StringBuilder waveTimer = new StringBuilder();
+        waveTimer.append("[orange]");
         int m = ((int)state.wavetime / 60) / 60;
         int s = ((int)state.wavetime / 60) % 60;
         int ms = (int)state.wavetime % 60;
         if(m > 0){
-            wavetimeremain.append(m).append("[white]: [orange]");
+            waveTimer.append(m).append("[white]: [orange]");
             if(s < 10){
-                wavetimeremain.append("0");
+                waveTimer.append("0");
             }
-            wavetimeremain.append(s).append("[white]min");
+            waveTimer.append(s).append("[white]min");
         }else{
-            wavetimeremain.append(s).append("[white].[orange]").append(ms).append("[white]s");
+            waveTimer.append(s).append("[white].[orange]").append(ms).append("[white]s");
         }
-        return wavetimeremain.toString();
+        return waveTimer.toString();
     }
 
-    private int CalwaveEnemy(int wave){
+    private int calWaveEnemy(int wave){
         int waveEnemy = 0;
         for(SpawnGroup group : state.rules.spawns){
             waveEnemy += group.getSpawned(Math.max(0, wave));

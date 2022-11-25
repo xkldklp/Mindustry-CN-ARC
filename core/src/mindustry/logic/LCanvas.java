@@ -20,6 +20,8 @@ import mindustry.logic.LStatements.*;
 import mindustry.ui.*;
 import mindustry.ui.dialogs.BaseDialog;
 
+import static mindustry.Vars.ui;
+
 public class LCanvas extends Table{
     public static final int maxJumpsDrawn = 100;
     //ew static variables
@@ -357,11 +359,13 @@ public class LCanvas extends Table{
                 t.button(Icon.copy, Styles.logici, () -> {
                 }).size(24f).padRight(6).get().tapped(this::copy);
 
+                t.button(st instanceof PrintStatement ? Icon.fileText : Icon.pencil, Styles.logici, () -> arcTrans()).size(24f).padRight(6).get().tapped(()->{});
+
                 t.button(Icon.cancel, Styles.logici, () -> {
                     remove();
                     dragging = null;
                     statements.layout();
-                }).size(24f);
+                }).size(24f).padLeft(Vars.mobile?48:0);
 
                 t.addListener(new InputListener(){
                     float lastx, lasty;
@@ -484,6 +488,34 @@ public class LCanvas extends Table{
             dialog.addCloseButton();
             dialog.show();
         }
+
+        public void arcTrans(){ //LC：md这玩意真难搞，这一小段代码研究了一整天才找到如何解决。
+            LStatement stNew;
+            int child = statements.getChildren().indexOf(this) + 1;
+            if(st instanceof PrintStatement pst){ //print->代码
+                Seq<LStatement> lsStatement = LAssembler.read(pst.value.replace("_"," "),privileged);
+                stNew = lsStatement.first();
+                if (stNew instanceof InvalidStatement) ui.arcInfo("[orange]警告：转换失败，请输入正确格式\n[cyan]" + LogicDialog.transText);
+                else if(stNew instanceof JumpStatement jst && jst.destIndex != -1){
+                    jst.dest = (StatementElem) statements.getChildren().get(jst.destIndex);
+                }
+            }else if (st instanceof InvalidStatement){
+                stNew = LogicIO.read(new String[]{"print",LogicDialog.transText},2);
+            }else{  //代码->print
+                StringBuilder thisText = new StringBuilder();
+                LogicIO.write(st,thisText);
+                LogicDialog.transText = thisText.toString();
+                stNew = LogicIO.read(new String[]{"print",LogicDialog.transText},2);
+            }
+            StatementElem stNewElem = new StatementElem(stNew);
+            statements.addChildAt(child, stNewElem);
+            remove();
+            for(Element ste :  statements.seq){
+                if(((StatementElem)ste).st instanceof JumpStatement jst && jst.dest == st.elem) jst.dest = stNewElem;
+            }
+            statements.layout();
+        }
+
 
         @Override
         public void draw(){

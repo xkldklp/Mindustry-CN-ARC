@@ -410,10 +410,10 @@ public class PlacementFragment{
                                         line.add(stack.item.localizedName).maxWidth(140f).fillX().color(Color.lightGray).padLeft(2).left().get().setEllipsis(true);
                                         line.labelWrap(() -> {
                                             Building core = player.core();
-                                            if(core == null || state.rules.infiniteResources) return "*/*";
+                                            int stackamount = Math.round(stack.amount * state.rules.buildCostMultiplier);
+                                            if(core == null || state.rules.infiniteResources) return "*/" + stackamount;
 
                                             int amount = core.items.get(stack.item);
-                                            int stackamount = Math.round(stack.amount * state.rules.buildCostMultiplier);
                                             String color = (amount < stackamount / 2f ? "[scarlet]" : amount < stackamount ? "[accent]" : "[white]");
 
                                             return color + UI.formatAmount(amount) + "[white]/" + stackamount;
@@ -466,8 +466,7 @@ public class PlacementFragment{
                 mainStack.update(() -> {
                     if(control.input.commandMode != wasCommandMode){
                         mainStack.clearChildren();
-                        if((!mobile || Core.settings.getBool("mobileCommandMode")) || !control.input.commandMode)
-                            mainStack.addChild(control.input.commandMode ? commandTable : blockCatTable);
+                        mainStack.addChild(control.input.commandMode ? commandTable : blockCatTable);
 
                         //hacky, but forces command table to be same width as blocks
                         if(control.input.commandMode){
@@ -480,11 +479,20 @@ public class PlacementFragment{
 
                 frame.add(mainStack).colspan(3).fill();
 
+                frame.row();
+
+                //for better inset visuals at the bottom
+                frame.rect((x, y, w, h) -> {
+                    if(Core.scene.marginBottom > 0){
+                        Tex.paneLeft.draw(x, 0, w, y);
+                    }
+                }).colspan(3).fillX().row();
+
                 //commandTable: commanded units
-                {
+                if (Core.settings.getBool("arcCommandTable")){
                     commandTable.touchable = Touchable.enabled;
                     commandTable.add("[accent]指挥模式").fill().center().labelAlign(Align.center).row();
-                    commandTable.image().color(Pal.accent).growX().pad(20f).padTop(0f).padBottom(4f).row();
+                    commandTable.image().color(getThemeColor()).growX().pad(20f).padTop(0f).padBottom(4f).row();
                     commandTable.table(u -> {
                         u.left();
                         int[] curCount = {0};
@@ -495,109 +503,146 @@ public class PlacementFragment{
                             u.clearChildren();
                             var units = control.input.selectedUnits;
                             if(units.size > 0){
-                                int[] counts_Full = new int[content.units().size];
-                                int[] counts_Wound = new int[content.units().size];
-                                float wound = (float)Core.settings.getInt("rtsWoundUnit")/100f;
+                                int[] counts = new int[content.units().size];
                                 for(var unit : units){
-                                    if (unit.health > unit.maxHealth * wound) counts_Full[unit.type.id] ++;
-                                    else counts_Wound[unit.type.id] ++;
+                                    counts[unit.type.id] ++;
                                 }
                                 commands.clear();
-                                firstCommand = false;
+                                boolean firstCommand = false;
+                                Table unitlist = u.table().growX().left().get();
+                                unitlist.left();
 
-                                u.table(ut->{
-                                    int col = 0;
-                                    ut.add("残").color(Color.red);
-                                    ut.add("("+Core.keybinds.get(Binding.rtsSelectWound).key.toString()+")").color(getThemeColor()).visible(!android);
-                                    for(int i = 0; i < counts_Wound.length; i++){
-                                        if(counts_Wound[i] > 0){
-                                            var type = content.unit(i);
-                                            ut.add(new ItemImage(type.uiIcon, counts_Wound[i])).color(Color.red).tooltip(type.localizedName).pad(4).with(b -> {
-                                                ClickListener listener = new ClickListener();
-                                                //left click -> select
-                                                b.clicked(KeyCode.mouseLeft, () -> control.input.selectedUnits.removeAll(unit -> unit.type != type || unit.health >= unit.maxHealth * wound)   );
-                                                //right click -> remove
-                                                b.clicked(KeyCode.mouseRight, () -> control.input.selectedUnits.removeAll(unit -> unit.type == type && unit.health < unit.maxHealth * wound));
+                                int col = 0;
+                                for(int i = 0; i < counts.length; i++){
+                                    if(counts[i] > 0){
+                                        var type = content.unit(i);
+                                        unitlist.add(new ItemImage(type.uiIcon, counts[i])).tooltip(type.localizedName).pad(4).with(b -> {
+                                            var listener = new ClickListener();
 
-                                                b.addListener(listener);
-                                                b.addListener(new HandCursorListener());
-                                                //gray on hover
-                                                b.update(() -> ((Group)b.getChildren().first()).getChildren().first().setColor(listener.isOver() ? Color.lightGray : Color.white));
-                                            });
+                                            //left click -> select
+                                            b.clicked(KeyCode.mouseLeft, () -> control.input.selectedUnits.removeAll(unit -> unit.type != type));
+                                            //right click -> remove
+                                            b.clicked(KeyCode.mouseRight, () -> control.input.selectedUnits.removeAll(unit -> unit.type == type));
 
-                                            if(++col % 7 == 0){
-                                                ut.row();
-                                            }
+                                            b.addListener(listener);
+                                            b.addListener(new HandCursorListener());
+                                            //gray on hover
+                                            b.update(() -> ((Group)b.getChildren().first()).getChildren().first().setColor(listener.isOver() ? Color.lightGray : Color.white));
+                                        });
 
-                                            if(!firstCommand){
-                                                commands.add(type.commands);
-                                                firstCommand = true;
-                                            }else{
-                                                //remove commands that this next unit type doesn't have
-                                                commands.removeAll(com -> !Structs.contains(type.commands, com));
-                                            }
+                                        if(++col % 7 == 0){
+                                            unitlist.row();
+                                        }
 
+                                        if(!firstCommand){
+                                            commands.add(type.commands);
+                                            firstCommand = true;
+                                        }else{
+                                            //remove commands that this next unit type doesn't have
+                                            commands.removeAll(com -> !Structs.contains(type.commands, com));
                                         }
                                     }
-                                });
+                                }
 
-
-                                u.row();
-                                u.table(ut->{
-                                    int col = 0;
-                                    ut.add("满").color(Color.green);
-                                    ut.add("("+Core.keybinds.get(Binding.rtsSelectHealth).key.toString()+")").color(getThemeColor()).visible(!android);
-                                    for(int i = 0; i < counts_Full.length; i++){
-                                        if(counts_Full[i] > 0){
-                                            var type = content.unit(i);
-                                            ut.add(new ItemImage(type.uiIcon, counts_Full[i])).tooltip(type.localizedName).pad(4).with(b -> {
-                                                ClickListener listener = new ClickListener();
-
-                                                //left click -> select
-                                                b.clicked(KeyCode.mouseLeft, () -> control.input.selectedUnits.removeAll(unit -> unit.type != type || unit.health <= unit.maxHealth * wound)   );
-                                                //right click -> remove
-                                                b.clicked(KeyCode.mouseRight, () -> control.input.selectedUnits.removeAll(unit -> unit.type == type && unit.health >= unit.maxHealth * wound));
-
-                                                b.addListener(listener);
-                                                b.addListener(new HandCursorListener());
-                                                //gray on hover
-                                                b.update(() -> ((Group)b.getChildren().first()).getChildren().first().setColor(listener.isOver() ? Color.lightGray : Color.white));
-                                            });
-
-                                            if(++col % 7 == 0){
-                                                ut.row();
-                                            }
-
-                                            if(!firstCommand){
-                                                commands.add(type.commands);
-                                                firstCommand = true;
-                                            }else{
-                                                //remove commands that this next unit type doesn't have
-                                                commands.removeAll(com -> !Structs.contains(type.commands, com));
-                                            }
-                                        }
-                                    }
-                                });
-
-
-                                if(commands.size > 1){
+                                if(commands.size > 1) {
                                     u.row();
 
                                     u.table(coms -> {
-                                        for(var command : commands){
+                                        coms.add(Blocks.worldProcessor.emoji()).width(20f).padRight(20f);
+                                        for (var command : commands) {
                                             coms.button(Icon.icons.get(command.icon, Icon.cancel), Styles.clearNoneTogglei, () -> {
                                                 IntSeq ids = new IntSeq();
-                                                for(var unit : units){
+                                                for (var unit : units) {
                                                     ids.add(unit.id);
                                                 }
 
                                                 Call.setUnitCommand(Vars.player, ids.toArray(), command);
                                             }).checked(i -> currentCommand[0] == command).size(50f).tooltip(command.localized());
                                         }
-                                    }).fillX().padTop(4f);
+                                    }).fillX().padTop(4f).left();
                                 }
-                            }else{
-                                u.add("[未选中单位]").color(Color.lightGray).growX().center().labelAlign(Align.center).pad(6);
+                                if(control.input.selectedUnits.size > 0){
+                                    u.row();
+                                    u.table(sp -> {
+                                        float size = 40f;
+                                        float wound = (float) Core.settings.getInt("rtsWoundUnit") / 100f;
+                                        if (control.input.selectedUnits.contains(unit -> unit.health >= unit.maxHealth * wound) && control.input.selectedUnits.contains(unit -> unit.health < unit.maxHealth * wound)){
+                                            sp.table(spp->{
+                                                spp.button("[green]\uE813", Styles.cleart, () -> {
+                                                    control.input.selectedUnits = control.input.selectedUnits.select(unit -> unit.health >= unit.maxHealth * wound);
+                                                    ui.arcInfo("[cyan]arc控制器\n[orange]选择高血量单位");
+                                                }).fill().size(size);
+                                                spp.button("[red]\uE80F", Styles.cleart, () -> {
+                                                    control.input.selectedUnits = control.input.selectedUnits.select(unit -> unit.health < unit.maxHealth * wound);
+                                                    ui.arcInfo("[cyan]arc控制器\n[orange]选择低血量单位");
+                                                }).size(size);
+                                            });
+
+                                        }
+
+                                        if (control.input.selectedUnits.contains(unit -> unit.type.commands.length > 1) && control.input.selectedUnits.contains(unit -> unit.type.commands.length <= 1)){
+                                            sp.table(spp->{
+                                                spp.button("\uE86E", Styles.cleart, () -> {
+                                                    control.input.selectedUnits = control.input.selectedUnits.select(unit -> unit.type.commands.length <= 1);
+                                                    ui.arcInfo("[cyan]arc控制器\n[orange]选择进攻性单位");
+                                                }).size(size);
+                                                spp.button("\uE86B", Styles.cleart, () -> {
+                                                    control.input.selectedUnits = control.input.selectedUnits.select(unit -> unit.type.commands.length > 1);
+                                                    ui.arcInfo("[cyan]arc控制器\n[orange]选择辅助性单位");
+                                                }).size(size);
+                                            });
+                                        }
+
+                                        int hasFlyer = control.input.selectedUnits.contains(Flyingc::isFlying) ? 1 : 0;
+                                        int hasLand = control.input.selectedUnits.contains(unit -> !unit.isFlying() && !unit.type.naval) ? 1 : 0;
+                                        int hasNaval = control.input.selectedUnits.contains(unit -> unit.type.naval) ? 1 : 0;
+                                        if (hasFlyer + hasLand + hasNaval >=2 ){
+                                            if (hasFlyer == 1){
+                                                sp.button(UnitTypes.flare.emoji(), Styles.cleart, () -> {
+                                                    control.input.selectedUnits = control.input.selectedUnits.select(Flyingc::isFlying);
+                                                    ui.arcInfo("[cyan]arc控制器\n[orange]飞行单位！");
+                                                }).color(Color.red).size(size);
+                                            }
+                                            if (hasLand == 1){
+                                                sp.button(UnitTypes.dagger.emoji(), Styles.cleart, () -> {
+                                                    control.input.selectedUnits = control.input.selectedUnits.select(unit -> !unit.isFlying() && !unit.type.naval);
+                                                    ui.arcInfo("[cyan]arc控制器\n[orange]陆军单位！");
+                                                }).color(Color.red).size(size);
+                                            }
+                                            if (hasNaval == 1){
+                                                sp.button(UnitTypes.retusa.emoji(), Styles.cleart, () -> {
+                                                    control.input.selectedUnits = control.input.selectedUnits.select(unit -> unit.type.naval);
+                                                    ui.arcInfo("[cyan]arc控制器\n[orange]海军单位！");
+                                                }).color(Color.red).size(size);
+                                            }
+                                        }
+                                    }).fillX().padTop(4f).left();
+                                }
+                            } else {
+                                u.add("[未选择单位]").color(getThemeColor()).growX().center().labelAlign(Align.center).pad(6);
+                            }
+                            if (mobile) {
+                                u.row();
+                                u.table(sp->{
+                                    sp.button("\uE86D", Styles.cleart, () -> {
+                                        control.input.selectedUnits.clear();
+                                        control.input.commandBuildings.clear();
+                                        for(var unit : player.team().data().units){
+                                            if(unit.isCommandable()){
+                                                control.input.selectedUnits.add(unit);
+                                            }
+                                        }
+                                    }).size(40f);
+                                    sp.button(Blocks.additiveReconstructor.emoji(), Styles.cleart, () -> {
+                                        control.input.selectedUnits.clear();
+                                        control.input.commandBuildings.clear();
+                                        for(var build : player.team().data().buildings){
+                                            if(build.block.commandable){
+                                                control.input.commandBuildings.add(build);
+                                            }
+                                        }
+                                    }).size(40f);
+                                }).fillX().padTop(4f).left().row();
                             }
                         };
 
@@ -631,6 +676,114 @@ public class PlacementFragment{
                         });
                         rebuildCommand.run();
                     }).grow();
+
+                } else{//commandTable: commanded units
+                        commandTable.touchable = Touchable.enabled;
+                        commandTable.add("[accent]指挥模式").fill().center().labelAlign(Align.center).row();
+                        commandTable.image().color(Pal.accent).growX().pad(20f).padTop(0f).padBottom(4f).row();
+                        commandTable.table(u -> {
+                            u.left();
+                            int[] curCount = {0};
+                            UnitCommand[] currentCommand = {null};
+                            var commands = new Seq<UnitCommand>();
+
+                            rebuildCommand = () -> {
+                                u.clearChildren();
+                                var units = control.input.selectedUnits;
+                                if(units.size > 0){
+                                    int[] counts = new int[content.units().size];
+                                    for(var unit : units){
+                                        counts[unit.type.id] ++;
+                                    }
+                                    commands.clear();
+                                    boolean firstCommand = false;
+                                    Table unitlist = u.table().growX().left().get();
+                                    unitlist.left();
+
+                                    int col = 0;
+                                    for(int i = 0; i < counts.length; i++){
+                                        if(counts[i] > 0){
+                                            var type = content.unit(i);
+                                            unitlist.add(new ItemImage(type.uiIcon, counts[i])).tooltip(type.localizedName).pad(4).with(b -> {
+                                                var listener = new ClickListener();
+
+                                                //left click -> select
+                                                b.clicked(KeyCode.mouseLeft, () -> control.input.selectedUnits.removeAll(unit -> unit.type != type));
+                                                //right click -> remove
+                                                b.clicked(KeyCode.mouseRight, () -> control.input.selectedUnits.removeAll(unit -> unit.type == type));
+
+                                                b.addListener(listener);
+                                                b.addListener(new HandCursorListener());
+                                                //gray on hover
+                                                b.update(() -> ((Group)b.getChildren().first()).getChildren().first().setColor(listener.isOver() ? Color.lightGray : Color.white));
+                                            });
+
+                                            if(++col % 7 == 0){
+                                                unitlist.row();
+                                            }
+
+                                            if(!firstCommand){
+                                                commands.add(type.commands);
+                                                firstCommand = true;
+                                            }else{
+                                                //remove commands that this next unit type doesn't have
+                                                commands.removeAll(com -> !Structs.contains(type.commands, com));
+                                            }
+                                        }
+                                    }
+
+                                    if(commands.size > 1){
+                                        u.row();
+
+                                        u.table(coms -> {
+                                            for(var command : commands){
+                                                coms.button(Icon.icons.get(command.icon, Icon.cancel), Styles.clearNoneTogglei, () -> {
+                                                    IntSeq ids = new IntSeq();
+                                                    for(var unit : units){
+                                                        ids.add(unit.id);
+                                                    }
+
+                                                    Call.setUnitCommand(Vars.player, ids.toArray(), command);
+                                                }).checked(i -> currentCommand[0] == command).size(50f).tooltip(command.localized());
+                                            }
+                                        }).fillX().padTop(4f).left();
+                                    }
+                                }else{
+                                    u.add("[未选择单位]").color(getThemeColor()).growX().center().labelAlign(Align.center).pad(6);
+                                }
+                            };
+
+                            u.update(() -> {
+                                boolean hadCommand = false;
+                                UnitCommand shareCommand = null;
+
+                                //find the command that all units have, or null if they do not share one
+                                for(var unit : control.input.selectedUnits){
+                                    if(unit.isCommandable()){
+                                        var nextCommand = unit.command().currentCommand();
+
+                                        if(hadCommand){
+                                            if(shareCommand != nextCommand){
+                                                shareCommand = null;
+                                            }
+                                        }else{
+                                            shareCommand = nextCommand;
+                                            hadCommand = true;
+                                        }
+                                    }
+                                }
+
+                                currentCommand[0] = shareCommand;
+
+                                int size = control.input.selectedUnits.size;
+                                if(curCount[0] != size){
+                                    curCount[0] = size;
+                                    rebuildCommand.run();
+                                }
+                            });
+                            rebuildCommand.run();
+                        }).grow();
+
                 }
 
                 //blockCatTable: all blocks | all categories

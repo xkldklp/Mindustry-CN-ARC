@@ -7,6 +7,9 @@ import arc.math.*;
 import arc.util.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
+import mindustry.type.UnitType;
+
+import static mindustry.arcModule.RFuncs.abilitysFormat;
 
 public class ArmorPlateAbility extends Ability{
     public TextureRegion plateRegion;
@@ -16,6 +19,11 @@ public class ArmorPlateAbility extends Ability{
     public float z = Layer.effect;
 
     protected float warmup;
+
+    @Override
+    public String description(UnitType unit){
+        return abilitysFormat("+@%额外血量", healthMultiplier * 100f);
+    }
 
     @Override
     public void update(Unit unit){

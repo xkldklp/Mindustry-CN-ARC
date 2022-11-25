@@ -78,7 +78,7 @@ public class SchematicsDialog extends BaseDialog{
         shouldPause = true;
         addCloseButton();
         buttons.button("@schematic.import", Icon.download, this::showImport);
-        buttons.row();
+        if (mobile) buttons.row();
         buttons.button("[cyan]蓝图档案馆", Icon.link, () -> {
             if(!Core.app.openURI(blueprintlink)){
                 ui.showErrorMessage("@linkfail");

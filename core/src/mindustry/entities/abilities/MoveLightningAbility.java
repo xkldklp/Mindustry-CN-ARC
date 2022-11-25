@@ -10,6 +10,9 @@ import mindustry.content.*;
 import mindustry.entities.*;
 import mindustry.entities.bullet.*;
 import mindustry.gen.*;
+import mindustry.type.UnitType;
+
+import static mindustry.arcModule.RFuncs.abilitysFormat;
 
 public class MoveLightningAbility extends Ability{
     /** Lightning damage */
@@ -63,7 +66,15 @@ public class MoveLightningAbility extends Ability{
         this.maxSpeed = maxSpeed;
         this.color = color;
     }
-    
+    @Override
+    public String description(UnitType unit){
+        return abilitysFormat("闪电@概率~@伤害~@长度 @x速度",
+                chance * 100,
+                damage,
+                length,
+                maxSpeed
+        );
+    }
     @Override
     public void update(Unit unit){
         float scl = Mathf.clamp((unit.vel().len() - minSpeed) / (maxSpeed - minSpeed));

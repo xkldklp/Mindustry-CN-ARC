@@ -37,4 +37,13 @@ public class ShootMulti extends ShootPattern{
             }
         });
     }
+
+    @Override
+    public int totalShots() {
+        int total = 0;
+        for (ShootPattern p : dest) {
+            total += p.totalShots();
+        }
+        return total * source.totalShots();
+    }
 }

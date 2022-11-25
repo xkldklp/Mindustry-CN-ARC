@@ -1,13 +1,14 @@
 package mindustry.entities.abilities;
 
-import arc.*;
 import arc.math.*;
 import arc.util.*;
-import mindustry.Vars;
 import mindustry.content.*;
 import mindustry.entities.*;
 import mindustry.gen.*;
 import mindustry.type.*;
+
+import static mindustry.Vars.tilesize;
+import static mindustry.arcModule.RFuncs.abilitysFormat;
 
 public class StatusFieldAbility extends Ability{
     public StatusEffect effect;
@@ -30,8 +31,14 @@ public class StatusFieldAbility extends Ability{
     }
 
     @Override
-    public String localized(){
-        return "能力场："+effect.localizedName+effect.emoji()+"[lightgray]~[stat]"+Strings.autoFixed(range / Vars.tilesize,2)+"[lightgray]格~[stat]"+Strings.autoFixed(duration/60f,2)+"[lightgray]时长(s)~[stat]"+Strings.autoFixed(reload/60f,2)+"[lightgray]频率(s)";
+    public String description(UnitType unit){
+        return abilitysFormat("@s~@格~@s@@",
+                reload / 60f,
+                range / tilesize,
+                duration / 60f,
+                effect.localizedName,
+                effect.emoji()
+        );
     }
 
     @Override

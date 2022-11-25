@@ -1,3 +1,87 @@
+[cyan]------------------------[v140.3-11/11]---------------------------
+7.0, an update that has been in development for more than 1.5 years, is finally here.
+
+As with earlier major updates, there are too many changes to list in a single changelog - these are just the highlights.
+
+An entirely new planet - Erekir - with its own campaign, tech tree, units and blocks
+100+ new blocks to research
+18 new units for Erekir, 5 new naval support units on Serpulo
+Tanks, hovercrafts, insectoid walkers and more
+10 new turrets
+Entire new systems for transporting power and items on Erekir
+A new, more direct system of commanding units to move to specific locations and attack enemies
+Special thanks to the community members who helped create maps for use in the campaign:
+
+Mechanicalfish
+ThatOneBepis
+hhhi17
+Note: Server-wise, this release should be compatible with beta 140.x versions.
+
+
+[cyan]------------------------[v140.2-11/9]---------------------------
+This is a minor bugfix patch, intended to be the last beta release before 7.0 is fully available.
+
+Fixed minimap block colors not updating on servers with fog enabled
+Fixed some screen bounds issues on mobile
+Fixed some unit targeting issues relating to fog
+Fixed units piling up at last core in Origin sector
+Fixed coastline unlocking too early on Serpulo
+Minor improvements to campaign completion dialog
+Added basic descriptions to Coastline/Naval Fortress
+Made canvas blocks blend together seamlessly
+Various improvements to display of stats/multipliers (Contributed by @MEEPofFaith)
+
+[cyan]------------------------[v140.1-11/3]---------------------------
+This is a hotfix for block targeting and Steam achievements.
+
+Fixed blocks on Serpulo not being targeted by units/turrets
+Fixed ability descriptions for some Erekir units
+Fixed several Steam achievements not triggering correctly
+Fixed various crafter lights flickering
+Fixed BuildingBulletDestroyEvent not firing (API fix)
+Buffed Shockwave Tower range and reload slightly
+API change: Removed GameState.serverPaused, you can set to State.paused instead now
+Removed screenshots from game data export
+Added heat icon to stats for easier differentiation
+Added extra hint about building cores to Basin nuke warning
+
+[cyan]------------------------[v140-11/1]---------------------------
+This version can be considered a pre-release. The Erekir campaign is complete, and now has a final sector.
+With the release in 10 or so days, all that remains is bugfixes and balancing.
+
+Fixed canvas being available on Serpulo
+Fixed RTS AI targeting unreachable locations and thus piling up units more than necessary
+Fixed tanks not applying crush damage on servers
+Made RTS AI target more structure types
+Made Scathe turret only reveal fog in a fraction of its range - a spotter is required for more range
+Made tank assembler require cyanogen
+Hosts can now pause in multiplayer (this does not affect headless servers)
+Misc unit balance
+Decreased cost of T2/3 Erekir cores significantly
+:emojis: for blocks in chat now automatically get replaced when typing on desktop (try :router:)
+Added new achievements - these have NOT been tested yet, and some will be broken! [Steam]
+Added 'rebuild selection' key - holding B (default) and dragging in an area will add ghost blocks to your build queue (Desktop only)
+Added a packet rate limit for servers - sending packets too fast will get you blocked/kicked
+Added a default max player limit for servers
+Added a message block for Erekir (yes it's literally just a recolor, I had no better ideas)
+Added a unbreakable message block for mapmakers
+Added a keybind to select all units while in command mode (G by default)
+Added support for selecting multiple unit factories at once (still no area selection yet)
+Stretched out 'landing' sound to sync with core landing - yes, very lazy, I wil make a new one at some point
+Increased speed of block constructors slightly
+Campaign:
+
+Improved hints for Onset
+Reduced research costs for most blocks
+Added neoplasm to tech tree
+Fixed objectives still continuing after capture
+Fixed sectors across Erekir/Serpulo updating or preventing launch when they shouldn't
+Added 'abandon' button in pause menu for easier access
+Added Ground Zero tutorial (Original implementation by @MEEPofFaith)
+Added several new Erekir maps
+Added (WIP) final map completion dialog
+Removed Interplanetary Accelerator from Serpulo research (it has no use)
+
 [cyan]------------------------[v139-10/5]---------------------------
 v7 is now moving into the beta stage. The campaign system has been (mostly) stabilized, and all that remains in terms of content is approximately 5 more Erekir maps.
 

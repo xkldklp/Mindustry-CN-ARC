@@ -88,9 +88,9 @@ public class UnitFactory extends UnitBlock{
             if (e.currentPlan == -1){
                 return new Bar(Iconc.units + "[red] " + Iconc.cancel, Pal.ammo, e::fraction);
             }
-             return new Bar(() -> Iconc.units + " " + Strings.fixed(e.progress * 100f / plans.get(e.currentPlan).time, 0) +  "% | " +
+             return new Bar(() -> e.currentPlan == -1 ? "[red] X" : (Iconc.units + " " + Strings.fixed(e.progress * 100f / plans.get(e.currentPlan).time, 0) +  "% | " +
                      Strings.fixed((plans.get(e.currentPlan).time - e.progress) / (60f * Vars.state.rules.unitBuildSpeed(e.team) * e.timeScale()), 0) + " s"
-                     , () -> Pal.ammo, e::fraction
+                    ), () -> Pal.ammo, e::fraction
 
         );
         });
@@ -132,7 +132,7 @@ public class UnitFactory extends UnitBlock{
                     }
 
                     if(plan.unit.unlockedNow()){
-                        t.image(plan.unit.uiIcon).size(40).pad(10f).left();
+                        t.image(plan.unit.uiIcon).size(40).pad(10f).left().scaling(Scaling.fit);
                         t.table(info -> {
                             info.add(plan.unit.localizedName).left();
                             info.row();

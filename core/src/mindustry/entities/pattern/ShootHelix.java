@@ -14,4 +14,9 @@ public class ShootHelix extends ShootPattern{
             }
         }
     }
+
+    @Override
+    public int totalShots() {
+        return shots * 2;
+    }
 }

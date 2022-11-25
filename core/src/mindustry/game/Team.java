@@ -21,7 +21,6 @@ public class Team implements Comparable<Team>{
     public String emoji = "";
     public boolean hasPalette;
     public String name;
-    public static int moreCustomTeam = Math.max(Core.settings.getInt("moreCustomTeam"),6);
 
     /** All 256 registered teams. */
     public static final Team[] all = new Team[256];

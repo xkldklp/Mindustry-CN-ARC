@@ -355,7 +355,6 @@ public class SettingsMenuDialog extends BaseDialog{
             game.checkPref("crashreport", true);
         }
 
-        game.sliderPref("moreCustomTeam", 6, 6, 256, 1, i -> i + "");
         game.sliderPref("maxSchematicSize",32,32,500,1, String::valueOf);
         game.checkPref("savecreate", true);
         game.checkPref("blockreplace", true);
@@ -574,7 +573,7 @@ public class SettingsMenuDialog extends BaseDialog{
         arc.checkPref("unitLogicTimerBars", false);
 
         arc.addCategory("arcRTSSupporter");
-        if(mobile) arc.checkPref("mobileCommandMode",true);
+        arc.checkPref("arcCommandTable",true);
         arc.checkPref("alwaysShowUnitRTSAi",false);
         arc.sliderPref("rtsWoundUnit",0, 0, 100, 2, s -> s+ "%");
 
@@ -591,7 +590,7 @@ public class SettingsMenuDialog extends BaseDialog{
         arc.checkPref("arcShareWaveInfo", false);
         arc.checkPref("arcAlwaysTeamColor",false);
 
-        arc.addCategory("arcCPlayerEffect");
+        arc.addCategory("arcPlayerEffect");
         arc.stringInput("playerEffectColor", "ffd37f");
         arc.sliderPref("unitTargetType", 0, 0, 5, 1, s -> {
             if(s==0){return "关闭";}
@@ -609,6 +608,17 @@ public class SettingsMenuDialog extends BaseDialog{
             else{return s+"";}
         });
         arc.sliderPref("playerEffectCurStroke", 0, 1, 30, 1, i -> (float)i/10f + "Pixel(s)");
+
+        arc.addCategoryS("雷达扫描设置 [lightgray](PC按键，手机辅助器)");
+        arc.sliderPref("radarMode",0, 0, 30, 1, s -> {
+            if(s==0)    return "关闭";
+            else if(s==30)  return "一键开关";
+            else{return "[lightgray]x[white]" + Strings.autoFixed(s * 0.2f,1) +"倍搜索";}
+        });
+        arc.sliderPref("radarSize",0, 0, 50, 1, s -> {
+            if(s==0)    return "固定大小";
+            else{return "[lightgray]x[white]" + Strings.autoFixed(s * 0.1f,1) +"倍";}
+        });
 
         arc.addCategory("developerMode");
         arc.checkPref("arcDisableModWarning",false);
@@ -689,7 +699,7 @@ public class SettingsMenuDialog extends BaseDialog{
         specmode.sliderPref("editorBrush",4,3,12,i->i+"");
         specmode.checkPref("autoSelSchematic",false);
         specmode.checkPref("researchViewer",false);
-        specmode.checkPref("atriVoice",false);
+        //specmode.checkPref("atriVoice",false);
         specmode.checkPref("developMode", false);
         //////////cheating
         cheating.addCategory("arcWeakCheat");
@@ -710,7 +720,6 @@ public class SettingsMenuDialog extends BaseDialog{
         files.add(Core.settings.getSettingsFile());
         files.addAll(customMapDirectory.list());
         files.addAll(saveDirectory.list());
-        files.addAll(screenshotDirectory.list());
         files.addAll(modDirectory.list());
         files.addAll(schematicDirectory.list());
         String base = Core.settings.getDataDirectory().path();
@@ -862,6 +871,11 @@ public class SettingsMenuDialog extends BaseDialog{
 
         public void addCategory(String name){
             list.add(new Divider(name, bundle.get("category." + name + ".name")));
+            rebuild();
+        }
+
+        public void addCategoryS(String name){
+            list.add(new Divider(name, name));
             rebuild();
         }
 

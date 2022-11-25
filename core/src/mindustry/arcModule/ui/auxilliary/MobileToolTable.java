@@ -6,6 +6,7 @@ import arc.graphics.g2d.*;
 import arc.scene.style.*;
 import arc.scene.ui.*;
 import mindustry.arcModule.*;
+import mindustry.arcModule.toolpack.arcScanner;
 import mindustry.content.*;
 import mindustry.gen.*;
 
@@ -54,6 +55,10 @@ public class MobileToolTable extends BaseToolsTable{
             if(build != null && player.unit().team() == build.team && build.canControlSelect(player.unit())){
                 Call.unitBuildingControlSelect(player.unit(), build);
             }
+        });
+
+        toolButton(Blocks.radar.uiIcon, "雷达扫描", () -> {
+            arcScanner.mobileRadar = !arcScanner.mobileRadar;
         });
     }
 

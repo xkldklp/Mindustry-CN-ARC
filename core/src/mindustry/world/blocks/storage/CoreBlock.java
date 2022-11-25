@@ -72,6 +72,7 @@ public class CoreBlock extends StorageBlock{
         player.set(entity);
 
         if(!net.client()){
+            player.team(tile.team());
             Unit unit = block.unitType.create(tile.team());
             unit.set(entity);
             unit.rotation(90f);

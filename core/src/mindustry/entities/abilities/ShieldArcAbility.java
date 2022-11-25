@@ -14,6 +14,9 @@ import mindustry.graphics.*;
 import mindustry.type.*;
 import mindustry.ui.*;
 
+import static mindustry.Vars.tilesize;
+import static mindustry.arcModule.RFuncs.abilitysFormat;
+
 public class ShieldArcAbility extends Ability{
     private static Unit paramUnit;
     private static ShieldArcAbility paramField;
@@ -67,8 +70,13 @@ public class ShieldArcAbility extends Ability{
     protected float widthScale, alpha;
 
     @Override
-    public String localized(){
-        return "盾场：[stat]"+max+"[lightgray]盾容";
+    public String description(UnitType unit){
+        return abilitysFormat("@盾容~@格~@恢复~@s冷却",
+                max,
+                radius / tilesize,
+                regen * 60f,
+                cooldown / 60f
+                );
     }
 
     @Override

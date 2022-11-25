@@ -6,6 +6,7 @@ import arc.math.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
 import arc.util.io.*;
+import mindustry.annotations.Annotations.*;
 import mindustry.entities.units.*;
 import mindustry.gen.*;
 import mindustry.type.*;
@@ -17,6 +18,7 @@ import arc.*;
 import static mindustry.Vars.*;
 
 public class Sorter extends Block{
+    public @Load(value = "@-cross", fallback = "cross-full") TextureRegion cross;
     public boolean invert;
 
     public Sorter(String name){
@@ -72,7 +74,7 @@ public class Sorter extends Block{
         public void draw(){
 
             if(sortItem == null){
-                Draw.rect("cross-full", x, y);
+                Draw.rect(cross, x, y);
             }else{
                 Draw.color(sortItem.color);
                 Fill.square(x, y, tilesize/2f - 0.00001f);

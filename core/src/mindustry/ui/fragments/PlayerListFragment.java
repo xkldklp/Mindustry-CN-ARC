@@ -28,6 +28,8 @@ public class PlayerListFragment{
     private TextField search;
     public Seq<Player> players = new Seq<>();
 
+    private float buttonSize = 30f;
+
     public void build(Group parent){
         content.name = "players";
         parent.fill(cont -> {
@@ -155,29 +157,26 @@ public class PlayerListFragment{
 
             if (Core.settings.getBool("arcWayzerServerMode")){
                 button.add(iconTable).size(h);
-                if (Core.settings.getBool("cheating_mode")){
-                    button.labelWrap("[" + user.id + "] ").minWidth(150f);
-                }
                 button.image(Icon.admin).visible(() -> user.admin && !(!user.isLocal() && net.server())).size(bs).get().updateVisibility();
                 button.table(
-                    t -> {
-                        t.labelWrap("[#" + user.color().toString().toUpperCase() + "]" + user.name()).minWidth(300f);
-                        t.touchable = Touchable.enabled;
-                        t.tapped(()->{
-                            Core.app.setClipboardText(user.name);
-                            ui.arcInfo("复制昵称：" + user.name);
-                        });
-                    }
-                ).width(320f).pad(10f).left();
+                        t -> {
+                            t.labelWrap("[#" + user.color().toString().toUpperCase() + "]" + user.name()).minWidth(300f);
+                            t.touchable = Touchable.enabled;
+                            t.tapped(()->{
+                                Core.app.setClipboardText(user.name);
+                                ui.arcInfo("复制昵称：" + user.name);
+                            });
+                        }
+                ).width(400f).pad(10f).left();
 
                 button.add().grow();
 
-                button.button(Icon.link, Styles.clearNonei, () -> {
+                button.button(String.valueOf(Iconc.link), Styles.cleart, () -> {
                     String message = arcAtPlayer(user.name);
                     Call.sendChatMessage(message);
-                });
+                }).size(buttonSize);
 
-                button.button(Icon.lock, Styles.clearTogglei, () -> {
+                button.button(String.valueOf(Iconc.lock), Styles.cleart, () -> {
                     if(follow != user){
                         follow = user;
                     }else {
@@ -189,25 +188,26 @@ public class PlayerListFragment{
                     }
                 }).checked(b -> {
                     boolean checked = follow == user;
-                    b.getStyle().imageUp = checked ? Icon.lock : Icon.lockOpen;
-                    b.getStyle().up = Styles.none;
+                    b.setText(checked ? String.valueOf(Iconc.lock) : String.valueOf(Iconc.lockOpen));
                     return checked;
-                });
+                }).size(buttonSize);
+
+                button.button("[coral]" + Iconc.planeOutline, Styles.cleart,
+                        () -> {
+                            ui.showConfirm("@confirm", Core.bundle.format("confirmvotekick",  user.name()), () -> {
+                                Call.sendChatMessage("/votekick " + user.name());
+                            });
+                        }).size(buttonSize);
+
+                if((net.server() || player.admin) && !user.isLocal() && (!user.admin || net.server())){
+                    button.button("[gold]" + Iconc.zoom, Styles.cleart, () -> Call.adminRequest(user, AdminAction.trace)).size(buttonSize);
+                    button.button("[gold]" + Iconc.cancel, Styles.cleart,
+                            () -> ui.showConfirm("@confirm", Core.bundle.format("confirmkick",  user.name()), () -> Call.adminRequest(user, AdminAction.kick))).size(buttonSize);
+                    button.button("[gold]" + Iconc.hammer, Styles.cleart,
+                            () -> ui.showConfirm("@confirm", Core.bundle.format("confirmban",  user.name()), () -> Call.adminRequest(user, AdminAction.ban))).size(buttonSize);
+                }
 
 
-                button.button(Icon.hammer, ustyle,
-                () -> {
-                    ui.showConfirm("@confirm", Core.bundle.format("confirmvotekick",  user.name()), () -> {
-                        Call.sendChatMessage("/votekick " + user.name());
-                    });
-                }).size(h);
-
-                button.button(Icon.hammer, ustyle, () -> 
-                        ui.showConfirm("@confirm", Core.bundle.format("confirmban",  user.name()), () -> Call.adminRequest(user, AdminAction.ban)));
-                button.button(Icon.cancel, ustyle, () -> 
-                        ui.showConfirm("@confirm", Core.bundle.format("confirmkick",  user.name()), () -> Call.adminRequest(user, AdminAction.kick)));
-                button.button(Icon.zoom, ustyle, () -> Call.adminRequest(user, AdminAction.trace));
-                
             }
             //原版模式
             else{
@@ -223,44 +223,44 @@ public class PlayerListFragment{
                     button.table(t -> {
                         t.defaults().size(bs);
 
-                    t.button(Icon.hammerSmall, ustyle,
-                    () -> ui.showConfirm("@confirm", Core.bundle.format("confirmban",  user.name()), () -> Call.adminRequest(user, AdminAction.ban)));
-                    t.button(Icon.cancelSmall, ustyle,
-                    () -> ui.showConfirm("@confirm", Core.bundle.format("confirmkick",  user.name()), () -> Call.adminRequest(user, AdminAction.kick)));
+                        t.button(Icon.hammerSmall, ustyle,
+                                () -> ui.showConfirm("@confirm", Core.bundle.format("confirmban",  user.name()), () -> Call.adminRequest(user, AdminAction.ban)));
+                        t.button(Icon.cancelSmall, ustyle,
+                                () -> ui.showConfirm("@confirm", Core.bundle.format("confirmkick",  user.name()), () -> Call.adminRequest(user, AdminAction.kick)));
 
-                    t.row();
+                        t.row();
 
-                    t.button(Icon.adminSmall, style, () -> {
-                        if(net.client()) return;
+                        t.button(Icon.adminSmall, style, () -> {
+                                    if(net.client()) return;
 
-                            String id = user.uuid();
+                                    String id = user.uuid();
 
-                            if(user.admin){
-                                ui.showConfirm("@confirm", Core.bundle.format("confirmunadmin",  user.name()), () -> {
-                                    netServer.admins.unAdminPlayer(id);
-                                    user.admin = false;
-                                });
-                            }else{
-                                ui.showConfirm("@confirm", Core.bundle.format("confirmadmin",  user.name()), () -> {
-                                    netServer.admins.adminPlayer(id, user.usid());
-                                    user.admin = true;
-                                });
-                            }
-                        }).update(b -> b.setChecked(user.admin))
-                            .disabled(b -> net.client())
-                            .touchable(() -> net.client() ? Touchable.disabled : Touchable.enabled)
-                            .checked(user.admin);
+                                    if(user.admin){
+                                        ui.showConfirm("@confirm", Core.bundle.format("confirmunadmin",  user.name()), () -> {
+                                            netServer.admins.unAdminPlayer(id);
+                                            user.admin = false;
+                                        });
+                                    }else{
+                                        ui.showConfirm("@confirm", Core.bundle.format("confirmadmin",  user.name()), () -> {
+                                            netServer.admins.adminPlayer(id, user.usid());
+                                            user.admin = true;
+                                        });
+                                    }
+                                }).update(b -> b.setChecked(user.admin))
+                                .disabled(b -> net.client())
+                                .touchable(() -> net.client() ? Touchable.disabled : Touchable.enabled)
+                                .checked(user.admin);
 
-                    t.button(Icon.zoomSmall, ustyle, () -> Call.adminRequest(user, AdminAction.trace));
+                        t.button(Icon.zoomSmall, ustyle, () -> Call.adminRequest(user, AdminAction.trace));
 
                     }).padRight(12).size(bs + 10f, bs);
                 }else if(!user.isLocal() && !user.admin && net.client() && Groups.player.size() >= 3 && player.team() == user.team()){ //votekick
                     button.add().growY();
 
-                button.button(Icon.hammer, ustyle,
-                    () -> ui.showConfirm("@confirm", Core.bundle.format("confirmvotekick",  user.name()),
-                    () -> Call.sendChatMessage("/votekick #" + user.id)))
-                .size(h);
+                    button.button(Icon.hammer, ustyle,
+                                    () -> ui.showConfirm("@confirm", Core.bundle.format("confirmvotekick",  user.name()),
+                                            () -> Call.sendChatMessage("/votekick #" + user.id)))
+                            .size(h);
                 }
             }
             content.add(button).padBottom(-6).width(700f).maxHeight(h + 14);

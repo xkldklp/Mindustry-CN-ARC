@@ -28,7 +28,6 @@ import static mindustry.Vars.*;
 import static arc.Core.bundle;
 import static arc.Core.settings;
 import static mindustry.gen.Tex.*;
-import static mindustry.gen.Tex.button;
 import static mindustry.ui.Styles.flatDown;
 import static mindustry.ui.Styles.flatOver;
 
@@ -109,20 +108,15 @@ public class HudSettingsTable extends Table{
             ScrollPane pane = pane(sp -> {
                 sp.background(Styles.black6);
                 sp.table(t -> {
-                    t.button("[cyan]S",NCtextStyle, () ->{
-                        Call.sendChatMessage("/sync");
-                    }).size(30,30).name("sync").tooltip("sync");
-                    t.button("[cyan]观",NCtextStyle, () -> {
-                        Call.sendChatMessage("/ob");
-                    }).size(30,30).name("ob").tooltip("观察者模式");
-                    t.button("[cyan]版",NCtextStyle, () -> {
-                        Call.sendChatMessage("/broad");
-                    }).size(30,30).tooltip("服务器信息版");
+                    t.button("[cyan]S",NCtextStyle, () -> Call.sendChatMessage("/sync")).size(30).tooltip("同步一波");
+                    t.button("[cyan]观",NCtextStyle, () -> Call.sendChatMessage("/ob")).size(30).tooltip("观察者模式");
+                    t.button("[cyan]技",NCtextStyle, () -> Call.sendChatMessage("/skill")).size(30).tooltip("技能！");
+                    t.button("[cyan]版",NCtextStyle, () -> Call.sendChatMessage("/broad")).size(30).tooltip("服务器信息版");
                     t.button("[red]版",textStyle, () -> {
                         Core.settings.put("ShowInfoPopup", !Core.settings.getBool("ShowInfoPopup"));
                     }).checked(a->Core.settings.getBool("ShowInfoPopup")).size(30,30).tooltip("关闭所有信息版");
                     t.button("[white]法",NCtextStyle, () -> {ui.showConfirm("受不了，直接投降？",()->Call.sendChatMessage("/vote gameover"));
-                    }).size(30,30).tooltip("法国模式");
+                    }).size(30,30).tooltip("法国军礼");
                 }).left();
                 sp.row();
                 sp.table(t -> {

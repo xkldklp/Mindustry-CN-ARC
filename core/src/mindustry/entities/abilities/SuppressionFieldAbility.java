@@ -1,14 +1,16 @@
 package mindustry.entities.abilities;
 
-import arc.Core;
 import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.math.*;
 import arc.util.*;
-import mindustry.Vars;
 import mindustry.entities.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
+import mindustry.type.UnitType;
+
+import static mindustry.Vars.tilesize;
+import static mindustry.arcModule.RFuncs.abilitysFormat;
 
 public class SuppressionFieldAbility extends Ability{
     protected static Rand rand = new Rand();
@@ -46,8 +48,11 @@ public class SuppressionFieldAbility extends Ability{
     }
 
     @Override
-    public String localized(){
-        return active?"压制场: [stat]"+Strings.autoFixed(range/Vars.tilesize,2)+"[lightgray]范围~[stat]"+Strings.autoFixed(reload/60f,2)+"[lightgray]频率(s)":"";
+    public String description(UnitType unit){
+        return abilitysFormat("@s~@格",
+                reload / 60f,
+                range / tilesize
+        );
     }
 
     @Override

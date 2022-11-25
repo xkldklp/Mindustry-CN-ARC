@@ -2,17 +2,17 @@ package mindustry.arcModule;
 
 import arc.Core;
 import arc.graphics.Color;
-import arc.graphics.g2d.Draw;
-import arc.graphics.g2d.Font;
-import arc.graphics.g2d.GlyphLayout;
-import arc.graphics.g2d.Lines;
+import arc.graphics.g2d.*;
+import arc.math.Mathf;
 import arc.scene.ui.layout.Scl;
 import arc.util.Align;
+import arc.util.Strings;
 import arc.util.pooling.Pools;
 import mindustry.entities.Effect;
 import mindustry.gen.Building;
 import mindustry.graphics.Pal;
 import mindustry.ui.Fonts;
+import mindustry.world.Tile;
 import mindustry.world.blocks.defense.MendProjector;
 import mindustry.world.blocks.defense.OverdriveProjector;
 import mindustry.world.blocks.defense.Radar;
@@ -21,8 +21,7 @@ import mindustry.world.blocks.storage.CoreBlock;
 
 import static arc.graphics.g2d.Draw.color;
 import static arc.graphics.g2d.Lines.stroke;
-import static mindustry.Vars.getThemeColor;
-import static mindustry.Vars.tilesize;
+import static mindustry.Vars.*;
 
 public class DrawUtilities {
     /**

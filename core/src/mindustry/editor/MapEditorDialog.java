@@ -16,6 +16,7 @@ import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
 import mindustry.*;
+import mindustry.arcModule.ui.dialogs.TeamSelectDialog;
 import mindustry.content.*;
 import mindustry.core.GameState.*;
 import mindustry.game.*;
@@ -469,7 +470,7 @@ public class MapEditorDialog extends Dialog implements Disposable{
     }
 
     public void build(){
-        float size = 58f;
+        float size = mobile ? 50f : 58f;
 
         clearChildren();
         table(cont -> {
@@ -625,9 +626,11 @@ public class MapEditorDialog extends Dialog implements Disposable{
                             t.button(String.format("[#%s]%s", team.color, team.localized()), flatToggleMenut, () -> editor.drawTeam = team)
                                     .checked(b -> editor.drawTeam == team).size(30f, 30f);*/
                         }
-                        t.button("[violet]+", flatToggleMenut, this::teamSelectMenu).
-                                checked(b -> !Arrays.asList(Team.baseTeams).contains(editor.drawTeam)
-                                ).tooltip("[acid]更多队伍选择").size(30f, 30f);
+                        t.button("[violet]+", flatToggleMenut, () -> {
+                            new TeamSelectDialog(team -> editor.drawTeam = team, editor.drawTeam).show();
+                        }).checked(b -> {
+                            return !Seq.with(Team.baseTeams).contains(editor.drawTeam);
+                        }).tooltip("[acid]更多队伍选择").size(30f, 30f);
                     });
                     to.row();
 

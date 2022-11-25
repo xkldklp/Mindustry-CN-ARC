@@ -6,6 +6,9 @@ import mindustry.*;
 import mindustry.gen.*;
 import mindustry.type.*;
 
+import static mindustry.Vars.tilesize;
+import static mindustry.arcModule.RFuncs.abilitysFormat;
+
 /** Spawns a certain amount of units upon death. */
 public class SpawnDeathAbility extends Ability{
     public UnitType unit;
@@ -24,6 +27,24 @@ public class SpawnDeathAbility extends Ability{
     public SpawnDeathAbility(){
     }
 
+    @Override
+    public String description(UnitType unit){
+        if (randAmount > 0) {
+            return abilitysFormat("(@~@)@@~@格",
+                    amount,
+                    amount + randAmount,
+                    this.unit.localizedName,
+                    this.unit.emoji(),
+                    spread / tilesize
+            );
+        }
+        return abilitysFormat("@@@~@格",
+                amount,
+                this.unit.localizedName,
+                this.unit.emoji(),
+                spread / tilesize
+        );
+    }
     @Override
     public void death(Unit unit){
         if(!Vars.net.client()){

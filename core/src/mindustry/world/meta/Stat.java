@@ -14,6 +14,7 @@ public class Stat implements Comparable<Stat>{
     health = new Stat("health"),
     armor = new Stat("armor"),
     size = new Stat("size"),
+    unitrange = new Stat("unitrange"),
     displaySize = new Stat("displaySize"),
     buildTime = new Stat("buildTime"),
     buildCost = new Stat("buildCost"),
@@ -80,9 +81,11 @@ public class Stat implements Comparable<Stat>{
     payloadCapacity = new Stat("payloadCapacity", StatCat.support),
 
     abilities = new Stat("abilities", StatCat.combat),
-    unitrange = new Stat("weapons", StatCat.combat),
     weapons = new Stat("weapons", StatCat.combat),
     bullet = new Stat("bullet", StatCat.combat),
+    estimateDPS = new Stat("estimateDPS", StatCat.combat),
+    aiController = new Stat("aiController", StatCat.combat),
+    targets = new Stat("targets", StatCat.combat),
     ammoType = new Stat("ammoType", StatCat.combat),
     ammoCapacity = new Stat("ammoCapacity", StatCat.combat),
 

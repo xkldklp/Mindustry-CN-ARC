@@ -11,7 +11,11 @@ import mindustry.*;
 import mindustry.content.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
+import mindustry.type.UnitType;
 import mindustry.ui.*;
+
+import static mindustry.Vars.tilesize;
+import static mindustry.arcModule.RFuncs.abilitysFormat;
 
 public class ForceFieldAbility extends Ability{
     /** Shield radius. */
@@ -54,8 +58,13 @@ public class ForceFieldAbility extends Ability{
     }
 
     @Override
-    public String localized(){
-        return "立场：[stat]"+max+"[lightgray]盾容~[stat]"+regen * 60f+"[lightgray]恢复~[stat]"+radius / Vars.tilesize+"[lightgray]格";
+    public String description(UnitType unit){
+        return abilitysFormat("@盾容~@格~@恢复~@s冷却",
+                max,
+                radius / tilesize,
+                regen * 60f,
+                cooldown / 60f
+                );
     }
 
     ForceFieldAbility(){}

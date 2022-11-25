@@ -30,6 +30,10 @@ public class ShootPattern implements Cloneable{
             throw new RuntimeException("impending doom", absurd);
         }
     }
+    //用于炮塔计算每次发射多少子弹
+    public int totalShots(){
+        return shots;
+    }
 
     public interface BulletHandler{
         /**

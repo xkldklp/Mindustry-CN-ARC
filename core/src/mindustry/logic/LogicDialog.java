@@ -33,6 +33,8 @@ public class LogicDialog extends BaseDialog{
     Table mainTable = new Table();
     public static boolean refreshing = true;
 
+    public static String transText = "";
+
     @Nullable LExecutor executor;
 
     public LogicDialog(){
@@ -269,13 +271,13 @@ public class LogicDialog extends BaseDialog{
         buttons.button("@variables", Icon.menu, () -> {
             BaseDialog dialog = new BaseDialog("@variables");
             dialog.hidden(() -> {
-                if(!wasPaused){
+                if(!wasPaused && !net.active()){
                     state.set(State.paused);
                 }
             });
 
             dialog.shown(() -> {
-                if(!wasPaused){
+                if(!wasPaused && !net.active()){
                     state.set(State.playing);
                 }
             });

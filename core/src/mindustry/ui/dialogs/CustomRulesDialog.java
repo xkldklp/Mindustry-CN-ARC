@@ -10,6 +10,7 @@ import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
 import mindustry.*;
+import mindustry.arcModule.ui.dialogs.TeamSelectDialog;
 import mindustry.content.*;
 import mindustry.ctype.*;
 import mindustry.game.*;
@@ -30,6 +31,8 @@ public class CustomRulesDialog extends BaseDialog{
     private Prov<Rules> resetter;
     private LoadoutDialog loadoutDialog;
 
+    private Seq<Team> teams;
+
     public CustomRulesDialog(){
         super("@mode.custom");
 
@@ -38,6 +41,8 @@ public class CustomRulesDialog extends BaseDialog{
         setFillParent(true);
         shown(this::setup);
         addCloseButton();
+
+        teams = Seq.with(Team.baseTeams);
     }
 
     private <T extends UnlockableContent> void showBanned(String title, ContentType type, ObjectSet<T> set, Boolf<T> pred){
@@ -181,8 +186,8 @@ public class CustomRulesDialog extends BaseDialog{
         check("@rules.unitcapvariable", b -> rules.unitCapVariable = b, () -> rules.unitCapVariable);
         numberi("@rules.unitcap", f -> rules.unitCap = f, () -> rules.unitCap, -999, 999);
         number("@rules.unitdamagemultiplier", f -> rules.unitDamageMultiplier = f, () -> rules.unitDamageMultiplier);
-        number("@rules.unitbuildspeedmultiplier", f -> rules.unitBuildSpeedMultiplier = f, () -> rules.unitBuildSpeedMultiplier, 0f, 500f);
-        number("@rules.unitcostmultiplier", f -> rules.unitCostMultiplier = f, () -> rules.unitCostMultiplier, 0f, 50f);
+        number("@rules.unitbuildspeedmultiplier", f -> rules.unitBuildSpeedMultiplier = f, () -> rules.unitBuildSpeedMultiplier, 0f, 50f);
+        number("@rules.unitcostmultiplier", f -> rules.unitCostMultiplier = f, () -> rules.unitCostMultiplier);
 
         main.button("@bannedunits", () -> showBanned("@bannedunits", ContentType.unit, rules.bannedUnits, u -> !u.isHidden())).left().width(300f).row();
         check("@bannedunits.whitelist", b -> rules.unitWhitelist = b, () -> rules.unitWhitelist);
@@ -260,6 +265,8 @@ public class CustomRulesDialog extends BaseDialog{
             for(Planet planet : new Planet[]{Planets.serpulo, Planets.erekir}){
                 t.button(planet.localizedName, style, () -> {
                     rules.env = planet.defaultEnv;
+                    rules.attributes.clear();
+                    rules.attributes.add(planet.defaultAttributes);
                     rules.hiddenBuildItems.clear();
                     rules.hiddenBuildItems.addAll(planet.hiddenItems);
                 }).group(group).checked(b -> rules.env == planet.defaultEnv);
@@ -282,15 +289,13 @@ public class CustomRulesDialog extends BaseDialog{
         title("@rules.title.teams");
 
         main.button("所有队伍开启无限火力", () -> {
-            for(int teamId =0;teamId<Core.settings.getInt("moreCustomTeam");teamId+=1){
-                Team team = Team.get(teamId);
+            for(Team team : Team.all){
                 team.rules().cheat = true;
             }
             setup();
         }).width(256f).height(32f).row();
         main.button("所有队伍关闭无限火力", () -> {
-            for(int teamId =0;teamId<Core.settings.getInt("moreCustomTeam");teamId+=1){
-                Team team = Team.get(teamId);
+            for(Team team : Team.all){
                 team.rules().cheat = false;
             }
             setup();
@@ -298,37 +303,46 @@ public class CustomRulesDialog extends BaseDialog{
 
         team("@rules.playerteam", t -> rules.defaultTeam = t, () -> rules.defaultTeam);
         team("@rules.enemyteam", t -> rules.waveTeam = t, () -> rules.waveTeam);
-        Team team;
-        for(int teamId =0;teamId<Core.settings.getInt("moreCustomTeam");teamId+=1){
-            team = Team.get(teamId);
+
+        main.button("更多队伍设置", Styles.flatBordert, () -> {
+            new TeamSelectDialog(team -> {
+                if(teams.contains(team)) teams.remove(team);
+                else teams.add(team);
+                setup();
+            }, team -> teams.contains(team), false).show();
+        }).marginLeft(14f).fillX().height(55f).row();
+
+        for(Team team : teams){
             boolean[] shown = {false};
             Table wasMain = main;
+
             main.button("[#" + team.color +  "]" + team.localized() + (team.emoji.isEmpty() ? "" : "[] " + team.emoji), Icon.downOpen, Styles.togglet, () -> {
                 shown[0] = !shown[0];
             }).marginLeft(14f).width(260f).height(55f).checked(a -> shown[0]).row();
 
-            Team finalTeam = team;
             main.collapser(t -> {
                 t.left().defaults().fillX().left().pad(5);
                 main = t;
-                TeamRule teams = rules.teams.get(finalTeam);
+                TeamRule teams = rules.teams.get(team);
 
-                check("@rules.aiCoreSpawn", b -> teams.aiCoreSpawn = b, () -> teams.aiCoreSpawn);
-                check("@rules.rtsai", b -> teams.rtsAi = b, () -> teams.rtsAi, () -> finalTeam != rules.defaultTeam);
-                numberi("@rules.rtsminsquadsize", f -> teams.rtsMinSquad = f, () -> teams.rtsMinSquad, () -> teams.rtsAi, 0, 1000);
-                numberi("@rules.rtsmaxsquadsize", f -> teams.rtsMaxSquad = f, () -> teams.rtsMaxSquad, () -> teams.rtsAi, 1, 10000);
-                number("@rules.rtsminattackweight", f -> teams.rtsMinWeight = f, () -> teams.rtsMinWeight, () -> teams.rtsAi);
                 check("@rules.cheat", b -> teams.cheat = b, () -> teams.cheat);
                 check("@rules.infiniteAmmo",b -> teams.infiniteAmmo = b, () -> teams.infiniteAmmo);
-                check("@rules.infiniteresources", b -> teams.infiniteResources = b, () -> teams.infiniteResources);
+                check("@rules.aiCoreSpawn", b -> teams.aiCoreSpawn = b, () -> teams.aiCoreSpawn);
 
-                number("@rules.buildspeedmultiplier", f -> teams.buildSpeedMultiplier = f, () -> teams.buildSpeedMultiplier, 0.001f, 500f);
                 number("@rules.blockhealthmultiplier", f -> teams.blockHealthMultiplier = f, () -> teams.blockHealthMultiplier);
                 number("@rules.blockdamagemultiplier", f -> teams.blockDamageMultiplier = f, () -> teams.blockDamageMultiplier);
-                number("@rules.unitdamagemultiplier", f -> teams.unitDamageMultiplier = f, () -> teams.unitDamageMultiplier);
-                number("@rules.unitbuildspeedmultiplier", f -> teams.unitBuildSpeedMultiplier = f, () -> teams.unitBuildSpeedMultiplier, 0.001f, 500f);
-                number("@rules.unitcostmultiplier", f -> teams.unitCostMultiplier = f, () -> teams.unitCostMultiplier);
 
+                check("@rules.rtsai", b -> teams.rtsAi = b, () -> teams.rtsAi, () -> team != rules.defaultTeam);
+                numberi("@rules.rtsminsquadsize", f -> teams.rtsMinSquad = f, () -> teams.rtsMinSquad, () -> teams.rtsAi, 0, 100);
+                numberi("@rules.rtsmaxsquadsize", f -> teams.rtsMaxSquad = f, () -> teams.rtsMaxSquad, () -> teams.rtsAi, 1, 1000);
+                number("@rules.rtsminattackweight", f -> teams.rtsMinWeight = f, () -> teams.rtsMinWeight, () -> teams.rtsAi);
+
+                check("@rules.infiniteresources", b -> teams.infiniteResources = b, () -> teams.infiniteResources);
+                number("@rules.buildspeedmultiplier", f -> teams.buildSpeedMultiplier = f, () -> teams.buildSpeedMultiplier, 0.001f, 50f);
+
+                number("@rules.unitdamagemultiplier", f -> teams.unitDamageMultiplier = f, () -> teams.unitDamageMultiplier);
+                number("@rules.unitbuildspeedmultiplier", f -> teams.unitBuildSpeedMultiplier = f, () -> teams.unitBuildSpeedMultiplier, 0.001f, 50f);
+                number("@rules.unitcostmultiplier", f -> teams.unitCostMultiplier = f, () -> teams.unitCostMultiplier);
                 main = wasMain;
             }, () -> shown[0]).growX().row();
         }
@@ -338,17 +352,17 @@ public class CustomRulesDialog extends BaseDialog{
         main.table(t -> {
             t.left();
             t.add(text).left().padRight(5);
-            int countTeams = 0;
-            Team team;
-            for(int teamId =0;teamId<Core.settings.getInt("moreCustomTeam");teamId+=1){
-                team = Team.get(teamId);
-                countTeams +=1;
-                if(countTeams%10==0)t.row();
-                Team finalTeam = team;
-                t.button(Tex.whiteui, Styles.clearTogglei, 38f, () -> {
-                    cons.get(finalTeam);
-                }).pad(1f).checked(b -> prov.get() == finalTeam).size(60f).tooltip(team.localized()).with(i -> i.getStyle().imageUpColor = finalTeam.color);
+
+            for(Team team : Team.baseTeams){
+                t.button(Tex.whiteui, Styles.squareTogglei, 38f, () -> {
+                    cons.get(team);
+                }).pad(1f).checked(b -> prov.get() == team).size(60f).tooltip(team.localized()).with(i -> i.getStyle().imageUpColor = team.color);
             }
+            t.button(Icon.add, Styles.squareTogglei, 38f, () -> {
+                new TeamSelectDialog(cons, prov.get()).show();
+            }).pad(1f).checked(b -> {
+                return !Seq.with(Team.baseTeams).contains(prov.get());
+            }).size(60f).tooltip("[acid]更多队伍选择");
         }).padTop(0).row();
     }
 
@@ -388,10 +402,10 @@ public class CustomRulesDialog extends BaseDialog{
         main.table(t -> {
             t.left();
             t.add(text).left().padRight(5)
-                .update(a -> a.setColor(condition.get() ? Color.white : Color.gray));
+            .update(a -> a.setColor(condition.get() ? Color.white : Color.gray));
             t.field((integer ? (int)prov.get() : prov.get()) + "", s -> cons.get(Strings.parseFloat(s)))
-                .padRight(100f)
-                .update(a -> a.setDisabled(!condition.get()))
+            .padRight(100f)
+            .update(a -> a.setDisabled(!condition.get()))
             //.valid(f -> Strings.canParsePositiveFloat(f) && Strings.parseFloat(f) >= min && Strings.parseFloat(f) <= max).width(120f).left();
             .valid(f ->  Strings.parseFloat(f) >= -Float.MAX_VALUE && Strings.parseFloat(f) <= Float.MAX_VALUE).width(120f).left();
         }).padTop(0);

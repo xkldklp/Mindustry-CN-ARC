@@ -9,6 +9,7 @@ import arc.struct.Seq;
 import arc.util.Strings;
 import arc.util.Time;
 import mindustry.Vars;
+import mindustry.arcModule.ui.dialogs.TeamSelectDialog;
 import mindustry.content.Blocks;
 import mindustry.content.UnitTypes;
 import mindustry.core.*;
@@ -69,7 +70,11 @@ public class OtherCoreItemDisplay extends Table {
                     }).size(40f).row();
 
                     buttons.button("T",textStyle, () -> {
-                        teamChangeMenu();
+                        new TeamSelectDialog(team -> {
+                            if(teams.contains(team.data())) teams.remove(team.data());
+                            else teams.add(team.data());
+                            teamsRebuild();
+                        }, team -> teams.contains(team.data()), false).show();
                     }).checked(gg->false).size(40f).row();
 
                     buttons.button(Blocks.worldProcessor.emoji(),textStyle, () -> {
@@ -94,36 +99,6 @@ public class OtherCoreItemDisplay extends Table {
     
             }).left();
         }
-    }
-
-    private void teamChangeMenu(){
-        BaseDialog dialog = new BaseDialog("队伍选择器");
-        Table selectTeam = new Table().top();
-
-        dialog.cont.pane(td -> {
-            for(Team team : Team.all){
-                if(team.id % 10 == 6){
-                    td.row();
-                    td.add("队伍：" + team.id + "~" + (team.id + 10));
-                }
-                ImageButton button = new ImageButton(Tex.whiteui, Styles.clearTogglei);
-                button.getStyle().imageUpColor = team.color;
-                button.margin(10f);
-                button.resizeImage(40f);
-                button.clicked(() -> {
-                    if(teams.contains(team.data())) teams.remove(team.data());
-                    else teams.add(team.data());
-                    teamsRebuild();
-                });
-                button.update(() -> button.setChecked(teams.contains(team.data())));
-                td.add(button);
-            }
-        });
-
-        dialog.add(selectTeam).center();
-        dialog.row();
-        dialog.addCloseButton();
-        dialog.show();
     }
 
     private void teamsRebuild(){

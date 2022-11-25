@@ -9,6 +9,7 @@ import mindustry.type.*;
 import mindustry.world.*;
 
 import static mindustry.Vars.*;
+import static mindustry.arcModule.RFuncs.abilitysFormat;
 
 public class LiquidRegenAbility extends Ability{
     public Liquid liquid;
@@ -17,6 +18,16 @@ public class LiquidRegenAbility extends Ability{
     public float slurpEffectChance = 0.4f;
     public Effect slurpEffect = Fx.heal;
 
+    @Override
+    public String description(UnitType unit){
+        return abilitysFormat("每格吸收@/s@@~@/s回血~最大@/s",
+                slurpSpeed,
+                liquid.localizedName,
+                liquid.emoji(),
+                slurpSpeed * regenPerSlurp,
+                Math.PI * Math.pow(Math.max(unit.hitSize / tilesize * 0.6f, 1), 2) * slurpSpeed * regenPerSlurp
+        );
+    }
     @Override
     public void update(Unit unit){
         //TODO timer?

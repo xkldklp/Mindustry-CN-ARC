@@ -1,10 +1,13 @@
 package mindustry.entities.abilities;
 
 import arc.util.*;
-import mindustry.Vars;
 import mindustry.content.*;
 import mindustry.entities.*;
 import mindustry.gen.*;
+import mindustry.type.UnitType;
+
+import static mindustry.Vars.tilesize;
+import static mindustry.arcModule.RFuncs.abilitysFormat;
 
 public class RepairFieldAbility extends Ability{
     public float amount = 1, reload = 100, range = 60;
@@ -24,8 +27,12 @@ public class RepairFieldAbility extends Ability{
     }
 
     @Override
-    public String localized(){
-        return "修复场：[stat]"+Strings.autoFixed(range / Vars.tilesize,2)+"[lightgray]格~[stat]"+amount+"[lightgray]量~[stat]"+Strings.autoFixed(reload/60f,2)+"[lightgray]频率(s)";
+    public String description(UnitType unit){
+        return abilitysFormat("@s~@格~@血",
+                reload / 60f,
+                range / tilesize,
+                amount
+                );
     }
 
     @Override

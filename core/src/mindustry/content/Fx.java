@@ -2470,6 +2470,58 @@ public class Fx{
         Lines.endLine();
     }).followParent(false).rotWithParent(false),
 
+    chainEmp = new Effect(30f, 300f, e -> {
+        if(!(e.data instanceof Position p)) return;
+        float tx = p.getX(), ty = p.getY(), dst = Mathf.dst(e.x, e.y, tx, ty);
+        Tmp.v1.set(p).sub(e.x, e.y).nor();
+
+        float normx = Tmp.v1.x, normy = Tmp.v1.y;
+        float range = 6f;
+        int links = Mathf.ceil(dst / range);
+        float spacing = dst / links;
+
+        Lines.stroke(4f * e.fout());
+        Draw.color(Color.white, e.color, e.fin());
+
+        Lines.beginLine();
+
+        Lines.linePoint(e.x, e.y);
+
+        rand.setSeed(e.id);
+
+        for(int i = 0; i < links; i++){
+            float nx, ny;
+            if(i == links - 1){
+                nx = tx;
+                ny = ty;
+            }else{
+                float len = (i + 1) * spacing;
+                Tmp.v1.setToRandomDirection(rand).scl(range/2f);
+                nx = e.x + normx * len + Tmp.v1.x;
+                ny = e.y + normy * len + Tmp.v1.y;
+            }
+
+            Lines.linePoint(nx, ny);
+        }
+
+        Lines.endLine();
+    }).followParent(false).rotWithParent(false),
+
+    legDestroy = new Effect(90f, 100f, e -> {
+        if(!(e.data instanceof LegDestroyData data)) return;
+        rand.setSeed(e.id);
+
+        e.lifetime = rand.random(70f, 130f);
+
+        Tmp.v1.trns(rand.random(360f), rand.random(data.region.width / 8f) * e.finpow());
+        float ox = Tmp.v1.x, oy = Tmp.v1.y;
+
+        alpha(e.foutpowdown());
+
+        stroke(data.region.height * scl);
+        line(data.region, data.a.x + ox, data.a.y + oy, data.b.x + ox, data.b.y + oy, false);
+    }).layer(Layer.groundUnit + 5f),
+
     arcMarker = new Effect(1800, e -> {
         color(Pal.command);
         stroke(2f);
@@ -2522,7 +2574,7 @@ public class Fx{
         for(int i = 0; i < 16; i++){
             float rot = i * 22.5f;
             if((e.fin() -0.2f) * 50 > i)
-            Drawf.simpleArrow(e.x, e.y,e.x  + Angles.trnsx(rot, 120f),e.y +  + Angles.trnsy(rot, 120f),96f,4f,Pal.heal);
+                Drawf.simpleArrow(e.x, e.y,e.x  + Angles.trnsx(rot, 120f),e.y +  + Angles.trnsy(rot, 120f),96f,4f,Pal.heal);
         }
     }),
 
@@ -2535,68 +2587,5 @@ public class Fx{
         Lines.circle(e.x,e.y,3f);
         Lines.circle(e.x,e.y+18.5f,27f);
         Drawf.arrow(player.x, player.y, e.x, e.y,5f * tilesize, 4f, Color.violet);
-    }),
-
-    chainEmp = new Effect(30f, 300f, e -> {
-        if(!(e.data instanceof Position p)) return;
-        float tx = p.getX(), ty = p.getY(), dst = Mathf.dst(e.x, e.y, tx, ty);
-        Tmp.v1.set(p).sub(e.x, e.y).nor();
-
-        float normx = Tmp.v1.x, normy = Tmp.v1.y;
-        float range = 6f;
-        int links = Mathf.ceil(dst / range);
-        float spacing = dst / links;
-
-        Lines.stroke(4f * e.fout());
-        Draw.color(Color.white, e.color, e.fin());
-
-        Lines.beginLine();
-
-        Lines.linePoint(e.x, e.y);
-
-        rand.setSeed(e.id);
-
-        for(int i = 0; i < links; i++){
-            float nx, ny;
-            if(i == links - 1){
-                nx = tx;
-                ny = ty;
-            }else{
-                float len = (i + 1) * spacing;
-                Tmp.v1.setToRandomDirection(rand).scl(range/2f);
-                nx = e.x + normx * len + Tmp.v1.x;
-                ny = e.y + normy * len + Tmp.v1.y;
-            }
-
-            Lines.linePoint(nx, ny);
-        }
-
-        Lines.endLine();
-    }).followParent(false).rotWithParent(false),
-
-    legDestroy = new Effect(90f, 100f, e -> {
-        if(!(e.data instanceof LegDestroyData data)) return;
-        rand.setSeed(e.id);
-
-        e.lifetime = rand.random(70f, 130f);
-
-        Tmp.v1.trns(rand.random(360f), rand.random(data.region.width / 8f) * e.finpow());
-        float ox = Tmp.v1.x, oy = Tmp.v1.y;
-
-        alpha(e.foutpowdown());
-
-        stroke(data.region.height * scl);
-        line(data.region, data.a.x + ox, data.a.y + oy, data.b.x + ox, data.b.y + oy, false);
-    }).layer(Layer.groundUnit + 5f);
-    /*
-    private static boolean inBorder(float x, float y){
-        //确认坐标点是否在屏幕内
-        if(inBorder(player.x, player.y)){
-            Float dis = player.dst(e.x,e.y);
-            Float radius = (float)Math.log(dis) * tilesize;
-            color(Color.red);
-            Drawf.arrow(player.x, player.y, player.x + (e.x - player.x) / dis * radius, player.y + (e.y - player.y) / dis * radius, radius * 0.9f, 4f, Pal.command);
-        }
-        return Core.camera.bounds(Tmp.r1).overlaps(Tmp.r2.setCentered(x, y, 50f));
-    }*/
+    });
 }

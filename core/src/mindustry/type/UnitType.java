@@ -484,6 +484,10 @@ public class UnitType extends UnlockableContent{
         return spawn(state.rules.defaultTeam, pos);
     }
 
+    public Unit spawn(Position pos, Team team){
+        return spawn(team, pos);
+    }
+
     public boolean hasWeapons(){
         return weapons.size > 0;
     }
@@ -674,19 +678,19 @@ public class UnitType extends UnlockableContent{
         stats.add(Stat.rotateSpeed,rotateSpeed);
         stats.add(Stat.size, StatValues.squared(hitSize / tilesize, StatUnit.blocks));
         stats.add(Stat.unitItemCapacity, itemCapacity);
-        stats.add(Stat.unitrange, (int)(maxRange / tilesize), StatUnit.blocks);
-        stats.add(Stat.ammoType, ammoType.icon());
-        stats.add(Stat.ammoCapacity, ammoCapacity);
+        stats.add(Stat.aiController,aiController.get().getClass().getSimpleName());
 
         if(abilities.any()){
-            var unique = new ObjectSet<String>();
-
-            for(Ability a : abilities){
-                if(a.display && unique.add(a.localized())){
-                    stats.add(Stat.abilities,a.localized());
-                }
-            }
+            stats.add(Stat.abilities, StatValues.abilities(this, abilities));
         }
+
+        stats.add(Stat.unitrange, (int)(maxRange / tilesize), StatUnit.blocks);
+        if(weapons.any()){
+            stats.add(Stat.weapons, StatValues.weapons(this, weapons));
+        }
+        stats.add(Stat.estimateDPS,estimateDps());
+        stats.add(Stat.ammoType, ammoType.icon());
+        stats.add(Stat.ammoCapacity, ammoCapacity);
 
         stats.add(Stat.flying, flying);
 
@@ -701,15 +705,9 @@ public class UnitType extends UnlockableContent{
         }
 
         if(mineTier >= 1){
-            stats.add(Stat.uniMineTier,mineTier);
-            stats.addPercent(Stat.mineSpeed, mineSpeed);
+            //stats.add(Stat.uniMineTier,mineTier);
+            //stats.addPercent(Stat.mineSpeed, mineSpeed);
             stats.add(Stat.mineTier, StatValues.drillUnit(this));
-            /*
-            stats.add(Stat.mineTier, StatValues.blocks(b ->
-                b.itemDrop != null &&
-                (b instanceof Floor f && (((f.wallOre && mineWalls) || (!f.wallOre && mineFloor))) ||
-                (!(b instanceof Floor) && mineWalls)) &&
-                b.itemDrop.hardness <= mineTier && (!b.playerUnmineable || Core.settings.getBool("doubletapmine"))));*/
         }
         if(buildSpeed > 0){
             stats.addPercent(Stat.buildSpeed, buildSpeed);
@@ -724,8 +722,8 @@ public class UnitType extends UnlockableContent{
             stats.add(Stat.buildCost, StatValues.items(reqs));
         }
 
-        if(weapons.any()){
-            stats.add(Stat.weapons, StatValues.weapons(this, weapons));
+        if(targetFlags.length > 0 && targetFlags[0] != null){
+            stats.add(Stat.targets, StatValues.targets(this, targetFlags));
         }
 
         if(immunities.size > 0){
@@ -920,6 +918,13 @@ public class UnitType extends UnlockableContent{
             ammoCapacity = Math.max(1, (int)(shotsPerSecond * targetSeconds));
         }
 
+        estimateDps();
+
+        //only do this after everything else was initialized
+        sample = constructor.get();
+    }
+    
+    public float estimateDps(){
         //calculate estimated DPS for one target based on weapons
         if(dpsEstimate < 0){
             dpsEstimate = weapons.sumf(Weapon::dps);
@@ -930,9 +935,8 @@ public class UnitType extends UnlockableContent{
                 dpsEstimate /= 25f;
             }
         }
-
-        //only do this after everything else was initialized
-        sample = constructor.get();
+        
+        return dpsEstimate;
     }
 
     @CallSuper
@@ -1551,8 +1555,8 @@ public class UnitType extends UnlockableContent{
         }
 
         if(Core.settings.getBool("unithitbox")){
-            Draw.color(unit.team.color, Color.black, Mathf.absin(Time.time, 4f, 1f));
-            Lines.poly(unit.x, unit.y, 6, unit.hitSize());
+            Draw.color(unit.team.color, 0.5f);
+            Lines.circle(unit.x, unit.y, unit.hitSize / 2f);
         }
 
     }

@@ -21,6 +21,7 @@ public enum Binding implements KeyBind{
     break_block(KeyCode.mouseRight),
 
     select_all_units(KeyCode.g),
+    select_all_unit_factories(KeyCode.h),
 
     pickupCargo(KeyCode.leftBracket),
     dropCargo(KeyCode.rightBracket),
@@ -79,12 +80,8 @@ public enum Binding implements KeyBind{
     point(KeyCode.j),
     showRTSAi(KeyCode.l),
     console(KeyCode.f8),
-    rtsSelectWound(KeyCode.f12),
-    rtsSelectHealth(KeyCode.f12),
-
-    rtsSelectAll(KeyCode.f2),
     lockonLastMark(KeyCode.f12),
-
+    arcDetail(KeyCode.f12),
     klpMenu(KeyCode.shiftRight)
     ;
 

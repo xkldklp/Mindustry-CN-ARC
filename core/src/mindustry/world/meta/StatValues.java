@@ -11,6 +11,7 @@ import arc.util.*;
 import mindustry.*;
 import mindustry.content.*;
 import mindustry.ctype.*;
+import mindustry.entities.abilities.Ability;
 import mindustry.entities.bullet.*;
 import mindustry.gen.*;
 import mindustry.maps.*;
@@ -38,8 +39,7 @@ public class StatValues{
     }
 
     public static String fixValue(float value){
-        int precision = Math.abs((int)value - value) <= 0.001f ? 0 : Math.abs((int)(value * 10) - value * 10) <= 0.001f ? 1 : 2;
-        return Strings.fixed(value, precision);
+        return Strings.autoFixed(value, 2);
     }
 
     public static StatValue squared(float value, StatUnit unit){
@@ -52,7 +52,7 @@ public class StatValues{
 
     public static StatValue number(float value, StatUnit unit, boolean merge){
         return table -> {
-            String l1 = fixValue(value), l2 = (unit.space ? " " : "") + unit.localized();
+            String l1 = (unit.icon == null ? "" : unit.icon + " ") + fixValue(value), l2 = (unit.space ? " " : "") + unit.localized();
 
             if(merge){
                 table.add(l1 + l2);
@@ -227,41 +227,62 @@ public class StatValues{
         });
     }
 
-    public static StatValue drillBlock(Drill drill){
+    public static StatValue drillBlock(Drill drill) {
         Seq<Block> list = content.blocks().select(b -> b instanceof Floor f && !f.wallOre && f.itemDrop != null && f.itemDrop.hardness <= drill.tier && f.itemDrop != drill.blockedItem);
-        list.sort(t->t.itemDrop.hardness);
-        if(drill instanceof BurstDrill){return table -> table.table(l -> {
-            l.left();
-            for(int i = 0; i < list.size; i++){
-                var item = list.get(i);
 
-                l.image(item.uiIcon).size(iconSmall).padRight(2).padLeft(2).padTop(3).padBottom(3);
-                l.add(item.localizedName).left().padLeft(1).padRight(4);
-                if(i % 5 == 4){
-                    l.row();
-                }
-            }
-        });
+        if (drill instanceof BurstDrill burstDrill) {
+            list.sort(t -> burstDrill.drillMultipliers.get(t.itemDrop, 1f));
+            return table -> {
+                table.row();
+                table.table(at->{
+                    at.background(Styles.grayPanel);
+                    at.add("[stat]" + drill.tier + "[lightgray]级[#" + getThemeColor() + "] ~ [stat]" +
+                            Strings.autoFixed(60f / drill.drillTime * drill.size * drill.size,2) + "[lightgray]物品/s");
+                    at.row();
+                    at.table(t -> {
+                        StringBuilder oreList = new StringBuilder();
+                        for (int i = 0; i < list.size; i++) {
+                            Block block = list.get(i);
+                            oreList.append(block.emoji()).append(" ").append(block.localizedName);
+                            if (i == list.size - 1 || burstDrill.drillMultipliers.containsKey(list.get(i + 1).itemDrop)) {
+                                t.labelWrap(oreList.toString()).width(250f).padLeft(20f).padTop(5f);
+                                float eff = 60f / (drill.drillTime + drill.hardnessDrillMultiplier * block.itemDrop.hardness) * drill.size * drill.size * burstDrill.drillMultipliers.get(block.itemDrop, 1f);
+                                t.add("[stat]" + Strings.fixed(eff, 2)).padLeft(20f);
+                                t.add("[cyan]" + Strings.fixed(eff * drill.liquidBoostIntensity * drill.liquidBoostIntensity, 2)).padLeft(20f).padRight(20f);
+                                t.row();
+                                oreList = new StringBuilder();
+                            } else oreList.append("  ");
+                        }
+                    });
+                });
+            };
+        } else {
+            list.sort(t -> t.itemDrop.hardness);
+            return table -> {
+            table.row();
+            table.table(at->{
+                at.background(Styles.grayPanel);
+                at.add("[stat]" + drill.tier + "[lightgray]级[#" + getThemeColor() + "] ~ [stat]" +
+                        Strings.autoFixed(60f / drill.drillTime * drill.size * drill.size,2) + "[lightgray]物品/s");
+                at.row();
+                at.table(t -> {
+                    StringBuilder oreList = new StringBuilder();
+                    for (int i = 0; i < list.size; i++) {
+                        Block block = list.get(i);
+                        oreList.append(block.emoji()).append(" ").append(block.localizedName);
+                        if (i == list.size - 1 || list.get(i + 1).itemDrop.hardness != block.itemDrop.hardness) {
+                            t.labelWrap(oreList.toString()).width(250f).padLeft(20f).padTop(5f);
+                            float eff = 60f / (drill.drillTime + drill.hardnessDrillMultiplier * block.itemDrop.hardness) * drill.size * drill.size;
+                            t.add("[stat]" + Strings.fixed(eff, 2)).padLeft(20f);
+                            t.add("[cyan]" + Strings.fixed(eff * drill.liquidBoostIntensity * drill.liquidBoostIntensity, 2)).padLeft(20f).padRight(20f);
+                            t.row();
+                            oreList = new StringBuilder();
+                        } else oreList.append("  ");
+                    }
+                });
+            });
+        };
         }
-        else{
-        return table -> table.table(l -> {
-            l.left();
-            StringBuilder blockInfo = new StringBuilder();
-            for(int i = 0; i < list.size; i++){
-                var block = list.get(i);
-                blockInfo.append(block.emoji()).append(" ").append(block.localizedName);
-
-                if(i == list.size-1||list.get(i+1).itemDrop.hardness!=list.get(i).itemDrop.hardness){
-                    Float eff = 60f / (drill.drillTime + drill.hardnessDrillMultiplier * list.get(i).itemDrop.hardness) * drill.size * drill.size;
-                    blockInfo.append("    [stat]<").append(Strings.autoFixed(eff,2)).append("|[cyan]");
-                    blockInfo.append(Strings.autoFixed(eff * drill.liquidBoostIntensity * drill.liquidBoostIntensity,2)).append("[stat]>");
-                    l.add(blockInfo.toString()).left().row();
-                    blockInfo = new StringBuilder();
-                }
-                else blockInfo.append("  ");
-
-            }
-        });}
     }
 
     public static StatValue arcSeparator(Separator separator){
@@ -281,39 +302,47 @@ public class StatValues{
                         b.itemDrop.hardness <= unit.mineTier && (!b.playerUnmineable || Core.settings.getBool("doubletapmine")));
         list.sort(t->t.itemDrop.hardness);
         if(unit.mineHardnessScaling){
-            return table -> table.table(l -> {
-                l.left();
-                StringBuilder blockInfo = new StringBuilder();
-                for (int i = 0; i < list.size; i++) {
-                    var block = list.get(i);
-                    blockInfo.append(block.emoji()).append(" ").append(block.localizedName);
-
-                    if (i == list.size - 1 || list.get(i + 1).itemDrop.hardness != list.get(i).itemDrop.hardness) {
-                        Float eff = 60f * unit.mineSpeed / (50f + list.get(i).itemDrop.hardness * 15f);
-                        blockInfo.append("    [stat]<").append(Strings.autoFixed(eff, 2)).append(">");
-                        l.add(blockInfo.toString()).left().row();
-                        blockInfo = new StringBuilder();
-                    } else blockInfo.append("  ");
-                }
-            });
+            return table -> {
+                table.row();
+                table.table(t -> {
+                    t.background(Styles.grayPanel);
+                    t.add("[stat]" + unit.mineTier + "[lightgray]级[#" + getThemeColor() + "] ~ [stat]" + (int)(unit.mineSpeed * 100) + "[lightgray]%");
+                    t.row();
+                    t.table(tt->{
+                        StringBuilder oreList = new StringBuilder();
+                        for (int i = 0; i < list.size; i++) {
+                            Block block = list.get(i);
+                            oreList.append(block.emoji()).append(" ").append(block.localizedName);
+                            if (i == list.size - 1 || list.get(i + 1).itemDrop.hardness != block.itemDrop.hardness) {
+                                tt.labelWrap(oreList.toString()).width(250f).padLeft(20f).padTop(5f);
+                                float eff = 60f * unit.mineSpeed / (50f + list.get(i).itemDrop.hardness * 15f);
+                                tt.add("[stat]" + Strings.fixed(eff, 2)).padLeft(20f);
+                                tt.row();
+                                oreList = new StringBuilder();
+                            } else oreList.append("  ");
+                        }
+                    });
+                });
+            };
         }
-        else {
-            return table -> table.table(l -> {
-                l.left();
-                StringBuilder blockInfo = new StringBuilder();
-                for (int i = 0; i < list.size; i++) {
-                    var item = list.get(i);
-                    l.image(item.uiIcon).size(iconSmall).padRight(2).padLeft(2).padTop(3).padBottom(3);
-                    l.add(item.localizedName).left().padLeft(1).padRight(4);
-                    if(i % 5 == 4){
-                        l.row();
+        else return table -> {
+            table.row();
+            table.table(t -> {
+                t.background(Styles.grayPanel);
+                t.add("[stat]" + unit.mineTier + "[lightgray]级[#" + getThemeColor() + "] ~ [stat]" + (int)(unit.mineSpeed * 100) + "[lightgray]%");
+                t.row();
+                t.table(tt->{
+                    StringBuilder oreList = new StringBuilder();
+                    for (int i = 0; i < list.size; i++) {
+                        Block block = list.get(i);
+                        oreList.append(block.emoji()).append(" ").append(block.localizedName);
                     }
-                }
-                Float eff = 60f * unit.mineSpeed / (50f + 15f);
-                blockInfo.append("    <").append(Strings.autoFixed(eff, 2)).append("[white]>");
-                l.add(blockInfo.toString()).left();
+                    tt.labelWrap(oreList.toString()).width(250f).padLeft(20f).padTop(5f);
+                    float eff = 60f * unit.mineSpeed / (50f + 15f);
+                    tt.add("[stat]" + Strings.fixed(eff, 2)).padLeft(20f);
+                });
             });
-        }
+        };
     }
 
     public static StatValue blocks(Boolf<Block> pred){
@@ -343,7 +372,7 @@ public class StatValues{
                         float reloadRate = (baseReload ? 1f : 0f) + maxUsed * multiplier * liquid.heatCapacity;
                         float standardReload = baseReload ? reload : reload / (maxUsed * multiplier * 0.4f);
                         float result = standardReload / (reload / reloadRate);
-                        bt.add(Core.bundle.format("bullet.reload", Strings.autoFixed(result, 2)));
+                        bt.add(Core.bundle.format("bullet.reload", Strings.autoFixed(result * 100, 1)));
                     }).left().padTop(-9);
                     c.row();
                 }
@@ -399,6 +428,51 @@ public class StatValues{
         };
     }
 
+    public static StatValue targets(UnitType unit, BlockFlag[] targetFlags){
+        return table -> {
+            table.row();
+            table.table(t -> {
+                t.background(Styles.grayPanel);
+                for(BlockFlag flag : targetFlags){
+                    if (flag == null) continue;
+                    t.add(flag.name()).width(150f).padBottom(5f);
+                    int count = 0;
+                    for (Block block: content.blocks()){
+                        if (block.flags.contains(flag)) {
+                            if (count >= 3) {
+                                t.add("\uE813").width(30f);
+                                break;
+                            }else t.add(block.emoji()).width(30f);
+                            count += 1;
+                        }
+                    }
+                    t.row();
+                }
+            }).padLeft(12f);
+        };
+    }
+
+    public static StatValue abilities(UnitType unit, Seq<Ability> abilities){
+        return table -> {
+            table.row();
+            table.table(t -> {
+                t.background(Styles.grayPanel);
+                for(Ability a : abilities){
+                    if (!a.display) continue;
+                    if (a.description(unit).length() > 0){
+                        t.table(tt->{
+                            tt.add(a.localized()).width(100f);
+                            tt.add(a.description(unit)).minWidth(350f).padRight(12f).padBottom(5f);
+                        });
+                    }else{
+                        t.add(a.localized()).minWidth(350f).padRight(12f).padBottom(5f);
+                    }
+                    t.row();
+                }
+            }).padLeft(12f);
+        };
+    }
+
     public static <T extends UnlockableContent> StatValue ammo(ObjectMap<T, BulletType> map){
         return ammo(map, 0, false);
     }
@@ -427,14 +501,17 @@ public class StatValues{
 
                 //no point in displaying unit icon twice
                 if(!compact && !(t instanceof Turret)){
-                    table.image(icon(t)).size(3 * 8).padRight(4).right().top();
+                    table.image(icon(t)).size(3 * 8).padRight(4).right().scaling(Scaling.fit).top();
                     table.add(t.localizedName).padRight(10).left().top();
                 }
 
                 table.table(bt -> {
                     bt.left().defaults().padRight(3).left();
 
-                    if(type.damage > 0 && (type.collides || type.splashDamage <= 0)){
+                    if (type instanceof LightningBulletType) {
+                        lightning(0, type.damage, type.lightningLength, type.lightningLengthRand).display(bt);
+                    }
+                    else if(type.damage > 0 && (type.collides || type.splashDamage <= 0)){
                         if(type.continuousDamage() > 0){
                             bt.add(Core.bundle.format("bullet.damage", type.continuousDamage()) + StatUnit.perSecond.localized());
                         }else{
@@ -443,11 +520,11 @@ public class StatValues{
                     }
 
                     if(type.buildingDamageMultiplier != 1){
-                        sep(bt, Core.bundle.format("bullet.buildingdamage", (int)(type.buildingDamageMultiplier * 100)));
+                        sep(bt, colorize(type.buildingDamageMultiplier) + "[lightgray]x建筑伤害");
                     }
 
                     if(type.rangeChange != 0 && !compact){
-                        sep(bt, Core.bundle.format("bullet.range", (type.rangeChange > 0 ? "+" : "-") + Strings.autoFixed(type.rangeChange / tilesize, 1)));
+                        sep(bt, "[lightgray]射程 + " + colorize(type.rangeChange / tilesize > 0) + Strings.autoFixed(type.rangeChange / tilesize,1) + " [lightgray]格");
                     }
 
                     if(type.splashDamage > 0){
@@ -459,7 +536,7 @@ public class StatValues{
                     }
 
                     if(!compact && !Mathf.equal(type.reloadMultiplier, 1f)){
-                        sep(bt, Core.bundle.format("bullet.reload", Strings.autoFixed(type.reloadMultiplier, 2)));
+                        sep(bt,  colorize(type.reloadMultiplier) + "[lightgray]x射速");
                     }
 
                     if(type.knockback > 0){
@@ -478,29 +555,21 @@ public class StatValues{
                         boolean laserPierce = type instanceof LaserBulletType || type instanceof ContinuousLaserBulletType || type instanceof ShrapnelBulletType;
                         boolean pierceBuilding = laserPierce || type instanceof ContinuousFlameBulletType || type instanceof RailBulletType || type.pierceBuilding;
                         boolean pierceUnit = type.pierce;
-                        boolean infinitePierce = type.pierceCap == -1;
-                        String str = "[stat]";
-                        if (infinitePierce && !(type instanceof RailBulletType)) {
-                            str += "无限";
+                        StringBuilder str = new StringBuilder("[stat]");
+                        if(type instanceof RailBulletType rail){
+                            str.append(Strings.autoFixed(rail.pierceDamageFactor * 100f, 1) + "%衰减");
+                        }else{
+                            str.append(type.pierceCap == -1? "无限" : type.pierceCap + "x");
                         }
-                        str += "穿透";
+                        str.append("穿透[lightgray]");
                         if (pierceBuilding && pierceUnit) {
-                            str += "建筑与单位";
+                            str.append("建筑与单位");
                         }
                         else {
-                            str += pierceBuilding ? "建筑" : "单位";
+                            str.append(pierceBuilding ? "建筑" : "单位");
                         }
-                        if (!infinitePierce && !(type instanceof RailBulletType)) {
-                            str += type.pierceCap + "次";
-                        }
-
-                        sep(bt, str);
-                        if (laserPierce) {
-                            sep(bt, " [stat]会被塑钢墙阻挡");
-                        }
-                        if (type instanceof RailBulletType rail) {
-                            sep(bt, " [stat]" + Strings.autoFixed(rail.pierceDamageFactor * 100f, 1) + "%[lightgray]衰减");
-                        }
+                        if(laserPierce) str.append("[stat](电性)");
+                        sep(bt, str.toString());
                     }
 
                     if(type.incendAmount > 0){
@@ -511,18 +580,20 @@ public class StatValues{
                         sep(bt, "[stat]追踪[lightgray]~[]"+Strings.autoFixed(type.homingPower * 50 * Time.toSeconds, 1)+"°/s[lightgray]~[]"+Strings.fixed(type.homingRange / tilesize,1)+"[lightgray]格");
                     }
 
-                    if(type.lightning > 0){
-                        sep(bt, "[stat]"+type.lightning+"[lightgray]x闪电~[stat]"+Strings.autoFixed((type.lightningDamage < 0 ? type.damage : type.lightningDamage),1)+"[lightgray]伤害~[stat]" + type.lightningLength+"[lightgray]格");
+                    if(!(type instanceof LightningBulletType) && type.lightning > 0){
+                        lightning(type.lightning, type.lightningDamage < 0 ? type.damage : type.lightningDamage, type.lightningLength, type.lightningLengthRand).display(bt);
                     }
-
-
 
                     if(type.pierceArmor){
                         sep(bt, "@bullet.armorpierce");
                     }
 
                     if(type.status != StatusEffects.none){
-                        sep(bt, (type.status.minfo.mod == null ? type.status.emoji() : "") + "[stat]" + type.status.localizedName + (type.status.reactive? "":"[lightgray] ~ [stat]" + Strings.autoFixed(type.statusDuration/60f,2)+"[white]s"));
+                        sep(bt, (type.status.minfo.mod == null ? type.status.emoji() : "") + "[stat]" + type.status.localizedName + (type.status.reactive? "":"[lightgray]~[]" + Strings.autoFixed(type.statusDuration/60f,2)+"[lightgray]s"));
+                    }
+
+                    if (type.suppressionRange > -1f) {
+                        sep(bt, "[lightgray]压制场~[stat]" + type.suppressionRange / 8f + "[]格~[stat]" + type.suppressionDuration / 60f + "[]秒");
                     }
 
                     if(type.fragBullet != null){
@@ -531,17 +602,68 @@ public class StatValues{
 
                         ammo(ObjectMap.of(t, type.fragBullet), indent + 1, false).display(bt);
                     }
-                }).padTop(compact ? 0 : -9).padLeft(indent * 8).left().get().background(compact ? null : Tex.underline);
+
+                    if (type.intervalBullet != null) {
+                        sep(bt, "[lightgray]每[stat]" + Strings.autoFixed(type.bulletInterval / 60f, 2) + "[]秒生成[stat]" + type.intervalBullets + "[]x子弹：");
+                        bt.row();
+                        ammo(ObjectMap.of(t, type.intervalBullet), indent + 1, false).display(bt);
+                    }
+
+                    Seq<BulletType> spawn = type.spawnBullets.copy();
+                    while (spawn.any()) {//显示所有spawnBullets
+                        BulletType bullet = spawn.first();
+                        Boolf<BulletType> pred = b -> bullet.damage == b.damage && bullet.splashDamage == b.splashDamage;
+                        //通过pred的的子弹被认为和当前子弹是一样的，合并显示
+                        sep(bt, "[stat]" + spawn.count(pred) + "x[lightgray]生成子弹：");
+                        bt.row();
+                        ammo(ObjectMap.of(t, bullet), indent + 1, false).display(bt);
+                        spawn.removeAll(pred);//删除已经显示的子弹
+                    }
+                }).padTop(compact ? 0 : -9).padLeft(12).left().get().background(compact ? null : Tex.underline);
 
                 table.row();
             }
         };
     }
 
+    public static StatValue lightning(int shots, float damage, int length, int lengthRand) {
+        return table -> {
+            String str = "[lightgray]";
+            if (shots > 0) {
+                str += String.format("[stat]%d[]x", shots);
+            }
+            str += String.format("闪电~[stat]%s[]伤害~", Strings.autoFixed(damage, 1));
+            if (lengthRand > 0) {
+                str += String.format("[stat]%d~%d[]长度", length, length + lengthRand);
+            }
+            else {
+                str += String.format("[stat]%d[]长度", length);
+            }
+            sep(table, str);
+        };
+    }
+
+    public static StatValue turretReload(Turret turret) {
+        return table -> table.add((turret.shoot.totalShots() == 1f ? "" : turret.shoot.totalShots() + " x ") + Strings.autoFixed(60f / turret.reload, 1) + "/s");
+    }
+
     //for AmmoListValue
     private static void sep(Table table, String text){
         table.row();
         table.add(text);
+    }
+
+    //for AmmoListValue
+    private static String ammoStat(float val){
+        return (val > 0 ? "[stat]+" : "[negstat]") + Strings.autoFixed(val, 1);
+    }
+
+    private static String colorize(float val){
+        return (val > 1 ? "[stat]" : "[negstat]") + Strings.autoFixed(val, 2);
+    }
+
+    private static String colorize(boolean val){
+        return val ? "[stat]" : "[negstat]";
     }
 
     private static TextureRegion icon(UnlockableContent t){

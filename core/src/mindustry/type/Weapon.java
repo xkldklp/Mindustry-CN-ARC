@@ -45,7 +45,7 @@ public class Weapon implements Cloneable{
     public boolean alternate = true;
     /** whether to rotate toward the target independently of unit */
     public boolean rotate = false;
-    /** rotation at which this weapon is locked to if rotate = false. TODO buggy!*/
+    /** rotation at which this weapon starts at. TODO buggy!*/
     public float baseRotation = 0f;
     /** whether to draw the outline on top. */
     public boolean top = true;
@@ -160,14 +160,23 @@ public class Weapon implements Cloneable{
 
         if(reload > 0) {
             t.row();
-            t.add("[lightgray]" + Stat.reload.localized() + ": " + (mirror ? "2x " : "") + "[stat]" + Strings.autoFixed(60f / reload * shoot.shots, 2) + " [white]" + StatUnit.perSecond.localized());
+            t.add("[lightgray]" + Stat.reload.localized() + ": " + (mirror ? "[stat]2 [lightgray]x " : "") + (shoot.totalShots() == 1 ? "" : "[stat]" + shoot.totalShots() + " [lightgray]x ") + "[stat]" +  Strings.autoFixed(60f / reload, 2) + " []" + StatUnit.perSecond.localized());
         }
         t.row();
-        t.add("[lightgray]武器范围: [stat]" + String.format("%.1f", bullet.range/8f) + " [white]格");
+        t.add("[lightgray]武器范围: [stat]" + String.format("%.1f", bullet.range/8f) + " []格");
+
+        if (rotate) {
+            t.row();
+            t.add("[lightgray]旋转速度: [stat]" + String.format("%.0f", rotateSpeed * 60f) + " []°/s");
+            if (rotationLimit < 361f) {
+                t.row();
+                t.add("[lightgray]旋转范围: [stat]" + String.format("%.0f", rotationLimit) + " []" + StatUnit.degrees.localized());
+            }
+        }
 
         if(inaccuracy > 0){
             t.row();
-            t.add("[lightgray]" + Stat.inaccuracy.localized() + ": [white]" + (int)inaccuracy + " " + StatUnit.degrees.localized());
+            t.add("[lightgray]" + Stat.inaccuracy.localized() + ": [stat]" + (int)inaccuracy + " []" + StatUnit.degrees.localized());
         }
 
         StatValues.ammo(ObjectMap.of(u, bullet)).display(t);
@@ -189,6 +198,7 @@ public class Weapon implements Cloneable{
         wy = unit.y + Angles.trnsy(rotation, x, y) + Angles.trnsy(weaponRotation, 0, -realRecoil);
 
         Draw.xscl = -Mathf.sign(flipSprite);
+        Draw.alpha(0.5f);
         Draw.rect(outlineRegion, wx, wy, weaponRotation);
         Draw.xscl = 1f;
     }
@@ -220,10 +230,12 @@ public class Weapon implements Cloneable{
         wy = unit.y + Angles.trnsy(rotation, x, y) + Angles.trnsy(weaponRotation, 0, -realRecoil);
 
         if(shadow > 0){
+            Draw.alpha(unitTrans);
             Drawf.shadow(wx, wy, shadow,unitTrans);
         }
 
         if(top){
+            Draw.alpha(unitTrans);
             drawOutline(unit, mount);
         }
 
@@ -239,16 +251,18 @@ public class Weapon implements Cloneable{
             }
         }
 
-        Draw.alpha(unitTrans);
+
         Draw.xscl = -Mathf.sign(flipSprite);
 
         //fix color
         unit.type.applyColor(unit);
+        Draw.alpha(unitTrans);
 
         if(region.found()) Draw.rect(region, wx, wy, weaponRotation);
 
         if(cellRegion.found()){
             Draw.color(unit.type.cellColor(unit));
+            Draw.alpha(unitTrans);
             Draw.rect(cellRegion, wx, wy, weaponRotation);
             Draw.color();
         }
@@ -274,7 +288,7 @@ public class Weapon implements Cloneable{
 
         Draw.xscl = 1f;
 
-        if (draw_minunithealthbar && Core.settings.getBool("unitWeaponTargetLine")){
+        if (draw_minunithealthbar && Core.settings.getBool("unitWeaponTargetLine") && mount.shoot){
             if(mount.aimX !=0 && mount.aimY != 0  && Mathf.len(mount.aimX - wx, mount.aimY - wy) <= 1200f){
                 Lines.stroke(1f);
                 if (unit.controller() == player) {
@@ -282,11 +296,10 @@ public class Weapon implements Cloneable{
                 } else {
                     Draw.color(unit.team.color);
                 }
-                Draw.alpha(mount.shoot?0.8f:0.3f);
+                Draw.alpha(0.8f);
                 Lines.line(wx, wy, mount.aimX, mount.aimY);
                 if(Core.settings.getInt("unitTargetType")==0 || !(unit.controller() instanceof Player))
                     Lines.spikes(mount.aimX,mount.aimY,4f,4f,4, (float) (Math.atan((mount.aimX-wx)/(mount.aimY-wy)*doubleRadDeg))+45f);
-                    //Lines.dashCircle(mount.aimX, mount.aimY, 8);
                 Draw.reset();
 
             }
@@ -322,9 +335,9 @@ public class Weapon implements Cloneable{
             mount.targetRotation = Angles.angle(axisX, axisY, mount.aimX, mount.aimY) - unit.rotation;
             mount.rotation = Angles.moveToward(mount.rotation, mount.targetRotation, rotateSpeed * Time.delta);
             if(rotationLimit < 360){
-                float dst = Angles.angleDist(mount.rotation, 0f);
+                float dst = Angles.angleDist(mount.rotation, baseRotation);
                 if(dst > rotationLimit/2f){
-                    mount.rotation = Angles.moveToward(mount.rotation, 0, dst - rotationLimit/2f);
+                    mount.rotation = Angles.moveToward(mount.rotation, baseRotation, dst - rotationLimit/2f);
                 }
             }
         }else if(!rotate){

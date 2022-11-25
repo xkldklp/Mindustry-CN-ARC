@@ -8,10 +8,12 @@ import arc.math.geom.Vec2;
 import arc.scene.ui.*;
 import arc.scene.ui.layout.Table;
 import arc.struct.ObjectMap;
+import arc.struct.Seq;
 import arc.util.Strings;
 import arc.util.Time;
 import arc.util.Tmp;
 import mindustry.arcModule.*;
+import mindustry.arcModule.ui.dialogs.TeamSelectDialog;
 import mindustry.content.Blocks;
 import mindustry.content.Items;
 import mindustry.content.StatusEffects;
@@ -35,7 +37,6 @@ import mindustry.world.blocks.payloads.BuildPayload;
 import mindustry.world.blocks.payloads.Payload;
 import mindustry.world.blocks.payloads.UnitPayload;
 
-import java.util.Arrays;
 import java.util.Objects;
 
 import static mindustry.Vars.*;
@@ -183,8 +184,10 @@ public class AdvanceToolTable extends Table {
                             tBox.button(String.format("[#%s]%s", team.color, team.localized()), flatToggleMenut, () -> player.team(team))
                                     .checked(b -> player.team() == team).size(30f, 30f);
                         }
-                        tBox.button("[violet]+", flatToggleMenut, this::teamChangeMenu).checked(b -> {
-                            return !Arrays.asList(Team.baseTeams).contains(player.team());
+                        tBox.button("[violet]+", flatToggleMenut, () -> {
+                            new TeamSelectDialog(team -> player.team(team), player.team()).show();
+                        }).checked(b -> {
+                            return !Seq.with(Team.baseTeams).contains(player.team());
                         }).tooltip("[acid]更多队伍选择").size(30f, 30f);
 
                     }).left().row();
@@ -412,38 +415,17 @@ public class AdvanceToolTable extends Table {
                             return Strings.canParsePositiveInt(text) && Integer.parseInt(text) < Team.all.length;
                         }).maxTextLength(4).get();
                         for (Team team : Team.baseTeams) {
-                            tt.button("[#" + team.color + "]" + team.localized(), cleart, () -> {
+                            tt.button("[#" + team.color + "]" + team.localized(), flatToggleMenut, () -> {
                                 unit.team = team;
                                 rebuildTable[0].run();
-                            }).size(30, 30).color(team.color);
+                            }).checked(b -> unit.team == team).size(30, 30);
                         }
-                        tt.button("[violet]+", cleart, () -> {
-                            BaseDialog selectTeamDialog = new BaseDialog("队伍选择器");
-                            Table selectTeam = new Table().top();
-                            selectTeamDialog.cont.pane(td -> {
-                                for (Team team : Team.all) {
-                                    if (team.id % 10 == 6) {
-                                        td.row();
-                                        td.add("队伍：" + team.id + "~" + (team.id + 9));
-                                    }
-                                    ImageButton button = new ImageButton(Tex.whiteui, Styles.clearTogglei);
-                                    button.getStyle().imageUpColor = team.color;
-                                    button.margin(10f);
-                                    button.resizeImage(40f);
-                                    button.clicked(() -> {
-                                        unit.team = team;
-                                        selectTeamDialog.hide();
-                                        rebuildTable[0].run();
-                                    });
-                                    button.update(() -> button.setChecked(unit.team == team));
-                                    td.add(button);
-                                }
-                            });
-
-                            selectTeamDialog.add(selectTeam).center();
-                            selectTeamDialog.row();
-                            selectTeamDialog.addCloseButton();
-                            selectTeamDialog.show();
+                        tt.button("[violet]+", flatToggleMenut, () -> {
+                            new TeamSelectDialog(team -> {
+                                unit.team = team; rebuildTable[0].run();
+                            }, unit.team).show();
+                        }).checked(b -> {
+                            return !Seq.with(Team.baseTeams).contains(unit.team);
                         }).tooltip("[acid]更多队伍选择").center().width(50f).row();
                     }).row();
                     t.table(list -> {

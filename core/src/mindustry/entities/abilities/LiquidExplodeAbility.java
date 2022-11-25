@@ -9,6 +9,7 @@ import mindustry.type.*;
 import mindustry.world.*;
 
 import static mindustry.Vars.*;
+import static mindustry.arcModule.RFuncs.abilitysFormat;
 
 public class LiquidExplodeAbility extends Ability{
     public Liquid liquid = Liquids.water;
@@ -16,6 +17,16 @@ public class LiquidExplodeAbility extends Ability{
     public float radAmountScale = 5f, radScale = 1f;
     public float noiseMag = 6.5f, noiseScl = 5f;
 
+    @Override
+    public String description(UnitType unit){
+        float rad = Math.max(unit.hitSize / tilesize * radScale, 1);
+        return abilitysFormat("总计@@@~@格半径",
+                1f / 3f * Math.PI * rad * rad * amount * radAmountScale,// 1/3πr²h
+                liquid.localizedName,
+                liquid.emoji(),
+                rad
+        );
+    }
     @Override
     public void death(Unit unit){
         //TODO what if noise is radial, so it looks like a splat?

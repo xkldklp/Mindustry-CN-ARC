@@ -77,6 +77,10 @@ public class PowerGraph{
         return powerBalance.rawMean();
     }
 
+    public boolean hasPowerBalanceSamples(){
+        return powerBalance.hasEnoughData();
+    }
+
     public float getLastPowerNeeded(){
         return lastPowerNeeded;
     }

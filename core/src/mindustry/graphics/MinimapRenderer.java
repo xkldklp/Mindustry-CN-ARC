@@ -131,7 +131,7 @@ public class MinimapRenderer{
 
         if(Marker.markList.size>0) {
             Marker.markList.each(a->{
-                if((Time.time - a.time)>Marker.retainTime) return;
+                if((Time.time - a.time) > Marker.retainTime) return;
                 Draw.color(a.markType.color);
                 Lines.stroke(Scl.scl(3f) * (1 - (Time.time % 180 + 30) / 210));
 

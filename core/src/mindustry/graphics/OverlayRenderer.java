@@ -10,6 +10,7 @@ import arc.util.*;
 import mindustry.*;
 import mindustry.ai.types.*;
 import mindustry.arcModule.District;
+import mindustry.content.Blocks;
 import mindustry.content.UnitTypes;
 import mindustry.entities.*;
 import mindustry.game.EventType.*;
@@ -21,6 +22,8 @@ import mindustry.world.*;
 import mindustry.world.blocks.storage.CoreBlock.*;
 
 import static mindustry.Vars.*;
+import static mindustry.arcModule.toolpack.arcScanner.drawScanner;
+import static mindustry.arcModule.toolpack.arcWaveSpawner.drawSpawner;
 
 public class OverlayRenderer{
     private static final float indicatorLength = 14f;
@@ -204,7 +207,7 @@ public class OverlayRenderer{
                 });
             }
         }
-
+        /*
         if(state.hasSpawns()){
             Lines.stroke(2f);
             Draw.color(Color.gray, Color.lightGray, Mathf.absin(Time.time, 8f, 1f));
@@ -223,7 +226,7 @@ public class OverlayRenderer{
                     }
                 }
             }
-            if (Core.settings.getBool("showFlyerSpawn") && spawner.countSpawns()<20) {
+            if (Core.settings.getBool("showFlyerSpawn") && spawner.countSpawns() < 20) {
                 for(Tile tile : spawner.getSpawns()) {
                     float angle = Angles.angle(world.width() / 2f, world.height() / 2f, tile.x, tile.y);
                     float trns = Math.max(world.width(), world.height()) * Mathf.sqrt2 * tilesize;
@@ -244,7 +247,8 @@ public class OverlayRenderer{
             }
             Draw.reset();
         }
-
+        */
+        drawSpawner();
 
         //draw selected block
         if(input.block == null && !Core.scene.hasMouse()){
@@ -313,6 +317,8 @@ public class OverlayRenderer{
             }
         }
         District.drawDistrict();
+
+        drawScanner();
     }
 
     private static class CoreEdge{

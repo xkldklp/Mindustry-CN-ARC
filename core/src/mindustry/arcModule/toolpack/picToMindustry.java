@@ -85,6 +85,14 @@ public class picToMindustry {
             }).width(200f);
         }).padBottom(20f).visible(() -> oriImage != null).row();
         pt.cont.table(a -> tTable = a);
+        pt.cont.row();
+        pt.cont.button("逻辑画网站 " + Blocks.logicDisplay.emoji(),()->{
+            String imageUrl = "https://buibiu.github.io/imageToMLogicPage/#/";
+            if (!Core.app.openURI(imageUrl)) {
+                ui.showErrorMessage("打开失败，网址已复制到粘贴板\n请自行在阅览器打开");
+                Core.app.setClipboardText(imageUrl);
+            }
+        }).width(200f);
         pt.addCloseButton();
         return pt;
     }
@@ -124,12 +132,12 @@ public class picToMindustry {
                     sorterGenerator();
                 }).size(100, 50);
                 tt.add("大小：" + formatNumber(image.width) + "\uE815" + formatNumber(image.height));
-            }).row();
+            }).row();/*
             t.table(tt -> {
                 tt.button("逻辑画 " + Blocks.logicDisplay.emoji(), Styles.cleart, () -> {
-                    //canvasGenerator();
+                    //https://buibiu.github.io/imageToMLogicPage/#/
                 }).size(100, 50).disabled(true);
-            }).row();
+            }).row();*/
         });
     }
 
