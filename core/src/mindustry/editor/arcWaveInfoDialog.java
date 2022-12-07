@@ -13,10 +13,10 @@ import arc.scene.ui.TextField.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
-import mindustry.Vars;
 import mindustry.ai.types.BuilderAI;
 import mindustry.ai.types.MinerAI;
 import mindustry.ai.types.RepairAI;
+import mindustry.arcModule.toolpack.arcWaveSpawner;
 import mindustry.content.*;
 import mindustry.core.UI;
 import mindustry.game.*;
@@ -32,7 +32,8 @@ import mindustry.ui.dialogs.*;
 import java.util.*;
 
 import static mindustry.Vars.*;
-import static mindustry.arcModule.RFuncs.fixedTime;
+import static mindustry.arcModule.RFuncs.*;
+import static mindustry.arcModule.toolpack.arcWaveSpawner.*;
 import static mindustry.content.UnitTypes.*;
 import static mindustry.game.SpawnGroup.*;
 import static mindustry.ui.Styles.*;
@@ -315,93 +316,35 @@ public class arcWaveInfoDialog extends BaseDialog {
                 }).growX();
             } else {
                 tb.pane(p -> {
+                    initArcWave((int) (calWinWave() * waveMulti + 1));
                     p.table(Tex.button, t -> {
                         p.margin(0).defaults().pad(5).growX();
                         t.add("\uE86D 为单位数量；\uE813 为单位血+盾；\uE810 为计算buff的血+盾；\uE86E 为预估DPS。在游戏中时会考虑地图出怪点数目").color(getThemeColor());
                     }).scrollX(false).growX().row();
                     for (int wave = 0; wave < calWinWave() * waveMulti; wave++) {
+                        arcWaveSpawner.waveInfo thisWave = arcWave.get(wave);
+                        thisWave.specLoc(-1,group -> true);
                         int finalWave = wave;
                         p.table(Tex.button, t -> {
                             t.table(tt -> {
-                                tt.add("第[accent]" + (finalWave + 1) + "[]波").fillX();
+                                tt.add("第[accent]" + (finalWave + 1) + "[]波");
                                 tt.row();
-                                tt.add(fixedTime((int) (finalWave * state.rules.waveSpacing + (state.rules.initialWaveSpacing <= 0 ? (2 * state.rules.waveSpacing) : state.rules.initialWaveSpacing)), false));
+                                float firstWaveTime = state.rules.initialWaveSpacing <= 0 ? (2 * state.rules.waveSpacing) : state.rules.initialWaveSpacing;
+                                int thisTime = (int) (finalWave * state.rules.waveSpacing + firstWaveTime);
+                                tt.add(fixedTime(thisTime, false)).row();
+                                Label waveTime = tt.add("").get();
+                                tt.update(()->{
+                                   if (!state.isGame()) waveTime.setText("");
+                                   else {
+                                       int deltaTime = thisTime - (int) (state.wave < 1 ? (firstWaveTime - state.wavetime) : (firstWaveTime + state.rules.waveSpacing * state.wave - state.wavetime));
+                                       waveTime.setText(fixedColorTime(deltaTime,false));
+                                   }
+                                });
                             }).width(120f).left();
-
-                            int totalAmount = 0, totalHealth = 0, totalEffHealth = 0, totalDps = 0;
-                            float thisAmount, thisHealth, thisEffHealth, thisDps;
-                            for (SpawnGroup group : state.rules.spawns) {
-                                thisAmount = group.getSpawned(finalWave);
-
-                                if (thisAmount > 0) {
-                                    thisHealth = (group.type.health + group.getShield(finalWave)) * thisAmount;
-                                    if (group.effect == null) {
-                                        thisEffHealth = (group.type.health + group.getShield(finalWave)) * thisAmount;
-                                        thisDps = group.type.estimateDps();
-                                    } else {
-                                        thisEffHealth = group.effect.healthMultiplier * (group.type.health + group.getShield(finalWave)) * thisAmount;
-                                        thisDps = group.effect.damageMultiplier * group.effect.reloadMultiplier * group.type.estimateDps();
-                                    }
-                                    if (spawner.countSpawns() > 1 && group.spawn == -1) {
-                                        thisAmount *= spawner.countSpawns();
-                                        thisHealth *= spawner.countSpawns();
-                                        thisEffHealth *= spawner.countSpawns();
-                                        thisDps *= spawner.countSpawns();
-                                    }
-                                    totalAmount += thisAmount;
-                                    totalHealth += thisHealth;
-                                    totalEffHealth += thisEffHealth;
-                                    totalDps += thisDps;
-                                }
-
-                            }
-                            if (totalAmount == 0) t.add("该波次没有敌人");
-                            else {
-                                int finalTotalAmount = totalAmount;
-                                int finalTotalHealth = totalHealth;
-                                int finalTotalEffHealth = totalEffHealth;
-                                int finalTotalDps = totalDps;
-                                t.table(tt -> {
-                                    tt.add("\uE86D").width(50f);
-                                    tt.add("[accent]" + finalTotalAmount).growX().row();
-                                    tt.add("\uE813").width(50f);
-                                    tt.add("[accent]" + UI.formatAmount(finalTotalHealth, 2)).growX().row();
-                                    if (finalTotalEffHealth != finalTotalHealth) {
-                                        tt.add("\uE810").width(50f);
-                                        tt.add("[accent]" + UI.formatAmount(finalTotalEffHealth, 2)).growX().row();
-                                    }
-                                    tt.add("\uE86E").width(50f);
-                                    tt.add("[accent]" + UI.formatAmount(finalTotalDps, 2)).growX();
-                                }).width(180f).left();
-                                ;
-                                t.pane(wi -> {
-                                    int curInfoWave = finalWave;
-                                    for (SpawnGroup group : state.rules.spawns) {
-                                        int amount = group.getSpawned(curInfoWave);
-                                        if (amount > 0) {
-                                            StringBuilder groupInfo = new StringBuilder();
-                                            groupInfo.append(group.type.emoji());
-
-                                            if (group.spawn != -1) groupInfo.append("*");
-
-                                            groupInfo.append(typeColor(group.type));
-
-                                            groupInfo.append("\n").append(amount);
-                                            groupInfo.append("\n");
-
-                                            if (group.getShield(curInfoWave) > 0f)
-                                                groupInfo.append(UI.formatAmount((long) group.getShield(curInfoWave)));
-                                            groupInfo.append("\n[]");
-                                            if (group.effect != null && group.effect != StatusEffects.none)
-                                                groupInfo.append(group.effect.emoji());
-                                            if (group.items != null && group.items.amount > 0)
-                                                groupInfo.append(group.items.item.emoji());
-                                            if (group.payloads != null && group.payloads.size > 0)
-                                                groupInfo.append("\uE87B");
-                                            wi.button(groupInfo.toString(), cleart, () -> unitSettingDialog(group)).height(80f).width(70f).left();
-                                        }
-                                    }
-                                }).scrollX(true).scrollY(false).maxWidth(mobile ? 500f : 1000f).growX();
+                            if (thisWave.amount == 0) t.add("该波次没有敌人");
+                            else{
+                                t.add(thisWave.proTable(true));
+                                t.pane(thisWave.unitTable(-1,group -> true,mobile ? 8 : 15)).scrollX(true).scrollY(false).growX();;
                             }
                         }).growX().row();
                         p.margin(0).defaults().pad(5).growX();
@@ -448,7 +391,7 @@ public class arcWaveInfoDialog extends BaseDialog {
                         b.left();
                         b.image(group.type.uiIcon).size(32f).padRight(3).scaling(Scaling.fit);
                         //if(group.effect != null && group.effect != StatusEffects.none) b.image(group.effect.uiIcon).size(20f).padRight(3).scaling(Scaling.fit);
-                        b.add(typeColor(group.type) + group.type.localizedName);
+                        b.add(group.type.typeColor() + group.type.localizedName);
                         if (group.effect != null && group.effect != StatusEffects.none)
                             b.image(group.effect.uiIcon).size(20f).padRight(3).scaling(Scaling.fit);
 
@@ -1052,14 +995,6 @@ public class arcWaveInfoDialog extends BaseDialog {
         filterEffect = StatusEffects.none;
     }
 
-    String typeColor(UnitType unit) {
-        if (unit.naval) return "[cyan]";
-        else if (unit.allowLegStep) return "[magenta]";
-        else if (unit.flying) return "[acid]";
-        else if (unit.hovering) return "[sky]";
-        else return "[stat]";
-    }
-
     enum Sort {
         begin(Structs.comps(Structs.comparingFloat(g -> g.begin), Structs.comparingFloat(g -> g.type.id))),
         health(Structs.comps(Structs.comparingFloat(g -> g.type.health), Structs.comparingFloat(g -> g.begin))),
@@ -1359,7 +1294,7 @@ public class arcWaveInfoDialog extends BaseDialog {
             if (group.end > 99999) continue;
             maxwave = Math.max(maxwave, group.end);
         }
-        if (maxwave > 99999) return 200;
+        if (maxwave > 5000) return 200;
         if (maxwave < 2 && state.rules.waveSpacing > 30f) return (int) (1800000 / state.rules.waveSpacing);
         return maxwave + 1;
     }

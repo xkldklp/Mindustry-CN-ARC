@@ -27,6 +27,8 @@ import mindustry.gen.*;
 import java.util.*;
 
 public class Fonts{
+
+    static String fontPack = "fonts/font.woff";
     private static final String mainFont = "fonts/font.woff";
     private static final ObjectSet<String> unscaled = ObjectSet.with("iconLarge");
     private static ObjectIntMap<String> unicodeIcons = new ObjectIntMap<>();
@@ -70,7 +72,10 @@ public class Fonts{
         largeIcons.clear();
         FreeTypeFontParameter param = fontParameter();
 
-        Core.assets.load("default", Font.class, new FreeTypeFontLoaderParameter(mainFont, param)).loaded = f -> Fonts.def = f;
+        if (Core.settings.getInt("fontSet") == 1) fontPack = "fonts/cute.woff";
+        else if (Core.settings.getInt("fontSet") == 2) fontPack = "fonts/kai.woff";
+        Core.assets.load("default", Font.class, new FreeTypeFontLoaderParameter(fontPack, param)).loaded = f -> Fonts.def = f;
+
         Core.assets.load("icon", Font.class, new FreeTypeFontLoaderParameter("fonts/icon.ttf", new FreeTypeFontParameter(){{
             size = 30;
             incremental = true;
@@ -193,13 +198,19 @@ public class Fonts{
         FreeTypeFontParameter param = new FreeTypeFontParameter(){{
             borderColor = Color.darkGray;
             incremental = true;
-            size = 18;
+            size = getFontSize();
         }};
 
-        Core.assets.load("outline", Font.class, new FreeTypeFontLoaderParameter(mainFont, param)).loaded = t -> Fonts.outline = t;
+        if (Core.settings.getInt("fontSet") == 1) fontPack = "fonts/cute.woff";
+        else if (Core.settings.getInt("fontSet") == 2) fontPack = "fonts/kai.woff";
+        Core.assets.load("outline", Font.class, new FreeTypeFontLoaderParameter(fontPack, param)).loaded = t -> Fonts.outline = t;
 
-        Core.assets.load("tech", Font.class, new FreeTypeFontLoaderParameter("fonts/tech.ttf", new FreeTypeFontParameter(){{
-            size = 18;
+        String techPack = "fonts/tech.ttf";
+        if (Core.settings.getInt("fontSet") == 1) techPack = "fonts/cuteTech.ttf";
+        else if (Core.settings.getInt("fontSet") == 2) techPack = "fonts/kaiTech.ttf";
+
+        Core.assets.load("tech", Font.class, new FreeTypeFontLoaderParameter(techPack, new FreeTypeFontParameter(){{
+            size = getFontSize();
         }})).loaded = f -> {
             Fonts.tech = f;
             Fonts.tech.getData().down *= 1.5f;
@@ -283,9 +294,15 @@ public class Fonts{
         return draw;
     }
 
+    static int getFontSize(){
+        if (Core.settings.getInt("fontSize") < 5) Core.settings.put("fontSize",10);
+        float multiplier = Core.settings.getInt("fontSize") / 10f;
+        return (int) (18 * multiplier);
+    }
+
     static FreeTypeFontParameter fontParameter(){
         return new FreeTypeFontParameter(){{
-            size = 18;
+            size = getFontSize();
             shadowColor = Color.darkGray;
             shadowOffsetY = 2;
             incremental = true;

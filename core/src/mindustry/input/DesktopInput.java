@@ -305,6 +305,8 @@ public class DesktopInput extends InputHandler{
         }
         if (!commandMode) lastCommand.clear();
 
+        if(input.keyTap(Binding.arcScanMode)) arcScanMode = !arcScanMode;
+
         //validate commanding units
         selectedUnits.removeAll(u -> !u.isCommandable() || !u.isValid());
 

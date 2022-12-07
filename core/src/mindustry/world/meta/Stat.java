@@ -46,8 +46,9 @@ public class Stat implements Comparable<Stat>{
     healing = new Stat("healing"),
     immunities = new Stat("immunities"),
 
-    itemCapacity = new Stat("itemCapacity", StatCat.items),
     itemsMoved = new Stat("itemsMoved", StatCat.items),
+    itemCapacity = new Stat("itemCapacity", StatCat.items),
+    bufferCapacity = new Stat("bufferCapacity", StatCat.items),
     launchTime = new Stat("launchTime", StatCat.items),
     maxConsecutive = new Stat("maxConsecutive", StatCat.items),
 

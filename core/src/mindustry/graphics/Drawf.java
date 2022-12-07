@@ -423,6 +423,13 @@ public class Drawf{
         Draw.color();
     }
 
+    public static void simpleArrow(float x, float y, float x2, float y2, float length, float radius){
+        float angle = Angles.angle(x, y, x2, y2);
+        Tmp.v1.set(x2, y2).sub(x, y).limit(length);
+        float vx = Tmp.v1.x + x, vy = Tmp.v1.y + y;
+        Fill.poly(vx, vy, 3, radius, angle);
+    }
+
     public static void simpleArrow(float x, float y, float x2, float y2, float length, float radius, Color color){
         simpleArrow(x, y, x2, y2, length, radius, color,1f);
     }

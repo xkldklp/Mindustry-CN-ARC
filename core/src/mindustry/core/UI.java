@@ -33,6 +33,7 @@ import mindustry.ui.fragments.*;
 
 import static arc.scene.actions.Actions.*;
 import static mindustry.Vars.*;
+import static mindustry.arcModule.toolpack.arcWaveSpawner.initArcWave;
 
 public class UI implements ApplicationListener, Loadable{
     public static String billions, millions, thousands;
@@ -245,6 +246,9 @@ public class UI implements ApplicationListener, Loadable{
         consolefrag.build(hudGroup);
         loadfrag.build(group);
         new FadeInFragment().build(group);
+
+        initArcWave();
+
     }
 
     @Override

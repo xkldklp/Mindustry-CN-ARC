@@ -71,7 +71,8 @@ public class PowerInfo {
         Table power = new Table(Tex.wavepane).marginTop(6);
 
         Bar powerBar = new Bar(
-                () -> Core.bundle.format("bar.powerbalance", (info.getPowerBalance() >= 0 ? "+" : "") + UI.formatAmount(info.getPowerBalance())),
+                () -> Core.bundle.format("bar.powerbalance", (info.getPowerBalance() >= 0 ? "+" : "") + UI.formatAmount(info.getPowerBalance())) +
+                        (info.getSatisfaction() >= 1 ? "" :" [gray]" + (int)(info.getSatisfaction() * 100) + "%"),
                 () -> Pal.powerBar,
                 () -> info.getSatisfaction());
         Bar batteryBar = new Bar(

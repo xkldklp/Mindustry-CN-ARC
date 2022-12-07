@@ -407,7 +407,7 @@ public class PlacementFragment{
                                     req.table(line -> {
                                         line.left();
                                         line.image(stack.item.uiIcon).size(8 * 2);
-                                        line.add(stack.item.localizedName).maxWidth(140f).fillX().color(Color.lightGray).padLeft(2).left().get().setEllipsis(true);
+                                        line.add((Core.settings.getBool("colorizedContent") ? "": "[lightgray]") + stack.item.localizedName).maxWidth(140f).fillX().padLeft(2).left().get().setEllipsis(true);
                                         line.labelWrap(() -> {
                                             Building core = player.core();
                                             int stackamount = Math.round(stack.amount * state.rules.buildCostMultiplier);

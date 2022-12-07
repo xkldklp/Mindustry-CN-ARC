@@ -159,19 +159,19 @@ public class PlayerListFragment{
                 button.add(iconTable).size(h);
                 button.image(Icon.admin).visible(() -> user.admin && !(!user.isLocal() && net.server())).size(bs).get().updateVisibility();
                 button.table(
-                        t -> {
-                            t.labelWrap("[#" + user.color().toString().toUpperCase() + "]" + user.name()).minWidth(300f);
-                            t.touchable = Touchable.enabled;
-                            t.tapped(()->{
-                                Core.app.setClipboardText(user.name);
-                                ui.arcInfo("复制昵称：" + user.name);
-                            });
-                        }
+                    t -> {
+                        t.labelWrap("[#" + user.color().toString().toUpperCase() + "]" + user.name()).minWidth(380f);
+                        t.touchable = Touchable.enabled;
+                        t.tapped(()->{
+                            Core.app.setClipboardText(user.name);
+                            ui.arcInfo("复制昵称：" + user.name);
+                        });
+                    }
                 ).width(400f).pad(10f).left();
 
                 button.add().grow();
 
-                button.button(String.valueOf(Iconc.link), Styles.cleart, () -> {
+                button.button("[#" + getThemeColor() + "]♐", Styles.cleart, () -> {
                     String message = arcAtPlayer(user.name);
                     Call.sendChatMessage(message);
                 }).size(buttonSize);
@@ -223,44 +223,44 @@ public class PlayerListFragment{
                     button.table(t -> {
                         t.defaults().size(bs);
 
-                        t.button(Icon.hammerSmall, ustyle,
-                                () -> ui.showConfirm("@confirm", Core.bundle.format("confirmban",  user.name()), () -> Call.adminRequest(user, AdminAction.ban)));
-                        t.button(Icon.cancelSmall, ustyle,
-                                () -> ui.showConfirm("@confirm", Core.bundle.format("confirmkick",  user.name()), () -> Call.adminRequest(user, AdminAction.kick)));
+                    t.button(Icon.hammerSmall, ustyle,
+                    () -> ui.showConfirm("@confirm", Core.bundle.format("confirmban",  user.name()), () -> Call.adminRequest(user, AdminAction.ban)));
+                    t.button(Icon.cancelSmall, ustyle,
+                    () -> ui.showConfirm("@confirm", Core.bundle.format("confirmkick",  user.name()), () -> Call.adminRequest(user, AdminAction.kick)));
 
-                        t.row();
+                    t.row();
 
-                        t.button(Icon.adminSmall, style, () -> {
-                                    if(net.client()) return;
+                    t.button(Icon.adminSmall, style, () -> {
+                        if(net.client()) return;
 
-                                    String id = user.uuid();
+                            String id = user.uuid();
 
-                                    if(user.admin){
-                                        ui.showConfirm("@confirm", Core.bundle.format("confirmunadmin",  user.name()), () -> {
-                                            netServer.admins.unAdminPlayer(id);
-                                            user.admin = false;
-                                        });
-                                    }else{
-                                        ui.showConfirm("@confirm", Core.bundle.format("confirmadmin",  user.name()), () -> {
-                                            netServer.admins.adminPlayer(id, user.usid());
-                                            user.admin = true;
-                                        });
-                                    }
-                                }).update(b -> b.setChecked(user.admin))
-                                .disabled(b -> net.client())
-                                .touchable(() -> net.client() ? Touchable.disabled : Touchable.enabled)
-                                .checked(user.admin);
+                            if(user.admin){
+                                ui.showConfirm("@confirm", Core.bundle.format("confirmunadmin",  user.name()), () -> {
+                                    netServer.admins.unAdminPlayer(id);
+                                    user.admin = false;
+                                });
+                            }else{
+                                ui.showConfirm("@confirm", Core.bundle.format("confirmadmin",  user.name()), () -> {
+                                    netServer.admins.adminPlayer(id, user.usid());
+                                    user.admin = true;
+                                });
+                            }
+                        }).update(b -> b.setChecked(user.admin))
+                            .disabled(b -> net.client())
+                            .touchable(() -> net.client() ? Touchable.disabled : Touchable.enabled)
+                            .checked(user.admin);
 
-                        t.button(Icon.zoomSmall, ustyle, () -> Call.adminRequest(user, AdminAction.trace));
+                    t.button(Icon.zoomSmall, ustyle, () -> Call.adminRequest(user, AdminAction.trace));
 
                     }).padRight(12).size(bs + 10f, bs);
                 }else if(!user.isLocal() && !user.admin && net.client() && Groups.player.size() >= 3 && player.team() == user.team()){ //votekick
                     button.add().growY();
 
-                    button.button(Icon.hammer, ustyle,
-                                    () -> ui.showConfirm("@confirm", Core.bundle.format("confirmvotekick",  user.name()),
-                                            () -> Call.sendChatMessage("/votekick #" + user.id)))
-                            .size(h);
+                button.button(Icon.hammer, ustyle,
+                    () -> ui.showConfirm("@confirm", Core.bundle.format("confirmvotekick",  user.name()),
+                    () -> Call.sendChatMessage("/votekick #" + user.id)))
+                .size(h);
                 }
             }
             content.add(button).padBottom(-6).width(700f).maxHeight(h + 14);

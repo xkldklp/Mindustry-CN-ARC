@@ -1927,6 +1927,14 @@ public class UnitType extends UnlockableContent{
         }
     }
 
+    public String typeColor() {
+        if (naval) return "[cyan]";
+        else if (allowLegStep) return "[magenta]";
+        else if (flying) return "[acid]";
+        else if (hovering) return "[sky]";
+        else return "[stat]";
+    }
+
     public static void initUnitTransp(){
         unitTrans = (float)Core.settings.getInt("unitTransparency") / 100f;
     }

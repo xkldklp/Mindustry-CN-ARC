@@ -301,7 +301,7 @@ public class SettingsMenuDialog extends BaseDialog{
         }
         menu.button("@settings.data", Icon.save, style, isize, () -> dataDialog.show()).marginLeft(marg).row();
 
-        int i = 7;
+        int i = Core.settings.getInt("changelogreaded") == changeLogRead ? 7 : 1;
         for(var cat : categories){
             int index = i;
             if(cat.icon == null){
@@ -398,7 +398,6 @@ public class SettingsMenuDialog extends BaseDialog{
         });
 
         graphics.addCategory("arcCOverview");
-        graphics.stringInput("themeColor", "ffd37f");
 
         graphics.sliderPref("fpscap", 240, 10, 245, 5, s -> (s > 240 ? Core.bundle.get("setting.fpscap.none") : Core.bundle.format("setting.fpscap.text", s)));
         int[] lastUiScale = {settings.getInt("uiscale", 100)};
@@ -691,15 +690,26 @@ public class SettingsMenuDialog extends BaseDialog{
         });
 
         //////////specmode
-        specmode.addCategory("specGameMode");
+        specmode.addCategory("moreContent");
         specmode.checkPref("modMode", false);
         specmode.sliderPref("itemSelectionHeight",4,4,12, i->i + "行");
         specmode.sliderPref("itemSelectionWidth",4,4,12, i->i + "列");
         specmode.sliderPref("blockInventoryWidth",3,3,16, i->i + "");
         specmode.sliderPref("editorBrush",4,3,12,i->i+"");
+
+        specmode.addCategory("personalized");
+        specmode.checkPref("colorizedContent",false);
+        specmode.sliderPref("fontSet", 0, 0, 2, 1, s -> {
+            if(s==0){return "原版字体";}
+            else if(s==1) return "[violet]LC[white]の[cyan]萌化字体包";
+            else if(s==2) return "[violet]9527[white]の[cyan]楷体包";
+            else{return s+"";}
+        });
+        specmode.sliderPref("fontSize",10,5,25,1,i->"x " + Strings.fixed(i * 0.1f,1));
+        specmode.stringInput("themeColor", "ffd37f");
+        specmode.addCategory("specGameMode");
         specmode.checkPref("autoSelSchematic",false);
         specmode.checkPref("researchViewer",false);
-        //specmode.checkPref("atriVoice",false);
         specmode.checkPref("developMode", false);
         //////////cheating
         cheating.addCategory("arcWeakCheat");
@@ -707,6 +717,7 @@ public class SettingsMenuDialog extends BaseDialog{
         cheating.checkPref("allBlocksReveal",false);
         cheating.checkPref("worldCreator",false);
         cheating.checkPref("overrideSkipWave", false);
+        cheating.checkPref("forceConfigInventory", false);
         cheating.checkPref("alwaysPickup", false);
         cheating.addCategory("arcStrongCheat");
         cheating.checkPref("showOtherTeamResource", false);
@@ -781,7 +792,7 @@ public class SettingsMenuDialog extends BaseDialog{
     private void visible(int index){
         prefs.clearChildren();
         Seq<Table> tables = new Seq<>();
-            tables.addAll(game, graphics, sound, arc,forcehide,specmode, cheating);   
+            tables.addAll(game, graphics, sound, arc,forcehide,specmode, cheating);
         for(var custom : categories){
             tables.add(custom.table);
         }

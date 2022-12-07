@@ -644,7 +644,7 @@ public class StatValues{
     }
 
     public static StatValue turretReload(Turret turret) {
-        return table -> table.add((turret.shoot.totalShots() == 1f ? "" : turret.shoot.totalShots() + " x ") + Strings.autoFixed(60f / turret.reload, 1) + "/s");
+        return table -> table.add((turret.shoot.totalShots() == 1f ? "" : turret.shoot.totalShots() + " x ") + Strings.autoFixed(60f / turret.reload, 2) + "/s");
     }
 
     //for AmmoListValue

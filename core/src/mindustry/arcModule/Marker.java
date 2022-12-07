@@ -2,7 +2,10 @@ package mindustry.arcModule;
 
 import arc.*;
 import arc.graphics.*;
+import arc.graphics.g2d.Draw;
+import arc.math.Mathf;
 import arc.math.geom.*;
+import arc.scene.ui.layout.Scl;
 import arc.struct.*;
 import arc.util.*;
 import mindustry.*;
@@ -12,15 +15,23 @@ import mindustry.core.*;
 import mindustry.entities.*;
 import mindustry.game.EventType.*;
 import mindustry.gen.*;
+import mindustry.graphics.Drawf;
+import mindustry.graphics.Layer;
+import mindustry.graphics.Pal;
 import mindustry.input.DesktopInput;
 
 import static mindustry.Vars.*;
+import static mindustry.arcModule.DrawUtilities.arcDrawText;
 import static mindustry.arcModule.RFuncs.getPrefix;
 
 public class Marker {
-    /** 冷却时间*/
+    /**
+     * 冷却时间
+     */
     public static final float heatTime = 0f;
-    /** 滞留时间*/
+    /**
+     * 滞留时间
+     */
     public static final float retainTime = 1800f;
 
     public static MarkType mark, gatherMark, attackMark, defenseMark, quesMark;
@@ -151,6 +162,12 @@ public class Marker {
         markList.peek().showEffect();
     }
 
+    public static void drawMarker() {
+        if (markList.size == 0) return;
+
+        markList.each(t -> (Time.time - t.time) < t.markType.effect.lifetime, t -> t.markType.showArrow(t.markPos));
+    }
+
     public static class MarkType {
         private final String name;
 
@@ -186,12 +203,22 @@ public class Marker {
         }
 
         public void sendMessage(Vec2 pos) {
-            String text = getPrefix(color,name) +
+            String text = getPrefix(color, name) +
                     "(" + World.toTile(pos.x) + "," + World.toTile(pos.y) + ")";
             Call.sendChatMessage(text);
             ui.MessageDialog.addMsg(new MessageDialog.advanceMsg(MessageDialog.arcMsgType.markLoc, text, pos));
         }
 
+        public void showArrow(Vec2 pos) {
+            Draw.reset();
+            Drawf.arrow(player.x, player.y, pos.x, pos.y, 5f * tilesize, 4f, color);
+            float dst = Mathf.dst(player.x, player.y, pos.x, pos.y) / 8;
+            Tmp.v1.set(pos.x, pos.y).sub(player.x, player.y).limit(4.5f * tilesize);
+            arcDrawText((int) dst + "", 0.2f,
+                    Tmp.v1.x + player.x,
+                    Tmp.v1.y + player.y,
+                    color, 1);
+        }
     }
 
     public static class MarkElement {

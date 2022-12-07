@@ -22,6 +22,8 @@ import mindustry.world.*;
 import mindustry.world.blocks.storage.CoreBlock.*;
 
 import static mindustry.Vars.*;
+import static mindustry.arcModule.Marker.drawMarker;
+import static mindustry.arcModule.toolpack.arcScanMode.arcScan;
 import static mindustry.arcModule.toolpack.arcScanner.drawScanner;
 import static mindustry.arcModule.toolpack.arcWaveSpawner.drawSpawner;
 
@@ -319,6 +321,8 @@ public class OverlayRenderer{
         District.drawDistrict();
 
         drawScanner();
+        drawMarker();
+        arcScan();
     }
 
     private static class CoreEdge{

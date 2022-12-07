@@ -104,6 +104,8 @@ public abstract class InputHandler implements InputProcessor, GestureListener{
 
     public Vec2 lastCommandPos;
 
+    public boolean arcScanMode = false;
+
     private final Eachable<BuildPlan> allPlans = cons -> {
         player.unit().plans().each(cons);
         selectPlans.each(cons);
@@ -1428,7 +1430,7 @@ public abstract class InputHandler implements InputProcessor, GestureListener{
         //consume tap event if necessary
         if(build.interactable(player.team()) && build.block.consumesTap){
             consumed = true;
-        }else if(build.interactable(player.team()) && build.block.synthetic() && (!consumed || build.block.allowConfigInventory)){
+        }else if(build.interactable(player.team()) && build.block.synthetic() && (!consumed || build.block.allowConfigInventory || settings.getBool("forceConfigInventory"))){
             if(build.block.hasItems && build.items.total() > 0){
                 inv.showFor(build);
                 consumed = true;

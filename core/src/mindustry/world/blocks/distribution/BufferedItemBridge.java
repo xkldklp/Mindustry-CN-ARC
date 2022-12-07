@@ -10,6 +10,8 @@ import mindustry.gen.*;
 import mindustry.ui.*;
 import mindustry.type.*;
 import mindustry.world.*;
+import mindustry.world.meta.Stat;
+import mindustry.world.meta.StatUnit;
 
 import static mindustry.Vars.*;
 
@@ -25,6 +27,14 @@ public class BufferedItemBridge extends ItemBridge{
         hasPower = false;
         hasItems = true;
         canOverdrive = true;
+    }
+
+    @Override
+    public void setStats(){
+        super.setStats();
+
+        stats.add(Stat.bufferCapacity, bufferCapacity);
+        stats.add(Stat.itemsMoved,Strings.autoFixed(bufferCapacity * 60f / speed ,2) , StatUnit.itemsSecond);
     }
 
     public class BufferedItemBridgeBuild extends ItemBridgeBuild{

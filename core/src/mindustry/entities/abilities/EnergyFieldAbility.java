@@ -48,9 +48,10 @@ public class EnergyFieldAbility extends Ability{
 
     @Override
     public String description(UnitType unit){
-        return abilitysFormat("@s~@格~@伤害~@s@~@%修复",
+        return abilitysFormat("@s~@格~@目标~@伤害~@s@~@%修复",
                 reload / 60f,
                 range / tilesize,
+                maxTargets = 25,
                 damage,
                 statusDuration / 60f,
                 status.emoji(),

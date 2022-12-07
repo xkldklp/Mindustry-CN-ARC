@@ -19,6 +19,7 @@ import mindustry.world.*;
 
 import static arc.Core.*;
 import static mindustry.Vars.*;
+import static mindustry.arcModule.RFuncs.colorizeContent;
 
 public class DatabaseDialog extends BaseDialog{
     private TextField search;
@@ -41,6 +42,7 @@ public class DatabaseDialog extends BaseDialog{
         }).fillX().padBottom(4).row();
 
         cont.pane(all).scrollX(false);
+        colorizeContent();
     }
 
     void rebuild(){
