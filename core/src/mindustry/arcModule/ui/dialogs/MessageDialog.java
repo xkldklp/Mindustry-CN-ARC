@@ -27,7 +27,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import static mindustry.Vars.*;
-import static mindustry.arcModule.District.districtSettingDialog;
 import static mindustry.ui.Styles.cleart;
 import static mindustry.ui.Styles.nodeArea;
 
@@ -58,7 +57,7 @@ public class MessageDialog extends BaseDialog {
         addCloseButton();
         buttons.button("设置", Icon.settings, this::arcMsgSettingTable);
 
-        buttons.button("区域规划器", () -> districtSettingDialog());
+        buttons.button("区域规划器", District::districtSettingDialog);
 
         buttons.row();
 
@@ -68,9 +67,7 @@ public class MessageDialog extends BaseDialog {
         });
         buttons.button("导出", Icon.upload, this::exportMsg).name("导出聊天记录");
 
-        buttons.button("刷新", Icon.refresh, this::build);
-
-        init();
+        buttons.button("图片分享器", Icon.image, arcChatPicture::arcSharePicture);
         shown(this::build);
         onResize(this::build);
 
@@ -89,10 +86,6 @@ public class MessageDialog extends BaseDialog {
             if (e.tile.build instanceof CoreBlock.CoreBuild)
                 addMsg(new MessageDialog.advanceMsg(arcMsgType.eventCoreDestory, "核心摧毁： " + "(" + (int) e.tile.x + "," + (int) e.tile.y + ")", new Vec2(e.tile.x * 8, e.tile.y * 8)));
         });
-    }
-
-    void init() {
-
     }
 
     void build() {
@@ -210,21 +203,21 @@ public class MessageDialog extends BaseDialog {
                 }).width(200f).height(50f);
             });
             t.row();
-            for (arcMsgType type : arcMsgType.values()) {
+            t.table(Tex.button, tt -> tt.pane(tp -> {
+                for (arcMsgType type : arcMsgType.values()) {
 
-                CheckBox box = new CheckBox("[#" + type.color.toString() + "]" + type.name);
+                    CheckBox box = new CheckBox("[#" + type.color.toString() + "]" + type.name);
 
-                box.update(() -> box.setChecked(type.show));
-                box.changed(() -> {
-                    type.show = !type.show;
-                    build();
-                });
+                    box.update(() -> box.setChecked(type.show));
+                    box.changed(() -> {
+                        type.show = !type.show;
+                        build();
+                    });
 
-                box.left();
-                t.add(box).left().padTop(3f);
-
-                t.row();
-            }
+                    box.left();
+                    tp.add(box).left().padTop(3f).row();
+                }
+            }).maxHeight(500).width(400f));
         });
 
         setDialog.cont.row();
@@ -241,6 +234,7 @@ public class MessageDialog extends BaseDialog {
         });
 
         setDialog.addCloseButton();
+        setDialog.button("刷新", Icon.refresh, this::build);
 
         setDialog.show();
     }
@@ -252,7 +246,7 @@ public class MessageDialog extends BaseDialog {
     }
 
     public boolean resolveMsg(String message) {
-        if (!ignoreMark){
+        if (!ignoreMark) {
             if (Marker.resolveMessage(message)) return true;
             if (District.resolveMessage(message)) return true;
             if (resolveMarkMsg(message, null)) return true;
@@ -265,7 +259,7 @@ public class MessageDialog extends BaseDialog {
     }
 
     public boolean resolveMsg(String message, @Nullable Player playersender) {
-        if (!ignoreMark){
+        if (!ignoreMark) {
             if (Marker.resolveMessage(message)) return true;
             if (District.resolveMessage(message)) return true;
             if (resolveMarkMsg(message, playersender)) return true;
@@ -309,7 +303,7 @@ public class MessageDialog extends BaseDialog {
                 "[YELLOW]PVP保护时间, 全力进攻吧", "[YELLOW]发起", "[YELLOW]你可以在投票结束前使用", "[GREEN]投票成功", "[GREEN]换图成功,当前地图",
                 "[RED]本地图禁用单位", "[RED]该地图限制空军,禁止进入敌方领空", "[yellow]本地图限制空军", "[YELLOW]火焰过多造成服务器卡顿,自动关闭火焰",
                 " [GREEN]====", "[RED]无效指令", "[RED]该技能", "切换成功",
-                "[violet][投票系统][]","[coral][-]野生的","[CYAN][+]野生的"   // xem相关
+                "[violet][投票系统][]", "[coral][-]野生的", "[CYAN][+]野生的"   // xem相关
         );
         for (int i = 0; i < serverMsg.size; i++) {
             if (message.contains(serverMsg.get(i))) {
