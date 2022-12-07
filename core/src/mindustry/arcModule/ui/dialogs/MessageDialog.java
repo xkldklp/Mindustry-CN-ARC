@@ -11,6 +11,7 @@ import arc.util.Nullable;
 import arc.util.Strings;
 import mindustry.Vars;
 import mindustry.arcModule.*;
+import mindustry.arcModule.toolpack.arcChatPicture;
 import mindustry.content.Fx;
 import mindustry.game.EventType;
 import mindustry.gen.Icon;
@@ -268,6 +269,7 @@ public class MessageDialog extends BaseDialog {
             if (Marker.resolveMessage(message)) return true;
             if (District.resolveMessage(message)) return true;
             if (resolveMarkMsg(message, playersender)) return true;
+            if (arcChatPicture.resolveMessage(message, playersender)) return true;
 
             if (playersender != null) {
                 addMsg(new MessageDialog.advanceMsg(MessageDialog.arcMsgType.chat, message, playersender.name(), new Vec2(playersender.x, playersender.y)));
@@ -332,7 +334,7 @@ public class MessageDialog extends BaseDialog {
         return false;
     }
 
-    public void addMsg(advanceMsg msg) {
+    public static void addMsg(advanceMsg msg) {
         msgList.add(msg);
     }
 
@@ -413,6 +415,7 @@ public class MessageDialog extends BaseDialog {
         markWave("标记", "波次", Color.valueOf("#7FFFD4")),
         markContent("标记", "内容", Color.valueOf("#7FFFD4")),
         markPlayer("标记", "玩家", Color.valueOf("#7FFFD4")),
+        arcChatPicture("分享", "图片", Color.yellow),
         district("规划区", "", Color.violet),
 
         serverTips("服务器", "小贴士", Color.valueOf("#98FB98"), false),
