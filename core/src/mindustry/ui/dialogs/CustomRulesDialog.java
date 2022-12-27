@@ -90,7 +90,7 @@ public class CustomRulesDialog extends BaseDialog{
                 dialog.cont.pane(t -> {
                     t.left().margin(14f);
                     int[] i = {0};
-                    content.<T>getBy(type).each(b -> !set.contains(b) && pred.get(b) && b.hasEmoji(), b -> {
+                    content.<T>getBy(type).each(b -> !set.contains(b) && pred.get(b), b -> {
                         int cols = mobile && Core.graphics.isPortrait() ? 4 : 12;
                         t.button(new TextureRegionDrawable(b.uiIcon), Styles.flati, iconMed, () -> {
                             set.add(b);
@@ -176,7 +176,7 @@ public class CustomRulesDialog extends BaseDialog{
         )).left().width(300f).row();
 
         main.button("@bannedblocks", () -> showBanned("@bannedblocks", ContentType.block, rules.bannedBlocks, Block::canBeBuilt)).left().width(300f).row();
-        main.button("@revealedblocks", () -> showBanned("@revealedblocks", ContentType.block, rules.revealedBlocks, Block::showUnlock)).left().width(300f).row();
+        main.button("@revealedblocks", () -> showBanned("@revealedblocks", ContentType.block, rules.revealedBlocks, b -> b.showUnlock() && (!b.isVanilla() || b.hasEmoji()))).left().width(300f).row();
         check("@rules.hidebannedblocks", b -> rules.hideBannedBlocks = b, () -> rules.hideBannedBlocks);
         check("@bannedblocks.whitelist", b -> rules.blockWhitelist = b, () -> rules.blockWhitelist);
 

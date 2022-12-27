@@ -3,7 +3,6 @@ package mindustry.arcModule.toolpack;
 import arc.Core;
 import arc.Events;
 import arc.func.Boolf;
-import arc.func.Cons;
 import arc.graphics.Color;
 import arc.graphics.g2d.*;
 import arc.math.Angles;
@@ -228,9 +227,9 @@ public class arcWaveSpawner {
             this.waveIndex = waveIndex;
             this.group = group;
             this.amount = group.getSpawned(waveIndex);
-            this.shield = group.getShield(waveIndex);   //盾
-            this.health = group.type.health + shield;   //盾+血
-            this.dps = group.type.estimateDps();
+            this.shield = group.getShield(waveIndex) * amount;   //盾
+            this.health = (group.type.health + shield) * amount;   //盾+血
+            this.dps = group.type.estimateDps() * amount;
             this.effHealth = health;
             if (group.effect != null) {
                 this.effHealth *= group.effect.healthMultiplier;

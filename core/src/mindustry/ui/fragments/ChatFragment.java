@@ -73,7 +73,7 @@ public class ChatFragment extends Table{
                 if(input.keyTap(Binding.chat_history_next) && historyPos > 0){
                     if(historyPos == 0) history.set(0, chatfield.getText());
                     while(!chatValidType(messages.get(historyPos)) && historyPos < history.size - 1 && historyPos > 0) historyPos--;
-                    historyPos--;
+                    historyPos = Math.max(historyPos - 1,0);
                     updateChat();
                 }
                 if(input.keyTap(Binding.chat_mode)){

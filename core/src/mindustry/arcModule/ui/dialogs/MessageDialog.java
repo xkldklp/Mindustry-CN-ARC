@@ -404,6 +404,7 @@ public class MessageDialog extends BaseDialog {
         normal("消息", Color.gray),
 
         chat("聊天", Color.valueOf("#778899")),
+        console("指令", Color.gold),
 
         markLoc("标记", "坐标", Color.valueOf("#7FFFD4")),
         markWave("标记", "波次", Color.valueOf("#7FFFD4")),

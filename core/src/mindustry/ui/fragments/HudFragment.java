@@ -401,6 +401,14 @@ public class HudFragment{
 
                 info.label(() -> fps.get(Core.graphics.getFramesPerSecond())).left().style(Styles.outlineLabel).name("fps");
                 info.row();
+                info.label(() -> {
+                    float speed = advanceToolTable.timeAcce;
+                    if (advanceToolTable.fpslock) {
+                        speed = Core.graphics.getFramesPerSecond() / advanceToolTable.targetfps;
+                    }
+                    return "倍速: " + String.format("%.2f", speed);
+                }).left().style(Styles.outlineLabel);
+                info.row();
 
                 if(android){
                     info.label(() -> memnative.get((int)(Core.app.getJavaHeap() / 1024 / 1024), (int)(Core.app.getNativeHeap() / 1024 / 1024))).left().style(Styles.outlineLabel).name("memory2");

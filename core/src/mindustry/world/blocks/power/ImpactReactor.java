@@ -40,14 +40,32 @@ public class ImpactReactor extends PowerGenerator{
         explodeSound = Sounds.explosionbig;
     }
 
+    private float warmupToTime(float warmup, float timeScale) {
+        return Mathf.log(1f - warmupSpeed * timeScale, 1f - warmup);
+    }
+
+    private float timeToWarmup(float time, float timeScale) {
+        return 1f - Mathf.pow(1 - warmupSpeed * timeScale, time);
+    }
+
     @Override
     public void setBars(){
         super.setBars();
 
-        addBar("power", (GeneratorBuild entity) -> new Bar(() ->
-                Iconc.power + "+ " + Strings.autoFixed((entity.getPowerProduction() - consPower.usage) * 60 * entity.timeScale(),1)  + ((entity.warmup()>0.001f && entity.warmup()<0.999f)? " | [lightgray]" + Strings.autoFixed(entity.warmup() * 100,1) + "%":""),
-        () -> Pal.powerBar,
-        () -> entity.productionEfficiency));
+        addBar("power", (GeneratorBuild entity) -> new Bar(
+                () -> entity.warmup() > 0.999f
+                        ? Strings.format(Iconc.power+"@[lightgray](@%)[]",
+                                Strings.autoFixed((entity.getPowerProduction() - consPower.usage) * 60 * entity.timeScale(), 1),
+                                Strings.autoFixed(entity.productionEfficiency * 100, 1)
+                        )
+                        : Strings.format(Iconc.power+"@[lightgray](@%)[]|@s",
+                                Strings.autoFixed((entity.getPowerProduction() - consPower.usage) * 60 * entity.timeScale(), 1),
+                                Strings.autoFixed(entity.productionEfficiency * 100, 1),
+                                Strings.autoFixed((warmupToTime(0.999f, entity.timeScale()) - warmupToTime(entity.warmup(), entity.timeScale())) / 60f, 1)
+                        ),
+                () -> Pal.powerBar,
+                () -> entity.productionEfficiency)
+        );
     }
 
     @Override
@@ -57,6 +75,14 @@ public class ImpactReactor extends PowerGenerator{
         if(hasItems){
             stats.add(Stat.productionTime, itemDuration / 60f, StatUnit.seconds);
         }
+        float startTime = warmupToTime(Mathf.pow(consPower.usage / powerProduction, 1f / 5f), 1f);
+        stats.add(Stat.startTime, startTime / 60f, StatUnit.seconds);
+        stats.add(Stat.fullStartTime, warmupToTime(0.999f, 1f) / 60f, StatUnit.seconds);
+        float startConsPower = 0;
+        for (int tick = 1;tick < startTime;tick++) {
+            startConsPower += consPower.usage - Mathf.pow(timeToWarmup(tick, 1f), 5f) * powerProduction;
+        }
+        stats.add(Stat.startConsPower, Mathf.ceil(startConsPower / 50f) * 50f, StatUnit.none);
     }
 
     public class ImpactReactorBuild extends GeneratorBuild{

@@ -61,7 +61,9 @@ public class AdvanceToolTable extends Table {
     private Boolean showPayload = false;
     private boolean showSelectPayload = false;
     private Boolean showPayloadBlock = false;
-    private float timeAcce = 1f;
+    public float timeAcce = 1f;
+    public float targetfps = 60;
+    public boolean fpslock = false;
     private float elevation = 0f;
 
     public AdvanceToolTable() {
@@ -135,24 +137,46 @@ public class AdvanceToolTable extends Table {
                             tBox.add("沙漏：").left();
                             tBox.button("/2", cleart, () -> {
                                 timeAcce /= 2;
+                                fpslock = false;
                                 Time.setDeltaProvider(() -> Math.min(Core.graphics.getDeltaTime() * 60 * timeAcce, 3 * timeAcce));
                                 ui.announce("当前时间倍率：" + timeAcce);
                             }).tooltip("[acid]将时间流速放慢到一半").size(40f, 30f);
                             tBox.button("×2", cleart, () -> {
                                 timeAcce *= 2;
+                                fpslock = false;
                                 Time.setDeltaProvider(() -> Math.min(Core.graphics.getDeltaTime() * 60 * timeAcce, 3 * timeAcce));
                                 ui.announce("当前时间倍率：" + timeAcce);
                             }).tooltip("[acid]将时间流速加快到两倍").size(40f, 30f);
                             tBox.button("[red]S", cleart, () -> {
                                 timeAcce = 0;
+                                fpslock = false;
                                 Time.setDeltaProvider(() -> Math.min(Core.graphics.getDeltaTime() * 60 * timeAcce, 3 * timeAcce));
                                 ui.announce("当前时间倍率：" + timeAcce);
                             }).tooltip("[acid]暂停时间").size(30f, 30f);
                             tBox.button("[green]N", cleart, () -> {
                                 timeAcce = 1;
+                                fpslock = false;
                                 Time.setDeltaProvider(() -> Math.min(Core.graphics.getDeltaTime() * 60 * timeAcce, 3 * timeAcce));
                                 ui.announce("当前时间倍率：" + timeAcce);
                             }).tooltip("[acid]恢复原速").size(30f, 30f);
+                            tBox.button("[white]F", cleart, () -> {
+                                timeAcce = 1;
+                                fpslock = true;
+                                Time.setDeltaProvider(() -> 60f / targetfps);
+                                ui.announce("当前帧率锁定：" + targetfps);
+                            }).tooltip("[acid]帧率模拟").size(30f, 30f);
+                            tBox.field(Integer.toString((int) targetfps), s -> {
+                                int num = Integer.parseInt(s);
+                                targetfps = 10 <= num && num < 10000 ? num : 60;
+                                if (fpslock) {
+                                    Time.setDeltaProvider(() -> 60f / targetfps);
+                                    ui.announce("当前帧率锁定：" + targetfps);
+                                }
+                            }).valid(s -> {
+                                if (!Strings.canParsePositiveInt(s)) return false;
+                                int num = Integer.parseInt(s);
+                                return 10 <= num && num < 10000;
+                            }).tooltip("允许的范围：10~9999").size(90f, 30f);
                         }).left();
                     }).left().row();
                 }

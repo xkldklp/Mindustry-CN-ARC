@@ -59,7 +59,7 @@ public class arcScanMode {
     static Seq<Building> forwardBuild = new Seq<>();
 
 
-    static {
+    static {/*
         {
             st.touchable = Touchable.disabled;
             st.margin(8f).add(">> 扫描详情模式 <<").color(getThemeColor()).style(Styles.outlineLabel).labelAlign(Align.center);
@@ -70,7 +70,7 @@ public class arcScanMode {
                 st.setPosition(Core.graphics.getWidth() / 2f, Core.graphics.getHeight() * 0.7f, Align.center);
             });
             Core.scene.add(st);
-        }
+        }*/
         {
             ct.touchable = Touchable.disabled;
             ct.visible = false;
@@ -135,9 +135,8 @@ public class arcScanMode {
         totalHealth = 0;
         totalEffHealth = 0;
         totalDps = 0;
-        int curInfoWave = state.wave + 1;
         checkInit();
-        waveInfo thisWave = arcWave.get(Math.min(state.wave + 1, arcWave.size - 1));
+        waveInfo thisWave = arcWave.get(Math.min(state.wave, arcWave.size - 1));
         for (Tile tile : spawner.getSpawns()) {
             if (Mathf.dst(tile.worldx(), tile.worldy(), Core.input.mouseWorldX(), Core.input.mouseWorldY()) < state.rules.dropZoneRadius) {
                 float curve = Mathf.curve(Time.time % 240f, 120f, 240f);
@@ -545,30 +544,24 @@ public class arcScanMode {
             if (p.from != null && p.trans) {
                 float x1 = p.build.tile.drawx(), y1 = p.build.tile.drawy();
                 float x2 = p.from.build.tile.drawx(), y2 = p.from.build.tile.drawy();
-                float dst = Mathf.dst(x1, y1, x2, y2);
-                /*
-                float angle = Angles.angle(x1, y1, x2, y2) + 90;
-                float offset = 0.8f;
-                x1 += Angles.trnsx(angle, offset);
-                y1 += Angles.trnsy(angle, offset);
-                x2 += Angles.trnsx(angle, offset);
-                y2 += Angles.trnsy(angle, offset);*/
-                /*  //一种简单的绘图方式，差别不大。但感觉没必要绘图，极少出现输入输出重叠的。或者可以出个判断是否有重叠
-                float offset = tilesize / 8f;
-                float delta = forward ? offset : -offset;
-                x1 += delta;
-                y1 += delta;
-                x2 += delta;
-                y2 += delta;*/
 
-                //Draw.z(Layer.weather + 0.2f);
                 Draw.color(mainColor);
                 Draw.color(Tmp.c1.set(mainColor).a(Mathf.absin(4f, 1f) * 0.4f + 0.6f));
                 Lines.stroke(1.5f);
                 Lines.line(x1, y1, x2, y2);
+            }
+            else {
+                Drawf.selected(p.build, Tmp.c1.set(highlightColor).a(Mathf.absin(4f, 1f) * 0.5f + 0.5f));
+            }
+            Draw.reset();
+        });
+        path.each(p -> {
+            if (p.from != null && p.trans) {
+                float x1 = p.build.tile.drawx(), y1 = p.build.tile.drawy();
+                float x2 = p.from.build.tile.drawx(), y2 = p.from.build.tile.drawy();
+                float dst = Mathf.dst(x1, y1, x2, y2);
 
-                //Draw.z(Layer.weather + 2.3f);
-                Draw.color(mainColor); //应该用highlightColor，但绘图层设置有问题
+                Draw.color(highlightColor);
                 Fill.circle(x1, y1, 1.8f);
 
                 if (dst > tilesize) {
@@ -580,9 +573,6 @@ public class arcScanMode {
                         Drawf.simpleArrow(x1, y1, x2, y2, dst / 2, 3f);
                     }
                 }
-            }
-            else {
-                Drawf.selected(p.build, Tmp.c1.set(highlightColor).a(Mathf.absin(4f, 1f) * 0.5f + 0.5f));
             }
             Draw.reset();
         });

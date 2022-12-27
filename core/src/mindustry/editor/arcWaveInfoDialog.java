@@ -336,7 +336,7 @@ public class arcWaveInfoDialog extends BaseDialog {
                                 tt.update(()->{
                                    if (!state.isGame()) waveTime.setText("");
                                    else {
-                                       int deltaTime = thisTime - (int) (state.wave < 1 ? (firstWaveTime - state.wavetime) : (firstWaveTime + state.rules.waveSpacing * state.wave - state.wavetime));
+                                       int deltaTime = thisTime - (int) (state.wave <= 1 ? (firstWaveTime - state.wavetime) : (firstWaveTime + state.rules.waveSpacing * (state.wave - 1) - state.wavetime));
                                        waveTime.setText(fixedColorTime(deltaTime,false));
                                    }
                                 });
