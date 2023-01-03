@@ -191,7 +191,7 @@ public class District {
         try {
             pos.fromString(text.substring(locBHand, locBTail + 1));
         } catch (Throwable e) {
-            Log.err("Cannot resolve position" + text.substring(locBHand, locBTail));
+            Log.err("Cannot resolve position");
             return false;
         }
         resolveDistrict.districtB = new Vec2(pos);

@@ -97,21 +97,21 @@ public class Marker {
         }
 
         if (Indexer > 10) {
-            /* Parse position */
-            String posStr = text.substring(text.indexOf('(', Indexer + 1));
-
-            Vec2 pos = Tmp.v1;
-
             try {
-                pos.fromString(posStr);
+                /* Parse position */
+                String posStr = text.substring(text.indexOf('(', Indexer + 1));
+
+                Vec2 pos = Tmp.v1;
+
+                    pos.fromString(posStr);
+
+                mark(markType, pos.scl(tilesize), false);
+                ui.MessageDialog.addMsg(new MessageDialog.advanceMsg(MessageDialog.arcMsgType.markLoc, text, pos));
+                return true;
             } catch (Throwable e) {
-                Log.err("Cannot resolve position from " + posStr);
+                Log.err("Cannot resolve position");
                 return false;
             }
-
-            mark(markType, pos.scl(tilesize), false);
-            ui.MessageDialog.addMsg(new MessageDialog.advanceMsg(MessageDialog.arcMsgType.markLoc, text, pos));
-            return true;
         }
 
         if (text.contains("[YELLOW][集合]") && text.contains("[WHITE]\"[WHITE]\",输入\"[gold]go[WHITE]\"前往")) {

@@ -8,6 +8,7 @@ import arc.util.Strings;
 import mindustry.ai.types.*;
 import mindustry.arcModule.*;
 import mindustry.arcModule.ai.*;
+import mindustry.arcModule.toolpack.arcPlayerEffect;
 import mindustry.entities.units.*;
 import mindustry.game.*;
 import mindustry.gen.*;
@@ -22,14 +23,14 @@ import static mindustry.arcModule.ui.RStyles.*;
 import static mindustry.content.UnitTypes.*;
 import static mindustry.ui.Styles.flatToggleMenut;
 
-public class AIToolsTable extends BaseToolsTable{
+public class AIToolsTable extends BaseToolsTable {
     private AIController selectAI;
 
-    public AIToolsTable(){
+    public AIToolsTable() {
         super(Icon.android);
 
         Events.run(EventType.Trigger.update, () -> {
-            if(selectAI != null){
+            if (selectAI != null) {
                 selectAI.unit(player.unit());
                 selectAI.updateUnit();
             }
@@ -37,29 +38,31 @@ public class AIToolsTable extends BaseToolsTable{
     }
 
     @Override
-    public void setup(){
+    public void setup() {
         clear();
         button(Icon.settingsSmall, clearLineNoneTogglei, 30, this::arcAISettingDialog).checked(t -> false);
         aiButton(new ArcMinerAI(), mono, "矿机AI");
         aiButton(new ArcBuilderAI(), poly, "重建AI");
         aiButton(new ArcRepairAI(), mega, "修复AI");
         aiButton(new DefenderAI(), oct, "保护AI");
+        if(Core.settings.getBool("vipMode"))    //测试赞助者功能，暂不开放。未经授权请不要分享破解方式
+        button(Icon.spray1Small, clearLineNoneTogglei, arcPlayerEffect::arcPlayerEffectSetting).checked(t->false);
     }
 
-    private void aiButton(AIController ai, UnitType symbol, String describe){
+    private void aiButton(AIController ai, UnitType symbol, String describe) {
         var button = button(new TextureRegionDrawable(symbol.uiIcon), clearLineNoneTogglei, 30, () -> selectAI(ai))
-        .checked(b -> selectAI == ai).size(40).get();
+                .checked(b -> selectAI == ai).size(40).get();
 
         ElementUtils.tooltip(button, describe);
     }
 
-    private void selectAI(AIController ai){
+    private void selectAI(AIController ai) {
         selectAI = selectAI == ai ? null : ai;
     }
 
-    private void arcAISettingDialog(){
-        int cols = (int)Math.max(Core.graphics.getWidth() / Scl.scl(480), 1);
-        
+    private void arcAISettingDialog() {
+        int cols = (int) Math.max(Core.graphics.getWidth() / Scl.scl(480), 1);
+
         BaseDialog dialog = new BaseDialog("ARC-AI设定器");
 
         dialog.cont.table(t -> {
@@ -72,12 +75,12 @@ public class AIToolsTable extends BaseToolsTable{
 
                 c.table(list -> {
                     int i = 0;
-                    for(Block block : ArcMinerAI.oreAllList){
-                        if(indexer.floorOresCount[block.id] == 0) continue;
-                        if(i++ % 3 == 0) list.row();
+                    for (Block block : ArcMinerAI.oreAllList) {
+                        if (indexer.floorOresCount[block.id] == 0) continue;
+                        if (i++ % 3 == 0) list.row();
                         list.button(block.emoji() + "\n" + indexer.floorOresCount[block.id], flatToggleMenut, () -> {
-                            if(oreList.contains(block)) oreList.remove(block);
-                            else if(!oreList.contains(block)) oreList.add(block);
+                            if (oreList.contains(block)) oreList.remove(block);
+                            else if (!oreList.contains(block)) oreList.add(block);
                         }).tooltip(block.localizedName).checked(k -> oreList.contains(block)).width(100f).height(50f);
                     }
                 }).row();
@@ -86,12 +89,12 @@ public class AIToolsTable extends BaseToolsTable{
 
                 c.table(list -> {
                     int i = 0;
-                    for(Block block : oreAllWallList){
-                        if(indexer.wallOresCount[block.id] == 0) continue;
-                        if(i++ % 3 == 0) list.row();
+                    for (Block block : oreAllWallList) {
+                        if (indexer.wallOresCount[block.id] == 0) continue;
+                        if (i++ % 3 == 0) list.row();
                         list.button(block.emoji() + "\n" + indexer.wallOresCount[block.id], flatToggleMenut, () -> {
-                            if(oreWallList.contains(block)) oreWallList.remove(block);
-                            else if(!oreWallList.contains(block)) oreWallList.add(block);
+                            if (oreWallList.contains(block)) oreWallList.remove(block);
+                            else if (!oreWallList.contains(block)) oreWallList.add(block);
                         }).tooltip(block.localizedName).checked(k -> oreWallList.contains(block)).width(100f).height(50f);
                     }
                 }).row();

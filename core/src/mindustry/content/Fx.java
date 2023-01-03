@@ -2546,7 +2546,6 @@ public class Fx{
                 }
             }
         }
-        //Drawf.arrow(player.x, player.y, e.x, e.y,5f * tilesize, 4f, Color.cyan);
     }),
 
     arcAttackMarker = new Effect(1800, e -> {
@@ -2559,11 +2558,9 @@ public class Fx{
             float rot = i * 90f + 45f + (-Time.time) % 360f;
             Drawf.simpleArrow(e.x  + Angles.trnsx(rot, radius),e.y +  + Angles.trnsy(rot, radius), e.x, e.y,6f + 4 * e.finpow(),2f + 4 * e.finpow(),Pal.attackMark);
         }
-        //Drawf.arrow(player.x, player.y, e.x, e.y, 5f * tilesize, 4f, Pal.attackMark);
     }),
 
     arcDefenseMarker = new Effect(1800, e -> {
-        //Drawf.arrow(player.x, player.y, e.x, e.y, 5f * tilesize, 4f, Pal.heal);
         color(Pal.heal);
         if(e.fin()<0.2f){
             Lines.circle(e.x, e.y, 20f + e.fin() * 400f);
@@ -2586,6 +2583,15 @@ public class Fx{
         Lines.line(e.x,e.y + 15f,e.x,e.y + 7f);
         Lines.circle(e.x,e.y,3f);
         Lines.circle(e.x,e.y+18.5f,27f);
-        //Drawf.arrow(player.x, player.y, e.x, e.y,5f * tilesize, 4f, Color.violet);
+    }),
+
+    simpleCircle = new Effect(60f,e -> {
+        color(e.color);
+        Fill.circle(e.x,e.y,2f * e.fout());
+    }),
+
+    simpleRect = new Effect(60f,e -> {
+        color(e.color);
+        Fill.square(e.x,e.y,2f * e.fout(),45);
     });
 }

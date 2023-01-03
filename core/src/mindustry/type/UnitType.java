@@ -37,10 +37,9 @@ import mindustry.world.blocks.units.*;
 import mindustry.world.consumers.*;
 import mindustry.world.meta.*;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import static arc.graphics.g2d.Draw.*;
 import static mindustry.Vars.*;
+import static mindustry.arcModule.toolpack.arcPlayerEffect.drawPlayerEffect;
 
 public class UnitType extends UnlockableContent{
     public static final float shadowTX = -12, shadowTY = -13;
@@ -1242,59 +1241,10 @@ public class UnitType extends UnlockableContent{
         }
         if (arcInfoControl(unit.team())) {
             //玩家操控的单位具有炫酷特效
-            if (Core.settings.getInt("superUnitEffect") != 0 && unit.controller() == Vars.player) {
+            if (unit.controller() instanceof Player) {
                 unitTrans = 100f;
                 DrawMinHealthBar = true;
-
-                float curStroke = (float) Core.settings.getInt("playerEffectCurStroke") / 10f;
-                Color effectcolor = getPlayerEffectColor();
-
-                float sectorRad = 0.14f, rotateSpeed = 0.5f;
-                int sectors = 5;
-
-                Lines.stroke(Lines.getStroke() * curStroke);
-
-                Draw.z(Layer.effect - 2f);
-                Draw.color(effectcolor);
-
-                Tmp.v1.trns(unit.rotation - 90, unit.x, unit.y).add(unit.x, unit.y);
-                float rx = Tmp.v1.x, ry = Tmp.v1.y;
-
-                if (curStroke > 0) {
-                    for (int i = 0; i < sectors; i++) {
-                        float rot = unit.rotation + i * 360f / sectors + Time.time * rotateSpeed;
-                        Lines.arc(unit.x, unit.y, maxRange, sectorRad, rot);
-                    }
-                }
-                Draw.reset();
-            } else if (Core.settings.getInt("superUnitEffect") == 2 && unit.controller() instanceof Player) {
-                unitTrans = 100f;
-                DrawMinHealthBar = true;
-
-                float curStroke = (float) Core.settings.getInt("playerEffectCurStroke") / 10f;
-                Color effectColor = unit.team.color;
-
-                float sectorRad = 0.14f, rotateSpeed = 0.5f;
-                int sectors = 5;
-
-                Lines.stroke(Lines.getStroke() * curStroke);
-
-                Draw.z(Layer.effect - 2f);
-                Draw.color(effectColor);
-
-                Tmp.v1.trns(unit.rotation - 90, unit.x, unit.y).add(unit.x, unit.y);
-                float rx = Tmp.v1.x, ry = Tmp.v1.y;
-
-                if (curStroke > 0) {
-                    for (int i = 0; i < sectors; i++) {
-                        float rot = unit.rotation + i * 360f / sectors + Time.time * rotateSpeed;
-                        Lines.arc(unit.x, unit.y, maxRange, sectorRad, rot, (int) (50 + maxRange / 10));
-                    }
-                }
-
-
-                Draw.reset();
-
+                drawPlayerEffect(unit);
             } else if (Core.settings.getBool("alwaysShowPlayerUnit") && (unit.controller() instanceof Player || unit.controller().isBeingControlled(player.unit()))) {
                 unitTrans = 100f;
                 DrawMinHealthBar = true;
@@ -1315,34 +1265,6 @@ public class UnitType extends UnlockableContent{
                 float unitRangeAlpha = turretAlert && (showHitPlayer || showHitCommand) ? 1f : Core.settings.getInt("unitweapon_range") / 100f;
                 Draw.alpha(unitRangeAlpha);
                 Lines.dashCircle(unit.x, unit.y, maxRange);
-            }
-
-
-            if (Core.settings.getInt("unitTargetType") > 0 && unit.controller() instanceof Player) {
-                Draw.reset();
-                Draw.z(Layer.effect);
-                Color effectColor = unit.controller() == Vars.player ? getPlayerEffectColor() : unit.team.color;
-                Draw.color(effectColor, 0.8f);
-                Lines.stroke(1f);
-                Lines.line(unit.x, unit.y, unit.aimX, unit.aimY);
-
-                switch (Core.settings.getInt("unitTargetType")) {
-                    case 1:
-                        Lines.dashCircle(unit.aimX, unit.aimY, 8);
-                        break;
-                    case 2:
-                        Drawf.target(unit.aimX, unit.aimY, 6f, 0.7f, effectColor);
-                        break;
-                    case 3:
-                        Drawf.target2(unit.aimX, unit.aimY, 6f, 0.7f, effectColor);
-                        break;
-                    case 4:
-                        Drawf.targetc(unit.aimX, unit.aimY, 6f, 0.7f, effectColor);
-                        break;
-                    case 5:
-                        Drawf.targetd(unit.aimX, unit.aimY, 6f, 0.7f, effectColor);
-                        break;
-                }
             }
 
             if (!control.input.commandMode && Core.settings.getBool("alwaysShowUnitRTSAi") && unit.isCommandable() && arcInfoControl()) {
