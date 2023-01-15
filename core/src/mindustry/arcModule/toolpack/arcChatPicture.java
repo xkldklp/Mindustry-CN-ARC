@@ -85,7 +85,7 @@ public class arcChatPicture {
             t.row();
             t.button("[orange]随机二次元(大雾)", () -> {
                 try {
-                    Http.get("https://api.ixiaowai.cn/api/api.php", res -> {
+                    Http.get("https://api.yimian.xyz/img/?type=moe", res -> {
                         Pixmap pix = new Pixmap(res.getResult());
                         Timer.schedule(() -> new floatFigure(pix, player), 0.01f);
                     });
@@ -163,7 +163,7 @@ public class arcChatPicture {
             });
             Core.scene.add(t);
             buildTable();
-            ui.arcInfo("已收到图片!，来源：" + (playersender.isNull() ? "" : playersender.name) + "\n[gray]使用参考中央监控室-图片分享器");
+            ui.arcInfo("已收到图片!，来源：" + (playersender != null ? playersender.isNull() ? "" : playersender.name : "") + "\n[gray]使用参考中央监控室-图片分享器");
         }
 
         private void buildTable() {
