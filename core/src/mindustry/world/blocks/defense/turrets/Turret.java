@@ -327,6 +327,8 @@ public class Turret extends ReloadTurret{
             if(!hasAmmo() || pos == null) return;
             BulletType bullet = peekAmmo();
 
+            if(bullet == null) return;
+
             var offset = Tmp.v1.setZero();
 
             //when delay is accurate, assume unit has moved by chargeTime already
@@ -381,7 +383,7 @@ public class Turret extends ReloadTurret{
                     }
                     Draw.reset();
                 }
-                if(Core.settings.getBool("showTurretAmmo") && this instanceof ItemTurret.ItemTurretBuild){
+                if(Core.settings.getBool("showTurretAmmo") && this instanceof ItemTurret.ItemTurretBuild && ammo.any()){
                     //lc参考miner代码
                     ItemTurret.ItemEntry entry = (ItemTurret.ItemEntry)ammo.peek();
                     Item lastAmmo= entry.item;
@@ -565,7 +567,7 @@ public class Turret extends ReloadTurret{
         @Override
         public void updateEfficiencyMultiplier(){
             if(heatRequirement > 0){
-                efficiency *= Math.min(heatReq / heatRequirement, maxHeatEfficiency);
+                efficiency *= Math.min(Math.max(heatReq / heatRequirement, cheating() ? 1f : 0f), maxHeatEfficiency);
             }
         }
 
@@ -595,7 +597,8 @@ public class Turret extends ReloadTurret{
             if(ammo.size >= 2 && ammo.peek().amount < ammoPerShot && ammo.get(ammo.size - 2).amount >= ammoPerShot){
                 ammo.swap(ammo.size - 1, ammo.size - 2);
             }
-            return ammo.size > 0 && ammo.peek().amount >= ammoPerShot;
+
+            return ammo.size > 0 && (ammo.peek().amount >= ammoPerShot || cheating());
         }
 
         public boolean charging(){
@@ -603,7 +606,7 @@ public class Turret extends ReloadTurret{
         }
 
         protected void updateReload(){
-            float multiplier = hasAmmo() ? peekAmmo().reloadMultiplier : 1f;
+            float multiplier = hasAmmo() ? peekAmmo() == null ? 1f : peekAmmo().reloadMultiplier : 1f;
             reloadCounter += delta() * multiplier * baseReloadSpeed();
 
             //cap reload for visual reasons

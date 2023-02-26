@@ -589,6 +589,7 @@ public class SettingsMenuDialog extends BaseDialog{
         arc.checkPref("ShowInfoPopup",true);
         arc.checkPref("arcShareWaveInfo", false);
         arc.checkPref("arcAlwaysTeamColor",false);
+        arc.checkPref("arcAutoGG",false);
 
         arc.addCategory("arcPlayerEffect");
         arc.stringInput("playerEffectColor", "ffd37f");
@@ -725,6 +726,7 @@ public class SettingsMenuDialog extends BaseDialog{
         cheating.checkPref("showOtherTeamState", false);
         cheating.checkPref("selectTeam",false);
         cheating.checkPref("playerNeedShooting", false);
+        cheating.checkPref("otherCheat",false);
         }
 
     public void exportData(Fi file) throws IOException{

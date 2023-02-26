@@ -45,7 +45,7 @@ public class arcChatPicture {
 
         MessageDialog.addMsg(new MessageDialog.advanceMsg(MessageDialog.arcMsgType.arcChatPicture, text));
 
-        Http.get(url, res -> {
+        Http.get(url, res -> new Thread(() -> {
             try {
                 Pixmap pix = new Pixmap(res.getResult());
                 Timer.schedule(() -> new floatFigure(pix, playersender), 0.01f);
@@ -53,7 +53,7 @@ public class arcChatPicture {
                 Log.err(e);
                 ui.arcInfo("[orange]图片读取失败");
             }
-        });
+        }).start());
 
         return true;
     }
