@@ -1,34 +1,33 @@
 package mindustry.entities.comp;
 
-import arc.*;
-import arc.graphics.*;
+import arc.Core;
+import arc.Events;
+import arc.graphics.Color;
 import arc.graphics.g2d.*;
-import arc.math.*;
-import arc.scene.ui.layout.*;
+import arc.math.Mathf;
+import arc.scene.ui.layout.Scl;
 import arc.util.*;
-import arc.util.pooling.*;
-import mindustry.*;
+import arc.util.pooling.Pools;
+import mindustry.Vars;
 import mindustry.annotations.Annotations.*;
-import mindustry.content.*;
-import mindustry.entities.units.*;
-import mindustry.game.EventType.*;
-import mindustry.game.*;
+import mindustry.content.UnitTypes;
+import mindustry.entities.units.BuildPlan;
+import mindustry.entities.units.UnitController;
+import mindustry.game.EventType.UnitChangeEvent;
+import mindustry.game.Team;
+import mindustry.game.Teams;
 import mindustry.gen.*;
-import mindustry.graphics.*;
-import mindustry.net.Administration.*;
-import mindustry.net.*;
-import mindustry.net.Packets.*;
-import mindustry.ui.*;
-import mindustry.world.blocks.defense.turrets.BaseTurret;
-import mindustry.world.blocks.defense.turrets.ReloadTurret;
+import mindustry.graphics.Drawf;
+import mindustry.graphics.Layer;
+import mindustry.net.Administration.PlayerInfo;
+import mindustry.net.NetConnection;
+import mindustry.net.Packets.KickReason;
+import mindustry.ui.Fonts;
 import mindustry.world.blocks.defense.turrets.Turret;
 import mindustry.world.blocks.production.GenericCrafter;
-import mindustry.world.blocks.production.HeatCrafter;
-import mindustry.world.blocks.storage.*;
-import mindustry.world.blocks.storage.CoreBlock.*;
-import mindustry.world.blocks.units.UnitFactory;
+import mindustry.world.blocks.storage.CoreBlock;
+import mindustry.world.blocks.storage.CoreBlock.CoreBuild;
 
-import static arc.Core.settings;
 import static mindustry.Vars.*;
 
 @EntityDef(value = {Playerc.class}, serialize = false)

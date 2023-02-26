@@ -93,6 +93,7 @@ public class KlpMenuDialog extends BaseDialog{
             addCheckSetting("按住一键装填", "按住一键装填", "按住装填按键 然后疯狂装填！", playerCtrlTable);
             addCheckSetting("自由鼠标", "自由鼠标", "开启后单位aim不会跟随鼠标位置", playerCtrlTable);
             addCheckSetting("按住一键装填自由鼠标", "按住一键装填自由鼠标", "开启后单位aim不会跟随鼠标位置", playerCtrlTable);
+            addSliderSetting("一键填装延迟(秒)", "一键填装延迟(秒)", 0f, 1f, 10, 0.0f, "一键填装延迟(秒)", playerCtrlTable);
             if (getSettingB("自由鼠标") || getSettingB("按住一键装填自由鼠标")) {
                 addCheckSetting("一键装填-wz模式", "一键装填-wz模式", "仅在鼠标附近装弹以绕过wz一键装弹，需开启自由鼠标！", playerCtrlTable);
             }
@@ -100,6 +101,7 @@ public class KlpMenuDialog extends BaseDialog{
             if (getSettingB("残血丢下荷载")) {
                 addSliderSetting("残载-血量阈值", "残载-血量阈值", 0f, 1f, 10, 0.25f, "低于血量阈值会丢下荷载!", playerCtrlTable);
             }
+            addCheckSetting("爬山无影脚", "爬山无影脚", "踩死你", playerCtrlTable);
         }
         settings.add(playerCtrlTable).row();
 

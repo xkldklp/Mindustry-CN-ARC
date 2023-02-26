@@ -363,7 +363,7 @@ public class Vars implements Loadable{
         arcVersionPrefix = "<ARC" + Iconc.unitCrawler + "~" + arcVersion + ">";
     }
 
-    /** Checks if a launch failure occurred.
+    /** Checks if a launch failure occurred.uu
      * If this is the case, failedToLaunch is set to true. */
     public static void checkLaunch(){
         settings.setAppName(appName);
