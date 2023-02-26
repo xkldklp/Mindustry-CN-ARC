@@ -1,5 +1,3 @@
-# GITHUB因为某种原因停止更新 获取请加入学术群然后叫我发你
-
 ## KLP改版学术端!
 很多奇怪功能，按右shift进行配置。\
 仅推荐大佬级玩家使用。\
@@ -25,9 +23,8 @@ v2-支持：[green]Root[blue]Channel[white]、[blue]MyIndustry2[white]、[yellow
 [yellow]Carrot
 
 # 发布|fork|自改端声明
-你不会想三改吧？ 随便\
+你不会想三改吧？ 记得保留爬爬标和开源（\
 此改端旧版(比最新版本少一个版本号，如140出来之后的139版)可随便发布\
-新版泛滥随时把仓库转为私密\
 Only support for simplified Chinese, would not support any other languague.
 
 # Building
